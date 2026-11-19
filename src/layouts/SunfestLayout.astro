@@ -1,0 +1,194 @@
+---
+import { inlineSvg } from '../utils/svg';
+// Shell of the Sunfest25 mini-site (/sunfest25/...): a working version of the fictional festival
+// website from the Sunfest case study. It has its own branding, so it does not use BaseLayout.
+// The pages are excluded from search engines (noindex) because the festival is not real.
+import '@fontsource/freckle-face/400.css';
+import '@fontsource/rubik/400.css';
+import '@fontsource/rubik/500.css';
+import '@fontsource/rubik/600.css';
+import '@fontsource/rubik/700.css';
+import '@fontsource/inter/600.css';
+import '../styles/sunfest.css';
+import BigButton from '../components/sunfest/BigButton.astro';
+import { sfNav, sfFooterLinks, sfHref, sfContacts } from '../data/sunfest25';
+import sunIcon from '../assets/sunfest25/sun-small.svg?raw';
+import igIcon from '../assets/sunfest25/ig.svg?raw';
+import spotifyIcon from '../assets/sunfest25/spotify.svg?raw';
+import telegramIcon from '../assets/sunfest25/telegram.svg?raw';
+import facebookIcon from '../assets/sunfest25/facebook.svg?raw';
+import { site } from '../data/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** slug of the current page ('' for home) */
+  page: string;
+  /** page background colour, from the design */
+  bg: string;
+  /** 'light' backgrounds get a text shadow behind white text */
+  tone?: 'light' | 'dark';
+  /** the three big white buttons at the bottom of each page */
+  next?: string[];
+}
+
+const { title, page, bg, tone = 'dark', next = [] } = Astro.props;
+const description =
+  Astro.props.description ??
+  'Sunfest25, a fictional music festival in the woods of Rovereto: a website prototype by Federico Manzoni and Michele Cazzaro.';
+const fullTitle = page === '' ? 'Sunfest25 · Embrace nature, party hard' : `${title} · Sunfest25`;
+const label = (slug: string) => sfFooterLinks.find((l) => l.slug === slug)?.label ?? slug;
+const socials = [
+  { name: 'Instagram', icon: igIcon },
+  { name: 'Spotify', icon: spotifyIcon },
+  { name: 'Telegram', icon: telegramIcon },
+  { name: 'Facebook', icon: facebookIcon },
+];
+const ogImage = new URL(site.ogImage, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    {
+      /* same security policy as the portfolio (published build only): everything comes from this site */
+      import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"} />
+    }
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, follow" />
+    <meta name="theme-color" content={bg} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+  </head>
+  <body class:list={['sf', `sf--${tone}`]} style={`--sf-bg: ${bg}`}>
+    <a class="sf-skip" href="#sf-main">Skip to content</a>
+
+    <aside class="sf-demo" aria-label="About this website">
+      <a class="sf-demo__back" href="/work/sunfest/"><span aria-hidden="true">←</span> <span class="sf-demo__long">Back to the case study</span><span class="sf-demo__short">Case study</span></a>
+      <span class="sf-demo__sep" aria-hidden="true"></span>
+      <span class="sf-demo__badge">Fictional festival</span>
+      <p class="sf-demo__credit">Website prototype by Federico Manzoni &amp; Michele Cazzaro</p>
+    </aside>
+
+    <header class="sf-top">
+      <nav class="sf-nav" aria-label="Sunfest">
+        <ul>
+          {
+            sfNav.map((item) => (
+              <li>
+                <a
+                  href={sfHref(item.slug)}
+                  class:list={{ 'sf-nav__logo': item.slug === '', 'is-active': item.slug === page }}
+                  aria-current={item.slug === page ? 'page' : undefined}
+                >
+                  {item.slug === '' ? (
+                    <>
+                      <span class="sf-sun" set:html={inlineSvg(sunIcon)} aria-hidden="true" />
+                      <span class="sf-wordmark">Sunfest</span>
+                      <span class="sf-visually-hidden">Home</span>
+                    </>
+                  ) : (
+                    item.label
+                  )}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </header>
+
+    <main id="sf-main" tabindex="-1">
+      <slot />
+
+      {
+        next.length > 0 && (
+          <nav class="sf-next" aria-label="More about Sunfest">
+            {next.map((slug) => (
+              <BigButton slug={slug} label={label(slug)} />
+            ))}
+          </nav>
+        )
+      }
+    </main>
+
+    <footer class="sf-footer">
+      <div class="sf-footer__grid">
+        <div class="sf-footer__brand">
+          <a class="sf-footer__logo" href={sfHref('')}>
+            <span class="sf-sun" set:html={inlineSvg(sunIcon)} aria-hidden="true"></span>
+            <span class="sf-wordmark">Sunfest</span>
+            <span class="sf-visually-hidden">Home</span>
+          </a>
+          <p>Rovereto’s biggest festival since 2001, bringing love and sound to the woods!</p>
+          <ul class="sf-footer__links">
+            {
+              sfFooterLinks.map((l) => (
+                <li>
+                  <a href={sfHref(l.slug)}>{l.label}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div>
+          <h2>Contacts</h2>
+          <ul class="sf-footer__contacts">
+            {sfContacts.map((c) => <li>{c}</li>)}
+          </ul>
+        </div>
+        <div>
+          <h2>Follow us</h2>
+          <ul class="sf-footer__social">
+            {
+              socials.map((s) => (
+                <li>
+                  <button type="button" data-proto={`${s.name}: Sunfest is fictional, so there is no account to follow.`}>
+                    <span set:html={inlineSvg(s.icon)} aria-hidden="true" />
+                    <span class="sf-visually-hidden">{s.name}</span>
+                  </button>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+      <p class="sf-footer__claim">Embrace nature party hard</p>
+    </footer>
+
+    <div class="sf-toast" role="status" aria-live="polite" hidden></div>
+
+    <script>
+      // On narrow screens the nav scrolls sideways: bring the current page's item into view
+      const nav = document.querySelector<HTMLElement>('.sf-nav');
+      const active = nav?.querySelector<HTMLElement>('.is-active:not(.sf-nav__logo)');
+      if (nav && active && nav.scrollWidth > nav.clientWidth) {
+        nav.scrollLeft = active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2;
+      }
+
+      // Buttons that would book, download or open socials on a real festival site show a short notice instead.
+      const toast = document.querySelector<HTMLElement>('.sf-toast');
+      let timer: number | undefined;
+      document.addEventListener('click', (e) => {
+        const el = (e.target as HTMLElement).closest<HTMLElement>('[data-proto]');
+        if (!el || !toast) return;
+        e.preventDefault();
+        toast.textContent =
+          el.dataset.proto || 'This is a prototype of a fictional festival, so this button doesn’t lead anywhere.';
+        toast.hidden = false;
+        requestAnimationFrame(() => toast.classList.add('is-visible'));
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          toast.classList.remove('is-visible');
+          window.setTimeout(() => (toast.hidden = true), 250);
+        }, 4000);
+      });
+    </script>
+  </body>
+</html>

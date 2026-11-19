@@ -1,0 +1,107 @@
+---
+// The home page, shared by / (English) and /it/ (Italian).
+// Order: intro → about → my work (projects) → CV → contact.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../Hero.astro';
+import UnbiasedPopup from '../UnbiasedPopup.astro';
+import About from '../About.astro';
+import CvProfile from '../CvProfile.astro';
+import HomeNav from '../HomeNav.astro';
+import CvSection from '../CvSection.astro';
+import CvDownload from '../CvDownload.astro';
+import MyWork from '../MyWork.astro';
+import Footer from '../Footer.astro';
+import ArrowBugs from '../ArrowBugs.astro';
+import { cvByLang } from '../../data/cv';
+import { site, siteText, contact } from '../../data/site';
+import { t, type Lang } from '../../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const s = t(lang);
+
+// Structured data so search engines understand who this site is about (a profile page about a person)
+const home = new URL(lang === 'it' ? '/it/' : '/', Astro.site).href;
+const personJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'ProfilePage',
+      '@id': `${home}#page`,
+      url: home,
+      name: siteText[lang].title,
+      inLanguage: lang,
+      mainEntity: { '@id': `${new URL('/', Astro.site).href}#person` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${new URL('/', Astro.site).href}#person`,
+      name: site.name,
+      jobTitle: 'UX Researcher',
+      description: siteText[lang].description,
+      url: new URL('/', Astro.site).href,
+      image: new URL(site.ogImage, Astro.site).href,
+      sameAs: [contact.linkedin, contact.orcid, contact.researchgate, contact.github].filter(Boolean),
+      alumniOf: { '@type': 'CollegeOrUniversity', name: 'University of Trento' },
+      affiliation: { '@type': 'CollegeOrUniversity', name: 'University of Waterloo' },
+      knowsAbout: ['User research', 'Usability testing', 'Games user research', 'Game UX', 'Human-Computer Interaction', 'UX/UI design'],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${new URL('/', Astro.site).href}#website`,
+      url: new URL('/', Astro.site).href,
+      name: site.name,
+      inLanguage: ['en', 'it'],
+      publisher: { '@id': `${new URL('/', Astro.site).href}#person` },
+    },
+  ],
+};
+---
+
+<BaseLayout lang={lang}>
+  <!-- "<" escaped so text in the data can never close the script tag -->
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(personJsonLd).replace(/</g, '\\u003c')} />
+  <Hero lang={lang} />
+  <UnbiasedPopup lang={lang} />
+  <HomeNav lang={lang} />
+  <main id="main">
+    <About lang={lang} />
+
+    <MyWork lang={lang} />
+
+    <section class="cv container" id="cv" aria-labelledby="cv-title">
+      <h2 id="cv-title" class="title">{s.myCv}</h2>
+      <CvProfile lang={lang} />
+      <div class="cv-sections">
+        {/* service & volunteering and certificates start closed (less important); the other CV sections start open */}
+        {cvByLang[lang].map((section) => (
+          <CvSection section={section} lang={lang} open={!['service', 'certificates'].includes(section.id)} />
+        ))}
+        <CvDownload lang={lang} />
+      </div>
+    </section>
+  </main>
+  <Footer lang={lang} game />
+  <ArrowBugs lang={lang} />
+</BaseLayout>
+
+<style>
+  main {
+    display: grid;
+    gap: clamp(4rem, 8vw, 7rem);
+    margin-top: clamp(1rem, 3vw, 2rem);
+  }
+
+  .cv {
+    display: grid;
+    gap: 16px;
+  }
+
+  .cv-sections {
+    display: grid;
+    gap: 50px;
+    margin-top: 24px;
+  }
+</style>

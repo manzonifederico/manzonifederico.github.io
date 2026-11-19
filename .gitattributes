@@ -1,0 +1,6 @@
+# Normalise line endings so Windows and Netlify (Linux) see the same files
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.pdf binary

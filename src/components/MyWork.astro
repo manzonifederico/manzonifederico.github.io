@@ -1,0 +1,341 @@
+---
+// "My work" section: title, Card/List view switch, topic filter chips, project cards
+// (Figma: MyWorkSection). The two Sunfest cards are joined by a "bridge" and move as one unit.
+import { projects, type Slug, type Project } from '../data/projects';
+import { t, tagLabel, type Lang } from '../i18n/ui';
+import ProjectCard from './ProjectCard.astro';
+
+interface Props {
+  lang: Lang;
+  /** Hide one project (used on a case-study page to skip the current one) */
+  exclude?: Slug;
+  defaultView?: 'card' | 'list';
+  /** Heading level for the "My work" title */
+  level?: 'h2' | 'h3';
+  /** Show the topic filter chips */
+  filters?: boolean;
+}
+const { lang, exclude, defaultView = 'card', level = 'h2', filters = true } = Astro.props;
+const s = t(lang);
+const Title = level;
+const list = projects.filter((p) => p.slug !== exclude);
+const cardLevel = level === 'h2' ? 'h3' : 'h4';
+const uid = exclude ? `work-${exclude}` : 'work';
+
+// Topic chips: tags shared by at least two of the listed projects, most common first
+// (a tag used by one project only stays on its card but is not offered as a filter)
+const counts = new Map<string, number>();
+list.forEach((p) => p.tags.forEach((tag) => counts.set(tag, (counts.get(tag) ?? 0) + 1)));
+const chips = [...counts.entries()].filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+// Group consecutive Sunfest projects so they can be joined visually
+type Slot = { kind: 'single'; project: Project } | { kind: 'pair'; projects: [Project, Project] };
+const slots: Slot[] = [];
+for (let i = 0; i < list.length; i++) {
+  const p = list[i];
+  if (p.slug === 'sunfest' && list[i + 1]?.slug === 'sunfest-usability') {
+    slots.push({ kind: 'pair', projects: [p, list[i + 1]] });
+    i++;
+  } else slots.push({ kind: 'single', project: p });
+}
+const tagsAttr = (p: Project) => p.tags.join('|');
+---
+
+<section class="my-work container" id={exclude ? undefined : 'work'} aria-labelledby={`${uid}-title`}>
+  <Title id={`${uid}-title`} class="title">{s.myWork}</Title>
+
+  <div class="toolbar">
+    <button
+      type="button"
+      class="view-btn"
+      data-view-toggle
+      data-cursor={s.cursorView}
+      data-label-card={s.cardView}
+      data-label-list={s.listView}
+      aria-controls={`${uid}-list`}>
+      <svg class="i-card" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <path
+          fill="currentColor"
+          d="M5 11q-.825 0-1.412-.587T3 9V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v4q0 .825-.587 1.413T19 11zm0-2h14V5H5zm0 12q-.825 0-1.412-.587T3 19v-4q0-.825.588-1.412T5 13h14q.825 0 1.413.588T21 15v4q0 .825-.587 1.413T19 21zm0-2h14v-4H5z"
+        ></path>
+      </svg>
+      <svg class="i-list" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <path
+          fill="currentColor"
+          d="M8 18v-2h13v2zm0-5v-2h13v2zm0-5V6h13v2zM4 19q-.425 0-.712-.288T3 18t.288-.712T4 17t.713.288T5 18t-.288.713T4 19m0-5q-.425 0-.712-.288T3 13t.288-.712T4 12t.713.288T5 13t-.288.713T4 14m0-5q-.425 0-.712-.288T3 8t.288-.712T4 7t.713.288T5 8t-.288.713T4 9"
+        ></path>
+      </svg>
+      <span data-view-label>{defaultView === 'card' ? s.cardView : s.listView}</span>
+      <span class="visually-hidden">{s.switchView}</span>
+    </button>
+
+    {
+      filters && (
+        <div class="chips" role="group" aria-label={s.filterLabel} data-filter-group aria-controls={`${uid}-list`}>
+          <button type="button" class="chip" aria-pressed="true" data-filter="">
+            {s.filterAll}
+          </button>
+          {chips.map(([tag, n]) => (
+            <button type="button" class="chip" aria-pressed="false" data-filter={tag}>
+              {tagLabel(lang, tag)}
+              <span class="chip-count" aria-hidden="true">
+                {n}
+              </span>
+            </button>
+          ))}
+        </div>
+      )
+    }
+  </div>
+
+  <p class="visually-hidden" aria-live="polite" data-filter-status data-template={s.filterResult}></p>
+
+  <div class="work-list" id={`${uid}-list`} data-view={defaultView}>
+    {
+      slots.map((slot) =>
+        slot.kind === 'single' ? (
+          <div class="slot" data-tags={tagsAttr(slot.project)}>
+            <ProjectCard project={slot.project} lang={lang} headingLevel={cardLevel} />
+          </div>
+        ) : (
+          <div class="pair">
+            <div class="slot" data-tags={tagsAttr(slot.projects[0])}>
+              <ProjectCard project={slot.projects[0]} lang={lang} headingLevel={cardLevel} grouped />
+            </div>
+            <div class="bridge" aria-hidden="true">
+              <span />
+              <span />
+            </div>
+            <div class="slot" data-tags={tagsAttr(slot.projects[1])}>
+              <ProjectCard project={slot.projects[1]} lang={lang} headingLevel={cardLevel} grouped />
+            </div>
+          </div>
+        ),
+      )
+    }
+    <p class="no-results" hidden data-no-results>{s.noResults}</p>
+  </div>
+</section>
+
+<script>
+  // Card / List view switch
+  document.querySelectorAll<HTMLButtonElement>('[data-view-toggle]').forEach((btn) => {
+    const list = document.getElementById(btn.getAttribute('aria-controls') ?? '');
+    const label = btn.querySelector('[data-view-label]');
+    if (!list || !label) return;
+    const sync = () => {
+      const view = list.dataset.view === 'list' ? 'list' : 'card';
+      btn.dataset.view = view;
+      label.textContent = (view === 'list' ? btn.dataset.labelList : btn.dataset.labelCard) ?? '';
+    };
+    btn.addEventListener('click', () => {
+      list.dataset.view = list.dataset.view === 'list' ? 'card' : 'list';
+      sync();
+    });
+    sync();
+  });
+
+  // Topic filter chips (one topic at a time; "All" resets)
+  document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
+    const list = document.getElementById(group.getAttribute('aria-controls') ?? '');
+    const section = group.closest('section');
+    const status = section?.querySelector<HTMLElement>('[data-filter-status]');
+    const empty = list?.querySelector<HTMLElement>('[data-no-results]');
+    if (!list) return;
+    const chips = Array.from(group.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+
+    chips.forEach((chip) =>
+      chip.addEventListener('click', () => {
+        const tag = chip.dataset.filter ?? '';
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        let shown = 0;
+        list.querySelectorAll<HTMLElement>('.slot').forEach((slot) => {
+          const match = !tag || (slot.dataset.tags ?? '').split('|').includes(tag);
+          slot.hidden = !match;
+          if (match) shown++;
+        });
+        // a Sunfest pair only stays joined while both cards are visible
+        list.querySelectorAll<HTMLElement>('.pair').forEach((pair) => {
+          const visible = pair.querySelectorAll('.slot:not([hidden])').length;
+          pair.classList.toggle('is-split', visible < 2);
+          pair.hidden = visible === 0;
+        });
+        if (empty) empty.hidden = shown > 0;
+        if (status)
+          status.textContent = (status.dataset.template ?? '{n} / {total}')
+            .replace('{n}', String(shown))
+            .replace('{total}', String(list.querySelectorAll('.slot').length));
+      }),
+    );
+  });
+</script>
+
+<style>
+  .my-work {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr); /* never let a long row widen the page */
+    gap: 16px;
+  }
+
+  .toolbar {
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+  }
+
+  .view-btn,
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--color-brand);
+    border-radius: var(--radius-pill);
+    background: #fff;
+    color: var(--color-brand);
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: var(--fs-small);
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  .view-btn {
+    padding: 4px 16px;
+    font-family: var(--font-display);
+  }
+
+  .view-btn:hover,
+  .chip:hover {
+    background: var(--color-brand-soft);
+  }
+
+  .i-list,
+  .view-btn[data-view='list'] .i-card {
+    display: none;
+  }
+
+  .view-btn[data-view='list'] .i-list {
+    display: block;
+  }
+
+  /* chips: same pill style as the project tags; selected = filled */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .chip {
+    padding: 4px 10px;
+    gap: 6px;
+  }
+
+  .chip[aria-pressed='true'] {
+    background: var(--color-brand);
+    color: #fff;
+  }
+
+
+  .chip-count {
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  .work-list {
+    display: grid;
+    gap: 54px;
+    margin-top: 36px;
+  }
+
+  .work-list[data-view='list'] {
+    gap: 36px;
+  }
+
+  .slot[hidden],
+  .pair[hidden] {
+    display: none;
+  }
+
+  /* ---------- Sunfest pair: the whole group lifts together on hover ---------- */
+  .pair {
+    display: grid;
+    transition: transform var(--dur) var(--ease), filter var(--dur) var(--ease);
+  }
+
+  .pair:hover,
+  .pair:focus-within {
+    transform: translateY(-4px);
+    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.12));
+  }
+
+  /* the neck joining the two Sunfest cards: blue, with concave (rounded-in) sides cut by a mask,
+     so there is nothing page-coloured around it that could show against the hover shadow */
+  .bridge {
+    display: flex;
+    justify-content: center;
+    height: 30px;
+    margin-block: -1px;
+  }
+
+  .bridge span {
+    display: none;
+  }
+
+  .bridge::before {
+    content: '';
+    width: 90px;
+    height: 100%;
+    background: var(--sunfest-bg);
+    -webkit-mask:
+      radial-gradient(circle 15px at 0 50%, transparent 14.5px, #000 15px) left / 50% 100% no-repeat,
+      radial-gradient(circle 15px at 100% 50%, transparent 14.5px, #000 15px) right / 50% 100% no-repeat;
+    mask:
+      radial-gradient(circle 15px at 0 50%, transparent 14.5px, #000 15px) left / 50% 100% no-repeat,
+      radial-gradient(circle 15px at 100% 50%, transparent 14.5px, #000 15px) right / 50% 100% no-repeat;
+  }
+
+  /* one Sunfest card filtered out: behave like normal cards */
+  .pair.is-split {
+    gap: 54px;
+  }
+
+  .pair.is-split .bridge {
+    display: none;
+  }
+
+  .no-results {
+    font-size: var(--fs-body);
+    color: #444;
+  }
+
+  @media (max-width: 720px) {
+    .work-list {
+      gap: 32px;
+      margin-top: 20px;
+    }
+    /* chips scroll sideways on phones instead of taking many lines */
+    .chips {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      flex: 1 1 100%;
+      min-width: 0;
+      width: 100%;
+      padding-bottom: 6px;
+      scrollbar-width: thin;
+    }
+    .chip {
+      flex: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pair:hover,
+    .pair:focus-within {
+      transform: none;
+    }
+  }
+</style>

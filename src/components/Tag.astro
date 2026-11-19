@@ -1,0 +1,26 @@
+---
+// A small pill label (e.g. "UX/UI Design"). Colours come from the project theme.
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+---
+
+<li class="tag">{label}</li>
+
+<style>
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    text-shadow: none;
+    border-radius: var(--radius-pill);
+    background: var(--theme-tag-bg, var(--color-brand));
+    color: var(--theme-tag-ink, #fff);
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: var(--fs-small);
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+</style>

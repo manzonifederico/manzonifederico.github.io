@@ -1,0 +1,1259 @@
+---
+// Easter egg on the home page (not with reduced motion; with a mouse, also not with the "Classic pointer" switch):
+// a few small dashed arrows (like the ones under the name) wander around the page and run away from the
+// pointer. Click one and it gets squashed like a mosquito. Squash them all and a big arrow flies in, grabs the
+// pointer and carries it off, followed by a souls-like "game over" screen with a user-research joke.
+// The big arrow's finale is picked at random: with a mouse it can also steal the pointer; on touch screens
+// (no pointer to steal) it is one of three attacks: explodes, swings a double axe at the glass, casts a
+// fireball. Each finale has its own game-over lines (ui.ts, bugsDeaths).
+// Sounds: squash and whoosh are synthesized in the browser; the boss music and the game-over sound are the
+// files in public/audio/, already cut to what plays (boss-fight.mp3: 8 s from second 2 of the original;
+// you-died.mp3: the first 7 s; originals in backups/audio-originals/). If a file is missing or can't play,
+// the game-over falls back to the synthesized hit and chord.
+// The arrows are decorative (aria-hidden); the game-over screen is a real <dialog> (focus, Esc to close).
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const s = t(lang);
+---
+
+<div class="bugs" aria-hidden="true" data-bugs hidden></div>
+
+<dialog class="death" aria-labelledby="death-title" aria-describedby="death-sub" data-bugs-death data-deaths={JSON.stringify(s.bugsDeaths)}>
+  <div class="death-band">
+    <p class="visually-hidden">{s.bugsDeathLabel}</p>
+    <h2 class="death-title" id="death-title"></h2>
+    <p class="death-sub" id="death-sub"></p>
+    <form method="dialog">
+      <button class="death-btn" type="submit" autofocus>{s.bugsRetry}</button>
+    </form>
+  </div>
+  <!-- bottom left: a small campfire marks the save, like an autosave icon -->
+  <!-- bottom right: how many times this visitor has died (kept in this browser only) + sound switch -->
+  <div class="death-corner">
+    <p class="death-count" data-bugs-count data-label={s.bugsDeathsCount}></p>
+    <div class="death-sound">
+      <label id="death-sound-label" for="death-sound-switch">{s.bugsSound}</label>
+      <button type="button" role="switch" aria-checked="true" aria-labelledby="death-sound-label" id="death-sound-switch" class="sound-switch" data-bugs-sound></button>
+    </div>
+  </div>
+  <p class="death-save">
+    <span class="fire" aria-hidden="true">
+      <span class="fire-glow"></span>
+      <svg viewBox="0 0 48 56" width="40" height="46">
+        <g class="flame">
+          <path d="M24 6C29 15 36 20 35 31C34.5 39 29.5 44 24 44C18.5 44 13.5 39.5 13 32C12.5 24 18 21 19 13C21 17 22 19 24 20C25 15 25 11 24 6Z" fill="#ff7a1a"/>
+          <path d="M24 20C27 25 31 28 30.5 34C30 39 27.5 42 24 42C20.5 42 18 39 17.8 35C17.6 30.5 20.5 28.5 21.5 24C22.5 26 23.3 27 24 27.5C24.6 25 24.8 23 24 20Z" fill="#ffc24d"/>
+          <path d="M24 31C25.5 34 27 35.5 26.8 37.8C26.6 40 25.5 41 24 41C22.5 41 21.3 40 21.2 38.2C21 36 22.6 34.8 24 31Z" fill="#fff1c9"/>
+        </g>
+        <rect x="6" y="44" width="36" height="6" rx="3" fill="#8a5a35" transform="rotate(-12 24 47)"/>
+        <rect x="6" y="44" width="36" height="6" rx="3" fill="#734a2b" transform="rotate(12 24 47)"/>
+      </svg>
+      <span class="ember e1"></span><span class="ember e2"></span><span class="ember e3"></span>
+    </span>
+    <span class="save-text">{s.bugsSaved}</span>
+  </p>
+</dialog>
+
+<script>
+  const layer = document.querySelector<HTMLElement>('[data-bugs]');
+  const death = document.querySelector<HTMLDialogElement>('[data-bugs-death]');
+  const fine = matchMedia('(hover: hover) and (pointer: fine)');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const html = document.documentElement;
+
+  const COUNT = 5;
+  const FLEE = 90; // px: how close the pointer can get before an arrow runs
+  const HEAD = 0; // degrees: direction the drawn arrow points to (its tip), so it can face where it goes
+  // a white halo under the blue strokes keeps the arrows visible on the blue blur at the top of the page
+  const SMALL = `<svg class="bug-svg" viewBox="0 0 40 30" width="40" height="30" fill="none">
+    <g stroke="#fff" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" opacity=".85">
+      <path class="bug-body" d="M4 15 H34" stroke-dasharray="4 3"/><path d="M28.5 9.5 L35 15 L28.5 20.5"/></g>
+    <path class="bug-body" d="M4 15 H34" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round"/>
+    <path d="M28.5 9.5 L35 15 L28.5 20.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <svg class="splat" viewBox="-20 -20 40 40" width="40" height="40">
+    <path d="M0-6V-14M5 4L11 9M-5 4L-11 9M6-3L13-6M-6-3L-13-6" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+  // the big one: the same arrow, six times bigger (its tip is at 210, 90)
+  const BIG = `<svg viewBox="0 0 40 30" width="240" height="180" fill="none">
+    <g stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".85">
+      <path d="M4 15 H34" stroke-dasharray="1.6 1.1"/><path d="M28.5 9.5 L35 15 L28.5 20.5"/></g>
+    <path d="M4 15 H34" stroke-width=".55" stroke-dasharray="1.6 1.1" stroke-linecap="round"/>
+    <path d="M28.5 9.5 L35 15 L28.5 20.5" stroke-width=".55" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+  const POINTER = `<svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 2 L3 18 L14.5 12.5 Z" fill="#145ee1" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+
+  type Bug = { el: HTMLElement; x: number; y: number; vx: number; vy: number; wander: number; rot: number; alive: boolean };
+  let bugs: Bug[] = [];
+  let caught = 0;
+  let mx = -9999;
+  let my = -9999;
+  let raf = 0;
+  let busy = false; // the big arrow / game-over screen is running
+
+  const coarse = matchMedia('(pointer: coarse)');
+  // mouse/trackpad: on unless "Classic pointer"; touch screens: on; never with "reduce motion"
+  // off with the footer's "Arrow game" switch (saved as arrows-off)
+  const switchedOff = () => {
+    try {
+      return localStorage.getItem('arrows-off') === '1';
+    } catch {
+      return false;
+    }
+  };
+  // only its own switch and "reduce motion" turn it off (not the pointer switch)
+  const enabled = () => !reduce.matches && !switchedOff() && (fine.matches || coarse.matches);
+  let touchMode = !fine.matches; // the last squash came from a finger
+  let fx: HTMLElement[] = []; // attack effects on screen (removed when the game restarts)
+  let pageAnims: Animation[] = []; // shakes applied to the page (cancelled when the game restarts)
+  const wait = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
+
+  function spawn() {
+    if (!layer) return;
+    layer.replaceChildren();
+    caught = 0;
+    const W = innerWidth;
+    const H = innerHeight;
+    bugs = Array.from({ length: COUNT }, () => {
+      const el = document.createElement('div');
+      el.className = 'bug';
+      el.innerHTML = SMALL;
+      layer.appendChild(el);
+      // start away from the pointer
+      let x = 0;
+      let y = 0;
+      do {
+        x = 40 + Math.random() * (W - 80);
+        y = 40 + Math.random() * (H - 80);
+      } while (Math.hypot(x - mx, y - my) < FLEE * 1.5);
+      const wander = Math.random() * Math.PI * 2;
+      const bug: Bug = { el, x, y, vx: Math.cos(wander) * 0.5, vy: Math.sin(wander) * 0.5, wander, rot: 0, alive: true };
+      return bug;
+    });
+  }
+
+  function step() {
+    const W = innerWidth;
+    const H = innerHeight;
+    const M = 24;
+    for (const b of bugs) {
+      if (!b.alive) continue;
+      b.wander += (Math.random() - 0.5) * 0.35;
+      let ax = Math.cos(b.wander) * 0.05;
+      let ay = Math.sin(b.wander) * 0.05;
+      const dx = b.x - mx;
+      const dy = b.y - my;
+      const d = Math.hypot(dx, dy) || 1;
+      const scared = d < FLEE;
+      if (scared) {
+        const f = (1 - d / FLEE) * 0.6;
+        ax += (dx / d) * f;
+        ay += (dy / d) * f;
+      }
+      b.vx = (b.vx + ax) * 0.94;
+      b.vy = (b.vy + ay) * 0.94;
+      const sp = Math.hypot(b.vx, b.vy);
+      const max = scared ? 2.6 : 0.8;
+      if (sp > max) {
+        b.vx *= max / sp;
+        b.vy *= max / sp;
+      } else if (sp < 0.3) {
+        b.vx += Math.cos(b.wander) * 0.08;
+        b.vy += Math.sin(b.wander) * 0.08;
+      }
+      b.x += b.vx;
+      b.y += b.vy;
+      // walls: bounce back in (an arrow pushed into a corner can be caught)
+      if (b.x < M || b.x > W - M) {
+        b.x = Math.min(W - M, Math.max(M, b.x));
+        b.vx = -b.vx;
+        b.wander = Math.atan2(b.vy, b.vx);
+      }
+      if (b.y < M || b.y > H - M) {
+        b.y = Math.min(H - M, Math.max(M, b.y));
+        b.vy = -b.vy;
+        b.wander = Math.atan2(b.vy, b.vx);
+      }
+      if (Math.hypot(b.vx, b.vy) > 0.15) {
+        const target = (Math.atan2(b.vy, b.vx) * 180) / Math.PI - HEAD;
+        const diff = ((target - b.rot + 540) % 360) - 180;
+        b.rot += diff * 0.2;
+      }
+      b.el.style.transform = `translate3d(${b.x - 32}px, ${b.y - 27}px, 0) rotate(${b.rot}deg)`;
+    }
+    raf = requestAnimationFrame(step);
+  }
+
+
+  // ---------- sound (made in the browser with Web Audio: original, no recorded files) ----------
+  // Only ever starts after a click on an arrow (browsers allow audio after a user action); each sound is
+  // under 3 seconds, and nothing plays with "reduce motion" since the whole game is off then.
+  let ctx: AudioContext | null = null;
+  let out: AudioNode | null = null; // master: loud enough for laptop speakers, a compressor keeps it from clipping
+  // sound on/off (switch on the game-over screen), remembered on this device
+  let soundOn = true;
+  try {
+    soundOn = localStorage.getItem('game-sound') !== '0';
+  } catch {
+    /* storage blocked: sound stays on */
+  }
+  const audio = () => {
+    if (!soundOn) return null;
+    try {
+      if (!ctx) {
+        ctx = new AudioContext();
+        const comp = ctx.createDynamicsCompressor();
+        comp.threshold.value = -14;
+        comp.ratio.value = 4;
+        const master = ctx.createGain();
+        master.gain.value = 1.4;
+        master.connect(comp).connect(ctx.destination);
+        out = master;
+      }
+      if (ctx.state === 'suspended') void ctx.resume();
+      return ctx;
+    } catch {
+      return null;
+    }
+  };
+  const noise = (a: AudioContext, seconds: number) => {
+    const buf = a.createBuffer(1, Math.ceil(a.sampleRate * seconds), a.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    const src = a.createBufferSource();
+    src.buffer = buf;
+    return src;
+  };
+  const env = (a: AudioContext, peak: number, attack: number, decay: number, at = a.currentTime) => {
+    const g = a.createGain();
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(peak, at + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + attack + decay);
+    g.connect(out ?? a.destination);
+    return g;
+  };
+  // squash: a "pop" and a wet splat (kept in the range small speakers can play)
+  const sfxSquash = () => {
+    const a = audio();
+    if (!a) return;
+    const t0 = a.currentTime;
+    const o = a.createOscillator();
+    o.frequency.setValueAtTime(900, t0);
+    o.frequency.exponentialRampToValueAtTime(170, t0 + 0.12);
+    o.connect(env(a, 0.55, 0.003, 0.13));
+    o.start(t0);
+    o.stop(t0 + 0.2);
+    const n = noise(a, 0.2);
+    const f = a.createBiquadFilter();
+    f.type = 'bandpass';
+    f.Q.value = 0.7;
+    f.frequency.setValueAtTime(3000, t0);
+    f.frequency.exponentialRampToValueAtTime(700, t0 + 0.14);
+    n.connect(f).connect(env(a, 0.7, 0.002, 0.14));
+    n.start(t0);
+  };
+  // the big arrow: a whoosh in, then out
+  const sfxWhoosh = (duration: number) => {
+    const a = audio();
+    if (!a) return;
+    const t0 = a.currentTime;
+    const n = noise(a, duration + 0.1);
+    const f = a.createBiquadFilter();
+    f.type = 'bandpass';
+    f.Q.value = 0.8;
+    f.frequency.setValueAtTime(400, t0);
+    f.frequency.exponentialRampToValueAtTime(3200, t0 + duration * 0.7);
+    f.frequency.exponentialRampToValueAtTime(900, t0 + duration);
+    n.connect(f).connect(env(a, 0.8, duration * 0.6, duration * 0.4));
+    n.start(t0);
+  };
+  // game over: a heavy hit and a dark, slightly dissonant chord that fades out (about 2.8 s)
+  const sfxDeath = () => {
+    const a = audio();
+    if (!a) return;
+    const t0 = a.currentTime;
+    const boom = a.createOscillator();
+    boom.type = 'triangle';
+    boom.frequency.setValueAtTime(170, t0);
+    boom.frequency.exponentialRampToValueAtTime(48, t0 + 0.9);
+    boom.connect(env(a, 0.9, 0.008, 1.2));
+    boom.start(t0);
+    boom.stop(t0 + 1.4);
+    const n = noise(a, 0.7);
+    const lp = a.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(2500, t0);
+    lp.frequency.exponentialRampToValueAtTime(300, t0 + 0.5);
+    n.connect(lp).connect(env(a, 0.8, 0.004, 0.6));
+    n.start(t0);
+    const chord = a.createBiquadFilter();
+    chord.type = 'lowpass';
+    chord.frequency.setValueAtTime(2600, t0 + 0.15);
+    chord.frequency.exponentialRampToValueAtTime(500, t0 + 2.8);
+    chord.connect(env(a, 0.35, 0.3, 2.35, t0 + 0.15));
+    // D3, F3, A3 and a sour G#3 an octave above the old ones, so laptop speakers can play them
+    [146.8, 174.6, 220, 207.7].forEach((hz, i) => {
+      const o = a.createOscillator();
+      o.type = 'sawtooth';
+      o.frequency.value = hz;
+      o.detune.value = i % 2 ? 8 : -8;
+      o.connect(chord);
+      o.start(t0 + 0.15);
+      o.stop(t0 + 2.9);
+    });
+  };
+
+
+  // ---------- music files (public/audio/) ----------
+  let bossTrack: HTMLAudioElement | null = null;
+  let deathTrack: HTMLAudioElement | null = null;
+  let deathStop: number | undefined;
+  const BOSS_FROM = 0; // s: the file is already cut to start 2 s into the original track
+  const DEATH_FOR = 7000; // ms: the game-over sound plays for 7 seconds
+  const track = (src: string, volume: number) => {
+    const el = new Audio(src);
+    el.preload = 'auto';
+    el.volume = volume;
+    el.dataset.volume = String(volume);
+    return el;
+  };
+  // created on the first squash (a click), so the browser lets them play later
+  const prepareTracks = () => {
+    bossTrack ??= track('/audio/boss-fight.mp3', 0.7);
+    deathTrack ??= track('/audio/you-died.mp3', 0.9);
+  };
+  const fadeOut = (el: HTMLAudioElement | null, ms: number) => {
+    if (!el || el.paused) return;
+    // timers, not animation frames: those stop in background tabs and the music would keep going
+    const start = el.volume;
+    const t0 = performance.now();
+    const id = window.setInterval(() => {
+      const k = Math.min(1, (performance.now() - t0) / ms);
+      el.volume = start * (1 - k);
+      if (k >= 1) {
+        window.clearInterval(id);
+        el.pause();
+        el.volume = Number(el.dataset.volume ?? 1);
+      }
+    }, 30);
+  };
+  let bossStop: number | undefined;
+  const playBoss = () => {
+    if (!bossTrack || !soundOn) return;
+    // safety net: the boss music never outlives the boss scene (e.g. if its animation is held up)
+    window.clearTimeout(bossStop);
+    bossStop = window.setTimeout(() => fadeOut(bossTrack, 500), 6000);
+    bossTrack.volume = Number(bossTrack.dataset.volume ?? 1);
+    bossTrack.currentTime = BOSS_FROM;
+    bossTrack.play().catch(() => {});
+  };
+  const playDeath = () => {
+    window.clearTimeout(deathStop);
+    if (!soundOn) return;
+    if (!deathTrack) return sfxDeath();
+    deathTrack.volume = Number(deathTrack.dataset.volume ?? 1);
+    deathTrack.currentTime = 0;
+    deathTrack
+      .play()
+      .then(() => {
+        deathStop = window.setTimeout(() => fadeOut(deathTrack, 400), DEATH_FOR - 400);
+      })
+      .catch(() => sfxDeath()); // file missing or blocked: the synthesized one
+  };
+
+  function squash(b: Bug) {
+    if (!b.alive || busy) return;
+    b.alive = false;
+    b.el.classList.add('is-squashed');
+    window.setTimeout(() => b.el.remove(), 1600);
+    sfxSquash();
+    prepareTracks();
+    caught++;
+    if (caught === COUNT) {
+      playBoss(); // the boss music starts as soon as the last arrow is squashed
+      window.setTimeout(boss, 700);
+    }
+  }
+
+  // the big arrow comes for the pointer
+  function boss() {
+    if (!enabled()) return restart();
+    if (touchMode) return touchBoss();
+    const pick = Math.floor(Math.random() * 4); // 0 = steal the pointer, 1–3 = the attacks
+    if (pick > 0) return touchBoss(pick - 1, mx, my);
+    stealPointer();
+  }
+
+  function stealPointer() {
+    busy = true;
+    const x = mx < 0 ? innerWidth / 2 : mx;
+    const y = my < 0 ? innerHeight / 2 : my;
+    html.classList.add('cursor-stolen');
+    const ptr = document.createElement('div');
+    ptr.className = 'stolen-pointer';
+    ptr.innerHTML = POINTER;
+    ptr.style.transform = `translate(${x - 3}px, ${y - 2}px)`;
+    const big = document.createElement('div');
+    big.className = 'boss';
+    big.innerHTML = BIG;
+    big.style.left = `${x - 210}px`;
+    big.style.top = `${y - 90}px`;
+    document.body.append(ptr, big);
+    sfxWhoosh(0.75);
+
+    const inFrom = `translate(${-(x + 260)}px, ${innerHeight * 0.4}px)`;
+    const away = { x: innerWidth - x + 300, y: -(y + 260) };
+    big.animate([{ transform: inFrom }, { transform: 'translate(0, 0)' }], { duration: 750, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'forwards' })
+      .finished.then(() => new Promise((r) => window.setTimeout(r, 260)))
+      .then(() => {
+        const opts: KeyframeAnimationOptions = { duration: 800, easing: 'cubic-bezier(.6,0,.9,.5)', fill: 'forwards' };
+        sfxWhoosh(0.8);
+        big.animate([{ transform: 'translate(0, 0)' }, { transform: `translate(${away.x}px, ${away.y}px)` }], opts);
+        return ptr.animate(
+          [{ transform: `translate(${x - 3}px, ${y - 2}px)` }, { transform: `translate(${x - 3 + away.x}px, ${y - 2 + away.y}px)` }],
+          opts,
+        ).finished;
+      })
+      .then(() => new Promise((r) => window.setTimeout(r, 500)))
+      .then(() => {
+        big.remove();
+        ptr.remove();
+        gameOver('steal');
+      });
+  }
+
+
+  // ---------- touch screens: the big arrow attacks the screen instead of stealing the pointer ----------
+  // classic double-bladed axe: two crescent blades on either side of the handle
+  const AXE = `<svg viewBox="0 0 100 180" width="100" height="180"><rect x="46.5" y="14" width="7" height="162" rx="3.5" fill="#8a5a35"/><g fill="#c9ced6" stroke="#5b6470" stroke-width="2.5" stroke-linejoin="round"><path d="M46 28 L46 64 C 36 58, 20 62, 6 78 C 13 60, 13 32, 6 14 C 20 30, 36 34, 46 28 Z"/><path d="M54 28 L54 64 C 64 58, 80 62, 94 78 C 87 60, 87 32, 94 14 C 80 30, 64 34, 54 28 Z"/></g><rect x="43" y="24" width="14" height="44" rx="3" fill="#6b4a2e"/></svg>`;
+  const layer2 = (cls: string) => {
+    const el = document.createElement('div');
+    el.className = `attack ${cls}`;
+    document.body.appendChild(el);
+    fx.push(el);
+    return el;
+  };
+  // the page itself shakes (and with "fall" breaks apart and drops)
+  const shakePage = (ms: number, fall = false) => {
+    document.querySelectorAll<HTMLElement>('.hero, #main, body > footer').forEach((el, i) => {
+      const dir = i % 2 ? 1 : -1;
+      const frames: Keyframe[] = [
+        { transform: 'none' },
+        { transform: 'translate(-10px, 4px) rotate(-0.6deg)' },
+        { transform: 'translate(9px, -6px) rotate(0.5deg)' },
+        { transform: 'translate(-6px, 6px)' },
+        { transform: 'translate(5px, -3px)' },
+      ];
+      if (fall) frames.push({ transform: `translate(${dir * 30}px, ${innerHeight * 0.7}px) rotate(${dir * 9}deg)`, opacity: 0.25 });
+      else frames.push({ transform: 'none' });
+      pageAnims.push(el.animate(frames, { duration: ms, easing: 'ease-in', fill: 'forwards' }));
+    });
+  };
+  const sfxBoom = () => {
+    const a = audio();
+    if (!a) return;
+    const t0 = a.currentTime;
+    const n = noise(a, 1);
+    const lp = a.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(3000, t0);
+    lp.frequency.exponentialRampToValueAtTime(200, t0 + 0.8);
+    n.connect(lp).connect(env(a, 0.9, 0.005, 0.9));
+    n.start(t0);
+    const o = a.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(150, t0);
+    o.frequency.exponentialRampToValueAtTime(40, t0 + 0.6);
+    o.connect(env(a, 0.8, 0.005, 0.7));
+    o.start(t0);
+    o.stop(t0 + 0.8);
+  };
+
+  // 1. it explodes and the site falls apart
+  const explode = async (big: HTMLElement, cx: number, cy: number) => {
+    big.animate([{ transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: 'translate(0, 0) scale(2.6)', opacity: 0 }], { duration: 260, fill: 'forwards' });
+    const o = layer2('attack-boom');
+    o.style.setProperty('--x', `${cx}px`);
+    o.style.setProperty('--y', `${cy}px`);
+    sfxBoom();
+    shakePage(1300, true);
+    await o.animate([{ opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 0.85 }], { duration: 1300, fill: 'forwards' }).finished;
+  };
+
+  // 2. it pulls out a double axe and hits the glass
+  const axe = async (big: HTMLElement, cx: number, cy: number) => {
+    const a = layer2('attack-axe');
+    a.innerHTML = AXE;
+    // pivot (bottom of the handle) below and right of the target; at -20° the blades land on it
+    a.style.left = `${cx + 44 - 50}px`;
+    a.style.top = `${cy + 120 - 174}px`;
+    big.animate([{ transform: 'translate(0, 0)' }, { transform: 'translate(-40px, 10px) rotate(-8deg)' }], { duration: 500, fill: 'forwards' });
+    const swing = a.animate(
+      [
+        { transform: 'rotate(60deg)', opacity: 0 },
+        { transform: 'rotate(75deg)', opacity: 1, offset: 0.45 },
+        { transform: 'rotate(-20deg)', opacity: 1, offset: 0.7 },
+        { transform: 'rotate(-17deg)', opacity: 1 },
+      ],
+      { duration: 1000, easing: 'cubic-bezier(.5,0,.9,.6)', fill: 'forwards' },
+    );
+    await wait(700);
+    sfxBoom();
+    shakePage(500);
+    const c = layer2('attack-cracks');
+    const lines = Array.from({ length: 9 }, (_, i) => {
+      let x = cx;
+      let y = cy;
+      let ang = (i / 9) * Math.PI * 2 + Math.random() * 0.4;
+      const pts = [`${x},${y}`];
+      for (let k = 0; k < 6; k++) {
+        ang += (Math.random() - 0.5) * 0.7;
+        const len = 40 + Math.random() * 80;
+        x += Math.cos(ang) * len;
+        y += Math.sin(ang) * len;
+        pts.push(`${Math.round(x)},${Math.round(y)}`);
+      }
+      return `<polyline points="${pts.join(' ')}"/>`;
+    }).join('');
+    c.innerHTML = `<svg width="${innerWidth}" height="${innerHeight}" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="rgba(0,0,0,.55)" stroke-width="4">${lines}</g><g stroke="rgba(255,255,255,.9)" stroke-width="1.5">${lines}</g><circle cx="${cx}" cy="${cy}" r="18" fill="rgba(255,255,255,.35)"/></svg>`;
+    c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 80, fill: 'forwards' });
+    await swing.finished;
+    await wait(500);
+  };
+
+  // 3. it casts a fireball that fills the screen
+  const fireball = async (big: HTMLElement, cx: number, cy: number) => {
+    const f = layer2('attack-fire');
+    f.style.left = `${cx - 30}px`;
+    f.style.top = `${cy - 30}px`;
+    big.animate(
+      [{ transform: 'translate(0, 0)' }, { transform: 'translate(-6px, 3px)' }, { transform: 'translate(5px, -3px)' }, { transform: 'translate(-40px, 0)' }],
+      { duration: 700, fill: 'forwards' },
+    );
+    sfxWhoosh(0.7);
+    await f.animate([{ transform: 'scale(0)' }, { transform: 'scale(1)' }], { duration: 700, easing: 'ease-out', fill: 'forwards' }).finished;
+    sfxBoom();
+    await f.animate([{ transform: 'scale(1)' }, { transform: `scale(${Math.ceil(Math.hypot(innerWidth, innerHeight) / 25)})` }], {
+      duration: 650,
+      easing: 'cubic-bezier(.5,0,.9,.5)',
+      fill: 'forwards',
+    }).finished;
+  };
+
+  function touchBoss(pick?: number, px?: number, py?: number) {
+    busy = true;
+    const onScreen = (v: number | undefined, max: number) => (v !== undefined && v >= 0 && v <= max ? v : max / 2);
+    const cx = onScreen(px, innerWidth);
+    const cy = onScreen(py, innerHeight);
+    if (px !== undefined) html.classList.add('cursor-stolen'); // with a mouse, the pointer vanishes in the attack
+    const big = document.createElement('div');
+    big.className = 'boss';
+    big.innerHTML = BIG;
+    big.style.left = `${cx - 210}px`; // tip of the big arrow on the centre of the screen
+    big.style.top = `${cy - 90}px`;
+    document.body.append(big);
+    fx.push(big);
+    sfxWhoosh(0.75);
+    const attacks = [
+      { kind: 'explode', run: explode },
+      { kind: 'axe', run: axe },
+      { kind: 'fireball', run: fireball },
+    ] as const;
+    const attack = attacks[pick ?? Math.floor(Math.random() * attacks.length)];
+    big
+      .animate([{ transform: `translate(${-(cx + 260)}px, ${innerHeight * 0.3}px)` }, { transform: 'translate(0, 0)' }], {
+        duration: 750,
+        easing: 'cubic-bezier(.2,.8,.3,1)',
+        fill: 'forwards',
+      })
+      .finished.then(() => attack.run(big, cx, cy))
+      .then(() => wait(350))
+      .then(() => gameOver(attack.kind));
+  }
+
+  type Finale = 'steal' | 'explode' | 'axe' | 'fireball';
+
+  // "Praise the sun" line: a little, original soldier in steel plate armour and a closed steel helmet, arms
+  // raised, pops up three times, very briefly, meme-style: random place, size and tilt
+  // (decorative, hidden from screen readers)
+  const PRAISE = `<svg viewBox="0 0 60 92" width="60" height="92" stroke-linecap="round" stroke-linejoin="round">
+    <g fill="none"><path d="M21 33 L10 11 M39 33 L50 11" stroke="#4a525d" stroke-width="9"/><path d="M21 33 L10 11 M39 33 L50 11" stroke="#aab3be" stroke-width="6"/></g>
+    <rect x="5.5" y="4.5" width="9" height="8" rx="2.5" fill="#8f99a5" stroke="#4a525d" stroke-width="1.4"/><rect x="45.5" y="4.5" width="9" height="8" rx="2.5" fill="#8f99a5" stroke="#4a525d" stroke-width="1.4"/>
+    <g fill="none"><path d="M25 64 L23 83 M35 64 L37 83" stroke="#4a525d" stroke-width="8"/><path d="M25 64 L23 83 M35 64 L37 83" stroke="#aab3be" stroke-width="5.5"/></g>
+    <path d="M16.5 86 Q17 81 23 81 Q27 81 27.5 86 Z M32.5 86 Q33 81 37 81 Q43 81 43.5 86 Z" fill="#7d8792" stroke="#4a525d" stroke-width="1.4"/>
+    <path d="M19 32 Q30 27 41 32 L42.5 52 Q30 57 17.5 52 Z" fill="#b9c1cb" stroke="#4a525d" stroke-width="1.6"/>
+    <path d="M30 30 V54" stroke="#8b949f" stroke-width="1.4"/><path d="M23 35 Q25 41 24 47" stroke="#e3e8ee" stroke-width="1.6" fill="none"/>
+    <path d="M17.5 52 Q30 57 42.5 52 L43 57 Q30 62 17 57 Z M17 57 Q30 62 43 57 L43.5 62 Q30 67 16.5 62 Z" fill="#9aa4af" stroke="#4a525d" stroke-width="1.4"/>
+    <ellipse cx="18" cy="33" rx="6" ry="4.6" fill="#a3acb7" stroke="#4a525d" stroke-width="1.5"/><ellipse cx="42" cy="33" rx="6" ry="4.6" fill="#a3acb7" stroke="#4a525d" stroke-width="1.5"/>
+    <path d="M24.5 27.5 h11 v4.5 h-11 Z" fill="#8f99a5" stroke="#4a525d" stroke-width="1.3"/>
+    <path d="M21 24 Q20.5 7 30 6 Q39.5 7 39 24 Q30 29.5 21 24 Z" fill="#b9c1cb" stroke="#4a525d" stroke-width="1.7"/>
+    <path d="M30 6.5 V25" stroke="#8b949f" stroke-width="1.3"/><path d="M23.5 17 H36.5" stroke="#1e232a" stroke-width="2.2"/>
+    <g fill="#4a525d"><circle cx="33.5" cy="21.5" r="0.8"/><circle cx="35.5" cy="21" r="0.8"/><circle cx="34.5" cy="23.2" r="0.8"/></g>
+    <path d="M24.5 10.5 Q26 8.5 28.5 8" stroke="#eef2f6" stroke-width="1.4" fill="none"/></svg>`;
+  let praiseTimers: number[] = [];
+  const praiseTheSun = () => {
+    if (!death) return;
+    for (let i = 0; i < 3; i++) {
+      const at = 500 + Math.random() * 4500; // somewhere in the first ~5 s
+      praiseTimers.push(
+        window.setTimeout(() => {
+          if (!death.open) return;
+          const fig = document.createElement('span');
+          fig.className = 'praise';
+          fig.setAttribute('aria-hidden', 'true');
+          fig.innerHTML = PRAISE;
+          const size = 46 + Math.random() * 60; // 46–106 px tall
+          fig.style.setProperty('--h', `${Math.round(size)}px`);
+          fig.style.setProperty('--rot', `${Math.round(Math.random() * 70 - 35)}deg`);
+          // anywhere on screen except the middle band with the text
+          const side = Math.random() < 0.5;
+          fig.style.left = `${side ? 3 + Math.random() * 22 : 68 + Math.random() * 24}%`;
+          fig.style.top = `${5 + Math.random() * 78}%`;
+          death.appendChild(fig);
+          window.setTimeout(() => fig.remove(), 650);
+        }, at),
+      );
+    }
+  };
+  const stopPraise = () => {
+    praiseTimers.forEach((t) => window.clearTimeout(t));
+    praiseTimers = [];
+    death?.querySelectorAll('.praise').forEach((el) => el.remove());
+  };
+  function gameOver(kind: Finale) {
+    if (!death) return restart();
+    // a line that fits how you died
+    const all = JSON.parse(death.dataset.deaths ?? '{}') as Record<Finale, [string, string, string?][]>;
+    const lines = all[kind] ?? [];
+    const [title, sub, extra] = lines[Math.floor(Math.random() * lines.length)] ?? ['', ''];
+    if (extra === 'praise') praiseTheSun();
+    death.querySelector('.death-title')!.textContent = title;
+    death.querySelector('.death-sub')!.textContent = sub;
+    // local death counter: stored in this browser only (no server, nothing sent anywhere)
+    let count = 1;
+    try {
+      count = Number(localStorage.getItem('game-deaths') ?? '0') + 1;
+      localStorage.setItem('game-deaths', String(count));
+    } catch {
+      /* storage blocked: counts this death only */
+    }
+    const counter = death.querySelector<HTMLElement>('[data-bugs-count]');
+    if (counter) counter.textContent = `${counter.dataset.label ?? 'Deaths'}: ${count}`;
+    html.classList.remove('cursor-stolen'); // the pointer comes back, to press the button
+    // the button and the sound switch fade in after ~1.6 s: until then they can't be clicked, so the clicks or
+    // taps people are still making while chasing arrows don't close the screen straight away
+    const form = death.querySelector<HTMLElement>('form');
+    const corner = death.querySelector<HTMLElement>('.death-corner');
+    if (form) form.inert = true;
+    if (corner) corner.inert = true;
+    death.showModal();
+    deathOpen = true;
+    window.setTimeout(
+      () => {
+        if (form) form.inert = false;
+        if (corner) corner.inert = false;
+        death.querySelector<HTMLButtonElement>('.death-btn')?.focus();
+      },
+      reduce.matches ? 0 : 1700,
+    );
+    fadeOut(bossTrack, 500);
+    playDeath();
+  }
+
+  function restart() {
+    busy = false;
+    fx.forEach((el) => el.remove());
+    fx = [];
+    pageAnims.forEach((a) => a.cancel());
+    pageAnims = [];
+    fadeOut(bossTrack, 300);
+    html.classList.remove('cursor-stolen');
+    if (!enabled() || !layer) return;
+    window.setTimeout(() => {
+      if (enabled()) spawn();
+    }, 1500);
+  }
+
+  // leaving the tab (or the page) silences the game
+  const silence = () => {
+    window.clearTimeout(bossStop);
+    window.clearTimeout(deathStop);
+    bossTrack?.pause();
+    deathTrack?.pause();
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) silence();
+  });
+  window.addEventListener('pagehide', silence);
+
+  const soundSwitch = document.querySelector<HTMLButtonElement>('[data-bugs-sound]');
+  const syncSound = () => soundSwitch?.setAttribute('aria-checked', String(soundOn));
+  syncSound();
+  soundSwitch?.addEventListener('click', () => {
+    soundOn = !soundOn;
+    try {
+      localStorage.setItem('game-sound', soundOn ? '1' : '0');
+    } catch {
+      /* storage blocked: this visit only */
+    }
+    if (!soundOn) silence(); // stops whatever is playing right away
+    syncSound();
+  });
+
+  // dev server only (removed from the published build): a hook for automated tests
+  if (import.meta.env.DEV) {
+    (window as unknown as { __arrowGame: unknown }).__arrowGame = { touchBoss, stealPointer };
+  }
+
+  // leaving the game-over screen (button, Esc or any other close): once per death. The button and Esc are
+  // handled directly too, not only through the dialog's "close" event, which some browsers deliver late.
+  let deathOpen = false;
+  const leaveDeath = () => {
+    if (!deathOpen) return;
+    deathOpen = false;
+    stopPraise();
+    window.clearTimeout(deathStop);
+    fadeOut(deathTrack, 300);
+    restart();
+  };
+  death?.addEventListener('close', leaveDeath);
+  death?.addEventListener('cancel', () => window.setTimeout(leaveDeath, 0));
+  death?.querySelector('.death-btn')?.addEventListener('click', () => window.setTimeout(leaveDeath, 0));
+
+  function sync() {
+    if (!layer) return;
+    const on = enabled();
+    layer.hidden = !on;
+    if (on && !raf) {
+      if (!bugs.length) spawn();
+      raf = requestAnimationFrame(step);
+    } else if (!on && raf) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+  }
+
+  // squash: a main-button press near a living arrow, on empty page (never on a link, button or other control)
+  const CONTROLS = "a, button, input, select, textarea, summary, label, dialog, [role='button'], [role='switch'], [role='tab'], [data-cursor]";
+  document.addEventListener(
+    'pointerdown',
+    (e) => {
+      if (busy || e.button !== 0 || !enabled() || !e.isTrusted) return;
+      const t = e.target as Element | null;
+      if (t?.closest?.(CONTROLS)) return;
+      const finger = e.pointerType !== 'mouse';
+      const dist = (b: Bug) => Math.hypot(b.x - e.clientX, b.y - e.clientY);
+      const hit = bugs.find((b) => b.alive && dist(b) < (finger ? 44 : 30));
+      if (!hit) {
+        // a near miss with a finger: the closest arrow darts away
+        const near = finger ? bugs.filter((b) => b.alive && dist(b) < 140).sort((a, b) => dist(a) - dist(b))[0] : undefined;
+        if (near) {
+          const d = dist(near) || 1;
+          near.vx = ((near.x - e.clientX) / d) * 7;
+          near.vy = ((near.y - e.clientY) / d) * 7;
+        }
+        return;
+      }
+      touchMode = finger;
+      e.preventDefault();
+      squash(hit);
+    },
+    true,
+  );
+
+  document.addEventListener(
+    'pointermove',
+    (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+    },
+    { passive: true },
+  );
+  document.documentElement.addEventListener('pointerleave', () => {
+    mx = -9999;
+    my = -9999;
+  });
+  document.addEventListener('pointer-mode', sync);
+  document.addEventListener('arrows-mode', sync);
+  fine.addEventListener?.('change', sync);
+  coarse.addEventListener?.('change', sync);
+  reduce.addEventListener?.('change', sync);
+  sync();
+</script>
+
+<style>
+  .bugs {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .bugs[hidden] {
+    display: none;
+  }
+
+  /* each arrow: 40×30 drawing + 12px around it. The arrows never take clicks themselves (pointer-events: none):
+     the script squashes one when a click lands near it on empty page, so links and buttons under an arrow
+     always work and never make a sound by accident */
+  .bugs :global(.bug) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 12px;
+    pointer-events: none;
+    color: var(--color-brand);
+    opacity: 0.6;
+    transform-origin: 32px 27px;
+    will-change: transform;
+  }
+
+
+  .bugs :global(.bug-svg),
+  .bugs :global(.splat) {
+    display: block;
+    stroke: currentColor;
+  }
+
+  /* the dashes crawl along the arrow, like little legs */
+  .bugs :global(.bug-body) {
+    animation: crawl 0.5s linear infinite;
+  }
+
+  @keyframes crawl {
+    to {
+      stroke-dashoffset: -7;
+    }
+  }
+
+  .bugs :global(.splat) {
+    position: absolute;
+    left: 12px;
+    top: 7px;
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  /* squashed: flattened on the spot, a little splat, then it fades away */
+  .bugs :global(.bug.is-squashed) {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.9s ease 0.6s;
+  }
+
+  .bugs :global(.bug.is-squashed .bug-svg) {
+    transform: scale(1.3, 0.18);
+    transition: transform 90ms ease-in;
+  }
+
+  .bugs :global(.bug.is-squashed .bug-body) {
+    animation: none;
+  }
+
+  .bugs :global(.bug.is-squashed .splat) {
+    opacity: 1;
+    transform: scale(1);
+    transition: transform 140ms ease-out, opacity 80ms;
+  }
+
+  /* the big arrow and the pointer it carries away */
+  :global(.boss) {
+    position: fixed;
+    z-index: 1002;
+    pointer-events: none;
+    color: var(--color-brand);
+  }
+
+  :global(.boss svg) {
+    display: block;
+    stroke: currentColor;
+  }
+
+  :global(.stolen-pointer) {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1003;
+    pointer-events: none;
+  }
+
+  :global(html.cursor-stolen),
+  :global(html.cursor-stolen *) {
+    cursor: none !important;
+  }
+
+  /* ---------- touch attacks ---------- */
+  :global(.attack) {
+    position: fixed;
+    z-index: 1002;
+    pointer-events: none;
+  }
+
+  :global(.attack-boom),
+  :global(.attack-cracks) {
+    inset: 0;
+  }
+
+  :global(.attack-boom) {
+    background: radial-gradient(
+      circle at var(--x) var(--y),
+      #fff 0,
+      #ffe7a3 10%,
+      #ff9a2e 24%,
+      rgba(200, 45, 10, 0.92) 42%,
+      rgba(10, 0, 0, 0.96) 72%
+    );
+  }
+
+  :global(.attack-axe) {
+    width: 100px;
+    height: 180px;
+    transform-origin: 50px 174px;
+  }
+
+  :global(.attack-axe svg),
+  :global(.attack-cracks svg) {
+    display: block;
+  }
+
+  :global(.attack-fire) {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff6c8 0, #ffc24d 35%, #ff6a1a 65%, #c41e0a 100%);
+    box-shadow:
+      0 0 24px 8px rgba(255, 140, 30, 0.8),
+      0 0 60px 20px rgba(255, 80, 0, 0.45);
+  }
+
+  /* ---------- game over (souls-like) ---------- */
+  .death {
+    overflow: hidden;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #e9e3d6;
+  }
+
+  .death[open] {
+    display: grid;
+    /* one column exactly as wide as the screen, so long lines wrap on phones instead of running off */
+    grid-template-columns: minmax(0, 1fr);
+    place-items: center;
+    animation: death-in 1.4s ease both;
+  }
+
+  .death::backdrop {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.92));
+  }
+
+  .death-band {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: clamp(64px, 9vw, 104px) 16px;
+    text-align: center;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9) 16%, rgba(0, 0, 0, 0.9) 84%, transparent);
+  }
+
+  .death-title {
+    margin: 0;
+    font-family: 'Cinzel', 'Trajan Pro', 'Optima', Georgia, 'Times New Roman', serif;
+    font-weight: 400;
+    font-size: clamp(1.75rem, 0.6rem + 4.4vw, 5rem);
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    color: #c8281f;
+    animation: death-grow 5s ease-out both;
+  }
+
+  .death-sub {
+    max-width: 52ch;
+    text-wrap: balance; /* lines of similar length, no single word left on the last line */
+    margin: 18px auto 0;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
+    line-height: 1.5;
+    animation: death-in 1.4s ease 0.8s both;
+  }
+
+  .death form {
+    margin-top: clamp(36px, 5vw, 56px);
+    animation: death-in 1s ease 1.6s both;
+  }
+
+  /* souls-style menu option: plain text, no box, on a soft lit bar with thin lines fading out at both ends
+     (it is the only option, so it always looks selected); hover / focus make it brighter */
+  .death-btn {
+    position: relative;
+    min-width: min(420px, 90vw);
+    padding: 14px 72px;
+    border: 0;
+    border-radius: 0;
+    background: radial-gradient(ellipse 50% 70% at 50% 50%, rgba(233, 227, 214, 0.12), transparent);
+    color: rgba(233, 227, 214, 0.85);
+    font: 400 clamp(1rem, 0.95rem + 0.25vw, 1.15rem) / 1.2 Georgia, 'Times New Roman', serif;
+    letter-spacing: 0.08em;
+    transition: color 200ms ease;
+  }
+
+  .death-btn::before,
+  .death-btn::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(233, 227, 214, 0.7) 50%, transparent);
+    opacity: 0.45;
+    transition: opacity 200ms ease;
+  }
+
+  .death-btn::before {
+    top: 0;
+  }
+
+  .death-btn::after {
+    bottom: 0;
+  }
+
+  .death-btn:hover,
+  .death-btn:focus {
+    outline: none;
+    color: #fff8e8;
+    background: radial-gradient(ellipse 50% 70% at 50% 50%, rgba(233, 227, 214, 0.24), transparent);
+  }
+
+  .death-btn:hover::before,
+  .death-btn:hover::after,
+  .death-btn:focus::before,
+  .death-btn:focus::after {
+    opacity: 1;
+  }
+
+  @media (forced-colors: active) {
+    .death-btn:focus {
+      outline: 2px solid ButtonText;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .death .death-corner {
+      top: 16px;
+      bottom: auto;
+    }
+
+    .death .death-btn {
+      min-width: 0;
+      padding: 14px 20px;
+    }
+  }
+
+  /* ---------- sound switch (bottom right) ---------- */
+  .death-corner {
+    position: absolute;
+    right: clamp(16px, 3vw, 40px);
+    bottom: clamp(16px, 3vw, 40px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    font: 0.95rem Georgia, 'Times New Roman', serif;
+    letter-spacing: 0.05em;
+    color: rgba(233, 227, 214, 0.85);
+    animation: death-in 1.2s ease 2s both;
+  }
+
+  .death-count {
+    margin: 0;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .death-sound {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sound-switch {
+    position: relative;
+    flex: none;
+    width: 34px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .sound-switch::before {
+    content: '';
+    position: absolute;
+    inset: 3px 0;
+    border-radius: 7px;
+    background: rgba(233, 227, 214, 0.3);
+  }
+
+  .sound-switch::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e9e3d6;
+    transition: transform 200ms ease;
+  }
+
+  .sound-switch[aria-checked='true']::before {
+    background: rgba(233, 227, 214, 0.6);
+  }
+
+  .sound-switch[aria-checked='true']::after {
+    transform: translateX(14px);
+  }
+
+  .sound-switch:focus-visible {
+    outline: 2px solid #e9e3d6;
+    outline-offset: 3px;
+    border-radius: 10px;
+  }
+
+  /* ---------- the campfire that marks the save (bottom left) ---------- */
+  .death-save {
+    position: absolute;
+    left: clamp(16px, 3vw, 40px);
+    bottom: clamp(16px, 3vw, 40px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font: 0.95rem Georgia, 'Times New Roman', serif;
+    letter-spacing: 0.05em;
+    color: rgba(233, 227, 214, 0.85);
+    animation: death-in 1.2s ease 2s both;
+  }
+
+  .fire {
+    position: relative;
+    display: block;
+    width: 40px;
+    height: 46px;
+  }
+
+  .fire svg {
+    position: relative;
+    display: block;
+    overflow: visible;
+  }
+
+  .fire-glow {
+    position: absolute;
+    left: 50%;
+    top: 55%;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 140, 40, 0.45), rgba(255, 110, 20, 0) 65%);
+    transform: translate(-50%, -50%);
+    animation: glow 2.2s ease-in-out infinite;
+  }
+
+  .flame {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: flicker 0.9s ease-in-out infinite alternate;
+  }
+
+  .ember {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #ffb347;
+    opacity: 0;
+    animation: ember 2.4s ease-out infinite;
+  }
+
+  .e2 {
+    animation-delay: 0.8s;
+    --drift: -9px;
+  }
+
+  .e3 {
+    animation-delay: 1.6s;
+    --drift: 7px;
+  }
+
+  @keyframes flicker {
+    0% {
+      transform: scale(1, 1) skewX(0deg);
+    }
+    35% {
+      transform: scale(0.96, 1.06) skewX(-3deg);
+    }
+    70% {
+      transform: scale(1.03, 0.95) skewX(2deg);
+    }
+    100% {
+      transform: scale(0.98, 1.04) skewX(-1deg);
+    }
+  }
+
+  @keyframes glow {
+    50% {
+      opacity: 0.6;
+      transform: translate(-50%, -50%) scale(0.9);
+    }
+  }
+
+  @keyframes ember {
+    0% {
+      opacity: 0;
+      transform: translate(0, 0);
+    }
+    15% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--drift, 4px), -40px);
+    }
+  }
+
+  @keyframes death-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes death-grow {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+    30% {
+      opacity: 1;
+    }
+    to {
+      transform: scale(1.04);
+    }
+  }
+</style>

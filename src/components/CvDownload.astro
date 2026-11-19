@@ -1,0 +1,76 @@
+---
+// "Curriculum Vitae download" with pill buttons (Figma: Curriculum Vitae Download, Button).
+import { cvFiles } from '../data/site';
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const files = cvFiles.filter((f) => f.show);
+---
+
+<div class="cv-download">
+  <h3 class="cv-download-title">{t(lang).cvDownload}</h3>
+  <div class="buttons">
+    {
+      files.map((f) => (
+        <a class="btn-download" href={f.href} download hreflang={f.lang} type="application/pdf" data-cursor={t(lang).cursorDownload}>
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 16l-5-5 1.4-1.45 2.6 2.6V4h2v8.15l2.6-2.6L17 11zm-6 4q-.825 0-1.412-.587T4 18v-3h2v3h12v-3h2v3q0 .825-.587 1.413T18 20z"
+            />
+          </svg>
+          {f.label[lang]}
+        </a>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .cv-download {
+    padding-left: var(--timeline-col);
+    display: grid;
+    gap: 20px;
+  }
+
+  .cv-download-title {
+    font-size: var(--fs-h2);
+    font-weight: 500;
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 15px;
+    border-radius: var(--radius-pill);
+    background: var(--color-brand);
+    color: #fff;
+    font-weight: 500;
+    font-size: var(--fs-small);
+    letter-spacing: 0.1px;
+    line-height: 20px;
+    text-decoration: none;
+    transition: background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  .btn-download:hover {
+    background: #0f4fc0;
+    box-shadow: 0 2px 6px rgba(20, 94, 225, 0.35);
+  }
+
+  @media (max-width: 720px) {
+    .cv-download {
+      padding-left: 0;
+    }
+  }
+</style>

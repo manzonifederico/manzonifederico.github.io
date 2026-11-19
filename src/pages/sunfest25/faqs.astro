@@ -1,0 +1,125 @@
+---
+import { inlineSvg } from '../../utils/svg';
+import SunfestLayout from '../../layouts/SunfestLayout.astro';
+import Carousel from '../../components/sunfest/Carousel.astro';
+import CheckProgram from '../../components/sunfest/CheckProgram.astro';
+import { faqs } from '../../data/sunfest25';
+import left from '../../assets/sunfest25/img/faqs-strip-left.jpg';
+import center from '../../assets/sunfest25/img/faqs-strip-center.jpg';
+import right from '../../assets/sunfest25/img/faqs-strip-right.jpg';
+import chevron from '../../assets/sunfest25/icons/keyboard-arrow-down.svg?raw';
+
+const icons = import.meta.glob<string>('../../assets/sunfest25/icons/*.svg', { query: '?raw', import: 'default', eager: true });
+const icon = (name: string) => icons[`../../assets/sunfest25/icons/${name}.svg`] ?? '';
+---
+
+<SunfestLayout title="FAQs" page="faqs" bg="#944c4c" next={['overnight', 'location', 'program']}>
+  <h1 class="sf-title">FAQs</h1>
+
+  <Carousel
+    label="Photos from the festival"
+    start={1}
+    images={[
+      { src: left, alt: 'A tent lit from inside, at night in the woods' },
+      { src: center, alt: 'Festival-goers cheering in front of the stage barrier' },
+      { src: right, alt: 'A backpack and a jacket, ready for the festival' },
+    ]}
+  />
+
+  <section class="sf-wrap sf-section faqs" aria-label="Frequently asked questions">
+    {
+      faqs.map((f) => (
+        <details class="faq">
+          <summary>
+            <span class="faq__icon" set:html={inlineSvg(icon(f.icon))} aria-hidden="true" />
+            <span class="faq__q">{f.q}</span>
+            <span class="faq__chevron" set:html={inlineSvg(chevron)} aria-hidden="true" />
+          </summary>
+          <p class="faq__a" set:html={f.a} />
+        </details>
+      ))
+    }
+  </section>
+
+  <CheckProgram />
+</SunfestLayout>
+
+<style>
+  .faqs {
+    max-width: 760px;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .faq {
+    background: #fff;
+    color: #000;
+    border-radius: 8px;
+  }
+  .faq summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3rem;
+    padding: 0.4rem 0.9rem 0.4rem 0;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 600;
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.35rem);
+    border-radius: 8px;
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq summary:hover {
+    background: #f1f1f1;
+  }
+  .faq__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    align-self: stretch;
+    border-right: 1px solid #ccc;
+  }
+  .faq__icon :global(svg) {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+  .faq__q {
+    flex: 1;
+    min-width: 0;
+  }
+  .faq__chevron {
+    flex: none;
+    display: flex;
+    width: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+  .faq__chevron :global(svg) {
+    width: 100%;
+    height: auto;
+  }
+  .faq[open] .faq__chevron {
+    transform: rotate(180deg);
+  }
+  .faq[open] summary {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .faq__a {
+    margin: 0 !important;
+    max-width: none !important;
+    padding: 0.75rem 1rem 1rem 3.75rem;
+    text-shadow: none !important;
+    border-top: 1px solid #eee;
+  }
+  .faq__a :global(a) {
+    color: #7a2f2f;
+    font-weight: 600;
+  }
+  @media (max-width: 480px) {
+    .faq__a {
+      padding-left: 1rem;
+    }
+  }
+</style>

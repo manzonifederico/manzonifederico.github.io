@@ -1,0 +1,38 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+
+# environment variables
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+
+# Local-only working folders (not published):
+# design-reference = cached Figma screenshots/code, my-files = raw files you hand over
+design-reference/
+my-files/
+Portfolio-*/
+
+# Claude Code local settings
+.claude/
+
+# local backups
+backups/
+
+# Kept on this computer only, not published (the site doesn't need them):
+# notes and docs, article exports, helper scripts
+/HANDOFF.md
+/README.md
+/content-export/
+/scripts/

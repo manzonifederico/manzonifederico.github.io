@@ -1,0 +1,199 @@
+---
+// Photo carousel for the Sunfest25 pages: swipe/scroll sideways, or use the arrow buttons
+// (keyboard: focus the photos and use ← →). `strip` = big centred photo with its neighbours
+// peeking at the sides (location, FAQs); `gallery` = a row of photos with the same height (volunteer).
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  label: string;
+  images: { src: ImageMetadata; alt: string }[];
+  variant?: 'strip' | 'gallery';
+  /** slide shown first (strip: centred) */
+  start?: number;
+}
+const { label, images, variant = 'strip', start = 0 } = Astro.props;
+---
+
+<section class:list={['carousel', `carousel--${variant}`]} aria-roledescription="carousel" aria-label={label} data-carousel data-start={start}>
+  <div class="carousel__track" tabindex="0" aria-label={`${label}: use the arrow keys to scroll`}>
+    <ul class="carousel__list">
+      {
+        images.map((img, i) => (
+          <li class="carousel__slide" aria-roledescription="slide" aria-label={`${i + 1} / ${images.length}`}>
+            <Image
+              src={img.src}
+              alt={img.alt}
+              widths={variant === 'strip' ? [600, 900, 1300] : [400, 600, 900]}
+              sizes={variant === 'strip' ? '(max-width: 900px) 80vw, 820px' : '(max-width: 600px) 80vw, 560px'}
+              loading={i === start ? 'eager' : 'lazy'}
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <button type="button" class="carousel__btn carousel__btn--prev" data-dir="-1" aria-label="Previous photo">
+    <span aria-hidden="true">←</span>
+  </button>
+  <button type="button" class="carousel__btn carousel__btn--next" data-dir="1" aria-label="Next photo">
+    <span aria-hidden="true">→</span>
+  </button>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((root) => {
+    const track = root.querySelector<HTMLElement>('.carousel__track')!;
+    const slides = [...root.querySelectorAll<HTMLElement>('.carousel__slide')];
+    const prev = root.querySelector<HTMLButtonElement>('[data-dir="-1"]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-dir="1"]')!;
+    const centred = root.classList.contains('carousel--strip');
+
+    const target = (slide: HTMLElement) =>
+      centred ? slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2 : slide.offsetLeft - parseFloat(getComputedStyle(track).paddingLeft);
+
+    // index of the slide currently at the reference point (centre for strips, left edge for galleries)
+    const current = () => {
+      let best = 0;
+      let dist = Infinity;
+      slides.forEach((s, i) => {
+        const d = Math.abs(target(s) - track.scrollLeft);
+        if (d < dist) {
+          dist = d;
+          best = i;
+        }
+      });
+      return best;
+    };
+    const go = (i: number, smooth = true) => {
+      const s = slides[Math.max(0, Math.min(slides.length - 1, i))];
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      track.scrollTo({ left: target(s), behavior: smooth && !reduce ? 'smooth' : 'auto' });
+    };
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth - 2;
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= max;
+    };
+
+    prev.addEventListener('click', () => go(current() - 1));
+    next.addEventListener('click', () => go(current() + 1));
+    track.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        go(current() + 1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        go(current() - 1);
+      }
+    });
+    track.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', () => go(current(), false));
+
+    go(Number(root.dataset.start ?? 0), false);
+    update();
+  });
+</script>
+
+<style>
+  .carousel {
+    position: relative;
+  }
+
+  .carousel__track {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .carousel__track::-webkit-scrollbar {
+    display: none;
+  }
+  .carousel__track:focus-visible {
+    outline: 3px solid var(--sf-yellow);
+    outline-offset: -3px;
+  }
+
+  .carousel__list {
+    list-style: none;
+    margin: 0;
+    display: flex;
+    gap: clamp(0.6rem, 1.5vw, 1rem);
+    width: max-content;
+  }
+
+  .carousel__slide :global(img) {
+    border-radius: var(--sf-radius);
+    object-fit: cover;
+  }
+
+  /* strip: one big photo in the middle, neighbours peeking at both sides */
+  .carousel--strip {
+    --slide: min(78vw, 820px);
+  }
+  .carousel--strip .carousel__list {
+    padding: 0 calc((100vw - var(--slide)) / 2);
+  }
+  .carousel--strip .carousel__slide {
+    width: var(--slide);
+    scroll-snap-align: center;
+  }
+  .carousel--strip .carousel__slide :global(img) {
+    width: 100%;
+    height: clamp(13rem, 36vw, 28rem);
+  }
+
+  /* gallery: photos keep their proportions, same height */
+  .carousel--gallery .carousel__list {
+    padding: 0 var(--sf-gutter) 0.25rem;
+  }
+  .carousel--gallery .carousel__slide {
+    scroll-snap-align: start;
+    scroll-margin-left: var(--sf-gutter);
+  }
+  .carousel--gallery .carousel__slide :global(img) {
+    height: clamp(10rem, 22vw, 16rem);
+    width: auto;
+  }
+
+  .carousel__btn {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-top: -1.5rem;
+    border: 2px solid #000;
+    border-radius: 50%;
+    background: #fff;
+    color: #000;
+    font: 700 1.3rem/1 var(--sf-text);
+    cursor: pointer;
+    box-shadow: 0 3px 0 #000;
+    transition: transform 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+  }
+  .carousel__btn:hover {
+    background: var(--sf-yellow);
+    transform: translateY(-2px);
+  }
+  .carousel__btn:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .carousel__btn--prev {
+    left: clamp(0.5rem, 2vw, 1.5rem);
+  }
+  .carousel__btn--next {
+    right: clamp(0.5rem, 2vw, 1.5rem);
+  }
+  @media (max-width: 560px) {
+    .carousel__btn {
+      width: 2.5rem;
+      height: 2.5rem;
+      margin-top: -1.25rem;
+      font-size: 1.1rem;
+    }
+  }
+</style>

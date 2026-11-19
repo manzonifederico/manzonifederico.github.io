@@ -1,0 +1,35 @@
+{
+  "name": "portfolio-site",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.10",
+    "@astrojs/sitemap": "^3.7.6",
+    "@fontsource/commissioner": "^5.3.0",
+    "@fontsource/freckle-face": "^5.3.0",
+    "@fontsource/ibm-plex-serif": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/josefin-sans": "^5.3.0",
+    "@fontsource/manrope": "^5.3.0",
+    "@fontsource/poppins": "^5.3.0",
+    "@fontsource/roboto": "^5.3.0",
+    "@fontsource/rubik": "^5.3.0",
+    "astro": "^7.4.13"
+  },
+  "engines": {
+    "node": ">=22.23"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "axe-core": "^4.10.2",
+    "typescript": "^6.0.3"
+  }
+}

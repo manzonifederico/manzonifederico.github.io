@@ -1,0 +1,460 @@
+---
+// Home page side navigation, styled like the legend on the left of the articles: Me → My work → CV → Contacts.
+// No box: just the words and small squares: full blue for the section you are reading, light blue for the others.
+// It appears with the first scroll of the visit (however short) and stays for the rest of the visit.
+// At the start of the page, after a few seconds without use it fades out; scrolling or hovering brings it back.
+// Wide screens (≥ 1720px): words in the free space beside the content. Narrower screens (900–1719px): there
+// is no free space for the words, so only small squares at the very edge; the word appears on hover/focus.
+// Elsewhere, after a few seconds without being used, the words fade out and the squares move closer to the
+// edge and closer together; hovering (or keyboard focus) brings the words back.
+// Phones: hidden.
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const s = t(lang);
+const items = [
+  { href: '#top', label: s.navMe },
+  { href: '#work', label: s.myWork },
+  { href: '#cv', label: s.myCv },
+  { href: '#contact', label: s.navContacts },
+];
+---
+
+<nav class="home-nav" aria-label={s.contents}>
+  <ol role="list">
+    {
+      items.map((i) => (
+        <li>
+          <a href={i.href} data-home-nav>
+            <span class="mark" aria-hidden="true" />
+            <span class="label">{i.label}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+  <span class="glider" aria-hidden="true"><span class="glider-blur"></span><span class="glider-dot"></span></span>
+</nav>
+
+<script>
+  const KEY = 'home-nav-seen';
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-home-nav]'));
+  const targets = links.map((a) =>
+    a.hash === '#top' ? document.querySelector<HTMLElement>('.about') : document.querySelector<HTMLElement>(a.hash),
+  );
+  const nav = document.querySelector<HTMLElement>('.home-nav');
+  let seen = false;
+  try {
+    seen = sessionStorage.getItem(KEY) === '1';
+  } catch {
+    /* storage blocked: it simply appears on scroll */
+  }
+
+  const update = () => {
+    // current = the last section whose top has passed 40% of the screen
+    const line = window.innerHeight * 0.4;
+    let current = 0;
+    targets.forEach((el, i) => {
+      if (el && el.getBoundingClientRect().top <= line) current = i;
+    });
+    // the footer (contacts) counts once it fills most of the screen, or at the very bottom
+    const footer = targets[targets.length - 1];
+    if (
+      (footer && footer.getBoundingClientRect().top <= window.innerHeight * 0.6) ||
+      window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4
+    )
+      current = targets.length - 1;
+    links.forEach((a, i) => a.setAttribute('aria-current', String(i === current)));
+    moveGlider(current);
+
+    const inHero = window.scrollY <= window.innerHeight * 0.35;
+    nav?.classList.toggle('is-visible', seen);
+    nav?.classList.toggle('is-dim', seen && inHero);
+
+    // over the blue blob of the hero or of the footer, the whole nav turns white (all words together).
+    // The blobs are ellipses blurred by ~100px, so the blue reaches beyond their edge: count the nav as
+    // "on blue" when its middle is inside the ellipse or less than ~120px outside it.
+    if (nav) {
+      const r = nav.getBoundingClientRect();
+      const x = r.left + 40;
+      const y = r.top + r.height / 2;
+      const blobs = Array.from(document.querySelectorAll<HTMLElement>('.hero .blob, .footer .blob')).map((el) =>
+        el.getBoundingClientRect(),
+      );
+      const onBlob = blobs.some((bl) => {
+        const rx = bl.width / 2;
+        const ry = bl.height / 2;
+        const dx = (x - (bl.left + rx)) / rx;
+        const dy = (y - (bl.top + ry)) / ry;
+        const outsidePx = (Math.sqrt(dx * dx + dy * dy) - 1) * Math.min(rx, ry);
+        return outsidePx < 120;
+      });
+      const foot = document.getElementById('contact')?.getBoundingClientRect();
+      const inFooterFade = !!foot && y > foot.top && y < foot.top + foot.height * 0.3;
+      nav.classList.toggle('on-blue', onBlob && !inFooterFade);
+    }
+    if (seen && !idleTimer) scheduleIdle();
+  };
+
+  // Idle (not hovered for a while):
+  // - at the start of the page (hero): the nav fades out completely ("asleep"); scrolling or hovering wakes it
+  // - elsewhere: compact, i.e. words hidden until hovered, squares nearer the edge and closer together
+  const IDLE_MS = 4000;
+  let idleTimer: number | undefined;
+  const scheduleIdle = () => {
+    window.clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(() => {
+      idleTimer = undefined;
+      if (!nav || nav.matches(':hover, :focus-within')) return;
+      if (window.scrollY <= window.innerHeight * 0.35) nav.classList.add('is-asleep');
+      else nav.classList.add('is-compact');
+      followLayout();
+    }, IDLE_MS);
+  };
+  // hovering shows the words in place (the nav does not move under the pointer)
+  // glider: follows the active square; while it travels, the blur stretches a little
+  const glider = nav?.querySelector<HTMLElement>('.glider');
+  let lastIndex = -1;
+  let movingTimer: number | undefined;
+  function moveGlider(index: number, instant = false) {
+    if (!nav || !glider) return;
+    const mark = links[index]?.querySelector<HTMLElement>('.mark');
+    if (!mark) return;
+    const n = nav.getBoundingClientRect();
+    const m = mark.getBoundingClientRect();
+    // first placement (page load), resizes and font loading: jump straight to the square, no glide
+    const jump = instant || lastIndex === -1;
+    if (jump) glider.style.transition = 'none';
+    glider.style.transform = `translate(${m.left - n.left}px, ${m.top - n.top}px)`;
+    if (jump) {
+      void glider.offsetWidth; // apply the position before re-enabling the transition
+      glider.style.transition = '';
+    }
+    if (index !== lastIndex && lastIndex !== -1) {
+      glider.classList.add('is-moving');
+      window.clearTimeout(movingTimer);
+      movingTimer = window.setTimeout(() => glider.classList.remove('is-moving'), 700);
+    }
+    lastIndex = index;
+  }
+  // layout changes (compact ↔ full) move the squares: keep the glider on them
+  const followLayout = () => {
+    const start = performance.now();
+    const step = () => {
+      if (lastIndex >= 0) moveGlider(lastIndex, true);
+      if (performance.now() - start < 450) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  nav?.addEventListener('transitionend', () => lastIndex >= 0 && moveGlider(lastIndex, true));
+  window.addEventListener('resize', () => lastIndex >= 0 && moveGlider(lastIndex, true));
+  document.fonts?.ready.then(() => lastIndex >= 0 && moveGlider(lastIndex, true));
+  // clicking a link moves the glider right away (the page then scrolls to the section)
+  links.forEach((a, i) => a.addEventListener('click', () => moveGlider(i)));
+
+  const wake = () => {
+    window.clearTimeout(idleTimer);
+    idleTimer = undefined;
+    nav?.classList.remove('is-asleep');
+    followLayout();
+  };
+  nav?.addEventListener('mouseenter', wake);
+  nav?.addEventListener('focusin', wake);
+  nav?.addEventListener('mouseleave', scheduleIdle);
+  nav?.addEventListener('focusout', (e) => {
+    if (!nav.contains(e.relatedTarget as Node)) scheduleIdle();
+  });
+
+  // the nav first appears with the very first scroll of the visit, however short
+  const onScroll = () => {
+    if (!seen) {
+      seen = true;
+      try {
+        sessionStorage.setItem(KEY, '1');
+      } catch {
+        /* ignore */
+      }
+    }
+    const wasCompact = nav?.classList.contains('is-compact');
+    nav?.classList.remove('is-asleep', 'is-compact');
+    if (wasCompact) followLayout();
+    scheduleIdle();
+  };
+  let ticking = false;
+  window.addEventListener(
+    'scroll',
+    () => {
+      onScroll();
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        update();
+        ticking = false;
+      });
+    },
+    { passive: true },
+  );
+  window.addEventListener('resize', update);
+  // loading (or reloading) the page at the top: keep the nav out of sight until a scroll or a hover
+  if (window.scrollY <= window.innerHeight * 0.35) nav?.classList.add('is-asleep');
+  update();
+</script>
+
+<style>
+  /* the nav box doubles as its hover area: from the page edge, with room above, below and to the right of
+     the squares, so the words stay visible while the pointer is anywhere inside it */
+  .home-nav {
+    position: fixed;
+    left: 0;
+    padding: 36px 48px 36px 6px;
+    top: 50%;
+    z-index: 40;
+    transform: translate(-8px, -50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms var(--ease), transform 300ms var(--ease);
+    font-family: var(--font-display);
+  }
+
+  .home-nav.is-visible,
+  .home-nav:focus-within {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(0, -50%);
+  }
+
+  /* asleep (idle at the start of the page): invisible, but its area still reacts to hover */
+  .home-nav.is-visible.is-asleep:not(:hover):not(:focus-within) {
+    opacity: 0;
+  }
+
+  .home-nav.is-dim:not(.on-blue):not(:hover):not(:focus-within) {
+    opacity: 0.8;
+  }
+
+  /* over the blue hero / footer */
+  .home-nav.on-blue a {
+    color: #fff;
+    opacity: 0.85;
+  }
+
+  .home-nav.on-blue a[aria-current='true'] {
+    opacity: 1;
+  }
+
+  .home-nav.on-blue .mark {
+    opacity: 0.5;
+  }
+
+  .home-nav.on-blue a[aria-current='true'] .mark {
+    opacity: 0;
+  }
+
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  /* same look as the article legend: words, square marker on the current section */
+  a {
+    position: relative;
+    display: block;
+    padding: 4px 0 4px 18px;
+    color: var(--color-brand);
+    font-size: 15px;
+    line-height: 1.3;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  a:hover,
+  a:focus-visible,
+  a[aria-current='true'] {
+    opacity: 1;
+  }
+
+  .mark {
+    position: absolute;
+    left: 2px;
+    top: 0.8em;
+    width: 5px;
+    height: 5px;
+  }
+
+  .mark {
+    border-radius: 1.5px;
+    background: currentColor;
+    opacity: 0.3;
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  a[aria-current='true'] .mark {
+    opacity: 0; /* the glider sits here instead */
+  }
+
+  .glider {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 5px;
+    height: 5px;
+    pointer-events: none;
+    /* soft ease-in-out, so the square glides instead of snapping */
+    transition: transform 700ms cubic-bezier(0.45, 0.05, 0.25, 1);
+  }
+
+  .glider-dot,
+  .glider-blur {
+    position: absolute;
+    background: var(--color-brand);
+  }
+
+  .glider-dot {
+    inset: 0;
+    border-radius: 1.5px;
+  }
+
+  .glider-blur {
+    left: 50%;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border-radius: 50%;
+    filter: blur(6px);
+    opacity: 0; /* the glow only shows while the square travels */
+    transform: scale(0.6);
+    transition:
+      transform 500ms cubic-bezier(0.45, 0.05, 0.25, 1),
+      opacity 600ms cubic-bezier(0.45, 0.05, 0.25, 1);
+  }
+
+  .glider.is-moving .glider-blur {
+    transform: scale(1.25);
+    opacity: 0.6;
+    transition:
+      transform 350ms cubic-bezier(0.45, 0.05, 0.25, 1),
+      opacity 250ms ease-out;
+  }
+
+  .home-nav.on-blue .glider-dot,
+  .home-nav.on-blue .glider-blur {
+    background: #fff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glider,
+    .glider-blur {
+      transition: none;
+    }
+  }
+
+  @media (min-width: 1720px) {
+    .home-nav {
+      padding-left: max(24px, calc((100vw - var(--content-max)) / 2 - 130px));
+      transition:
+        opacity 300ms var(--ease),
+        transform 300ms var(--ease),
+        padding-left 400ms var(--ease),
+        visibility 0s;
+    }
+    ol {
+      transition: gap 400ms var(--ease);
+    }
+    a {
+      transition: opacity var(--dur) var(--ease), padding 400ms var(--ease);
+    }
+    .label {
+      display: inline-block;
+      transition: opacity 300ms var(--ease), transform 300ms var(--ease);
+    }
+
+    /* compact (idle): only outlined squares, closer to the page edge and to each other */
+    .home-nav.is-compact {
+      padding-left: 16px;
+    }
+    .is-compact ol {
+      gap: 0;
+    }
+    .is-compact a {
+      padding-block: 2px;
+    }
+    .is-compact:not(:hover):not(:focus-within) .label {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+  }
+
+  /* narrower screens: no room for the words beside the content, so only the squares (light blue, full blue for the
+     current section); the words appear on hover or keyboard focus */
+  @media (max-width: 1719px) {
+    ol {
+      gap: 0;
+    }
+    a {
+      width: 22px;
+      height: 26px;
+      padding: 0;
+    }
+    .mark {
+      left: 8px;
+      top: 9px;
+    }
+    .label {
+      position: absolute;
+      left: 22px;
+      top: 50%;
+      transform: translate(-4px, -50%);
+      padding: 4px 8px 4px 4px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .home-nav:hover .label,
+    .home-nav:focus-within .label {
+      opacity: 1;
+      transform: translate(0, -50%);
+      pointer-events: auto;
+    }
+  }
+
+  /* narrower screens: the content starts close to the edge, so the hover area stays slim on the right */
+  @media (max-width: 1599px) {
+    .home-nav {
+      padding-right: 10px;
+    }
+  }
+
+  @media (max-width: 1279px) {
+    .home-nav {
+      padding-right: 0;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .home-nav {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-nav,
+    .label {
+      transition: none;
+    }
+  }
+
+  @media print {
+    .home-nav {
+      display: none;
+    }
+  }
+</style>

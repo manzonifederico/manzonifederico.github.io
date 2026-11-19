@@ -1,0 +1,1235 @@
+---
+// Case-study page, shared by /work/<slug>/ (English) and /it/work/<slug>/ (Italian UI;
+// the article text itself is in English).
+import { getCollection, render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectLogo from '../ProjectLogo.astro';
+import ProjectCard from '../ProjectCard.astro';
+import LangSwitch from '../LangSwitch.astro';
+import Tag from '../Tag.astro';
+import MyWork from '../MyWork.astro';
+import Footer from '../Footer.astro';
+import { getProject, projectText, type Project } from '../../data/projects';
+import { site } from '../../data/site';
+import { t, tagLabel, localePath, type Lang } from '../../i18n/ui';
+
+interface Props {
+  project: Project;
+  lang: Lang;
+}
+const { project, lang } = Astro.props;
+const s = t(lang);
+const text = projectText(project, lang);
+
+const entries = await getCollection('articles', (e) => e.id.startsWith(`${project.slug}/`));
+const byVersion = Object.fromEntries(entries.map((e) => [e.id.split('/')[1], e]));
+
+type VersionKey = 'full' | 'key-points' | 'summary';
+// Italian pages use full-it.md / key-points-it.md / summary-it.md when they exist, else the English text
+const entryFor = (k: VersionKey) => (lang === 'it' && byVersion[`${k}-it`]) || byVersion[k];
+// order of the reading-mode tabs; the first one is the one the page opens on
+const versions = (['key-points', 'full', 'summary'] as VersionKey[])
+  .filter((k) => byVersion[k])
+  .map((key) => ({ key, label: s.modes[key] }));
+const allTranslated = lang !== 'it' || versions.every((v) => byVersion[`${v.key}-it`]);
+
+const rendered = await Promise.all(
+  versions.map(async (v) => {
+    const entry = entryFor(v.key);
+    const r = await render(entry);
+    // optional front matter `legend:` maps a heading to a shorter label for the quick links on the left
+    const short = (entry.data?.legend ?? {}) as Record<string, string>;
+    const headings = r.headings.filter((h) => h.depth === 2).map((h) => ({ ...h, text: short[h.text] ?? h.text }));
+    return { ...v, Content: r.Content, headings, lang: entry === byVersion[v.key] ? 'en' : 'it' };
+  }),
+);
+const bibliography = byVersion['bibliography'] ? await render(byVersion['bibliography']) : null;
+const Bibliography = bibliography?.Content;
+
+// opens on the first mode (Key points)
+const defaultMode: VersionKey = rendered[0].key;
+const related = project.related ? getProject(project.related) : undefined;
+
+// ---------- SEO ----------
+const pageTitle = `${project.title}: ${text.subtitle} | ${site.name}`;
+const pageUrl = new URL(localePath(lang, `/work/${project.slug}/`), Astro.site).href;
+// social preview: a landscape screenshot of the project (cropped to 1200×630), else the site's default image
+const wide = project.cardImages.find((c) => c.kind === 'desktop' || c.kind === 'screen');
+const og = wide ? await getImage({ src: wide.src, width: 1200, height: 630, fit: 'cover', position: 'top', format: 'jpg', layout: 'none' }) : null;
+const ogImage = og ? og.src : site.ogImage;
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Article',
+      headline: `${project.title}: ${text.subtitle}`,
+      description: text.description,
+      url: pageUrl,
+      inLanguage: lang,
+      image: new URL(ogImage, Astro.site).href,
+      keywords: project.tags.join(', '),
+      author: { '@type': 'Person', name: site.name, url: new URL('/', Astro.site).href },
+      isPartOf: { '@type': 'WebSite', name: site.name, url: new URL('/', Astro.site).href },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: site.name, item: new URL(localePath(lang, '/'), Astro.site).href },
+        { '@type': 'ListItem', position: 2, name: project.title, item: pageUrl },
+      ],
+    },
+  ],
+};
+---
+
+<BaseLayout
+  lang={lang}
+  title={pageTitle}
+  description={text.description}
+  type="article"
+  image={og?.src}
+  imageAlt={wide?.alt}
+  bodyClass={project.theme}>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(articleJsonLd).replace(/</g, '\\u003c')} />
+  <main id="main">
+    <article class="case">
+      <div class="case-panel">
+        <div class="topbar container">
+          <a class="back" href={localePath(lang, '/') + '#work'}>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path fill="currentColor" d="m7.825 13l5.6 5.6L12 20l-8-8l8-8l1.425 1.4l-5.6 5.6H20v2z"></path>
+            </svg>
+            {s.back}
+          </a>
+          <LangSwitch lang={lang} />
+        </div>
+
+        <header class="case-head container" id="start">
+          <h1 class="case-title"><ProjectLogo project={project} size="hero" /></h1>
+          <p class="case-sub">{text.subtitle}</p>
+          <ul class="tags" role="list" aria-label={s.tags}>
+            {project.tags.map((tag) => <Tag label={tagLabel(lang, tag)} />)}
+          </ul>
+        </header>
+
+        <div class="case-layout container">
+          <!-- Linked legend: Start → sections of the current version → End -->
+          <nav class="legend" aria-label={s.contents}>
+            <details class="legend-box" data-legend>
+              <summary>{s.contents}</summary>
+              <ol class="legend-list" role="list">
+                <li><a href="#start" data-legend-link>{s.start}</a></li>
+                {
+                  rendered.map((v) =>
+                    v.headings.map((h) => (
+                      <li data-legend-for={v.key} hidden={v.key !== defaultMode} lang={v.lang}>
+                        <a href={`#${h.slug}`} data-legend-link>
+                          {h.text}
+                        </a>
+                      </li>
+                    )),
+                  )
+                }
+                <li><a href="#end" data-legend-link>{s.end}</a></li>
+              </ol>
+            </details>
+          </nav>
+
+          <div class="reader">
+            <h2 class="reader-q" id="reader-q">{s.readHow}</h2>
+            <div class="modes" role="tablist" aria-labelledby="reader-q">
+              {
+                rendered.map((v) => (
+                  <button
+                    type="button"
+                    role="tab"
+                    class="mode"
+                    id={`tab-${v.key}`}
+                    aria-controls={`panel-${v.key}`}
+                    aria-selected={v.key === defaultMode ? 'true' : 'false'}
+                    tabindex={v.key === defaultMode ? 0 : -1}
+                    data-mode={v.key}
+                    data-cursor={s.modeCursor[v.key]}>
+                    {v.label}
+                  </button>
+                ))
+              }
+            </div>
+
+            {s.englishOnly && !allTranslated && <p class="en-only">{s.englishOnly}</p>}
+
+            <!-- Reviewer mode only: reveal people's names on this page (one switch for all names) -->
+            <button
+              type="button"
+              class="names-btn"
+              data-names-toggle
+              data-label-show={s.showNames}
+              data-label-hide={s.hideNames}>
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M12 16q1.875 0 3.188-1.312T16.5 11.5t-1.312-3.187T12 7T8.813 8.313T7.5 11.5t1.313 3.188T12 16m0-1.8q-1.125 0-1.912-.788T9.3 11.5t.788-1.912T12 8.8t1.913.788t.787 1.912t-.787 1.913T12 14.2m0 4.8q-3.65 0-6.65-2.037T1 11.5q1.35-3.425 4.35-5.462T12 4t6.65 2.038T23 11.5q-1.35 3.425-4.35 5.463T12 19"
+                />
+              </svg>
+              <span data-names-label>{s.showNames}</span>
+            </button>
+
+            {
+              rendered.map((v) => (
+                <section
+                  class="prose"
+                  role="tabpanel"
+                  id={`panel-${v.key}`}
+                  aria-labelledby={`tab-${v.key}`}
+                  data-panel={v.key}
+                  tabindex="0"
+                  lang={v.lang}
+                  hidden={v.key !== defaultMode}>
+                  <v.Content />
+                </section>
+              ))
+            }
+
+            {
+              Bibliography && (
+                <details class="biblio" lang="en">
+                  <summary>{s.references}</summary>
+                  <div class="prose prose--small">
+                    <Bibliography />
+                  </div>
+                </details>
+              )
+            }
+
+            <footer class="credits" id="end">
+              <div>
+                <!-- the same "Show names" switch next to the team, so the names can be revealed right where they are -->
+                <div class="credits-head">
+                  <h2 class="credits-title">{s.team}</h2>
+                  <button
+                    type="button"
+                    class="names-btn names-btn--team"
+                    data-names-toggle
+                    data-label-show={s.showNames}
+                    data-label-hide={s.hideNames}>
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                      <path fill="currentColor" d="M12 16q1.875 0 3.188-1.312T16.5 11.5t-1.312-3.187T12 7T8.813 8.313T7.5 11.5t1.313 3.188T12 16m0-1.8q-1.125 0-1.912-.788T9.3 11.5t.788-1.912T12 8.8t1.913.788t.787 1.912t-.787 1.913T12 14.2m0 4.8q-3.65 0-6.65-2.037T1 11.5q1.35-3.425 4.35-5.462T12 4t6.65 2.038T23 11.5q-1.35 3.425-4.35 5.463T12 19" />
+                    </svg>
+                    <span data-names-label>{s.showNames}</span>
+                  </button>
+                </div>
+                <ul role="list">
+                  {project.team.map((m) => {
+                    // "Name (role)" → the name is blurred in reviewer mode, the role stays readable
+                    const [, name, role] = m.match(/^(.*?)(\s*\(.*\))?$/) ?? [m, m, ''];
+                    return (
+                      <li>
+                        <span class="pii pii-name">{name}</span>
+                        {role}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+              {
+                project.resources.length > 0 && (
+                  <div>
+                    <h2 class="credits-title">{s.resources}</h2>
+                    <ul role="list">
+                      {project.resources.map((r) => (
+                        <li>
+                          <a href={r.href} target="_blank" rel="noopener">
+                            {r.label}
+                            <span class="visually-hidden"> {s.newTab}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              }
+            </footer>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <p class="home-link"><a href={localePath(lang, '/')}>{s.goHome}</a></p>
+
+    {
+      related && (
+        <section class="related container" aria-labelledby="related-title">
+          <h2 id="related-title" class="related-title">
+            {s.related}
+          </h2>
+          <div class="work-list" data-view="list">
+            <ProjectCard project={related} lang={lang} headingLevel="h3" />
+          </div>
+        </section>
+      )
+    }
+
+    <MyWork lang={lang} exclude={project.slug} defaultView="list" level="h2" filters={false} />
+  </main>
+  <Footer lang={lang} />
+
+  <!-- Click-to-enlarge for article images (only images with more detail than shown) -->
+  <dialog class="lightbox" aria-label={s.enlarge} data-lightbox data-label={s.enlarge}>
+    <button type="button" class="lightbox-close" data-lightbox-close aria-label={s.closeImage}>×</button>
+    <figure>
+      <img alt="" data-lightbox-img />
+      <figcaption data-lightbox-caption aria-hidden="true"></figcaption>
+    </figure>
+  </dialog>
+</BaseLayout>
+
+<script>
+  // ---------- "Show names" (reviewer mode, this page only) ----------
+  {
+    // two buttons (top of the article and next to the team) that share one state
+    const btns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-names-toggle]'));
+    const setShown = (shown: boolean) => {
+      document.body.classList.toggle('names-shown', shown);
+      btns.forEach((btn) => {
+        btn.dataset.state = shown ? 'shown' : 'hidden';
+        const label = btn.querySelector<HTMLElement>('[data-names-label]');
+        if (label) label.textContent = (shown ? btn.dataset.labelHide : btn.dataset.labelShow) ?? '';
+      });
+      // names hidden from screen readers in reviewer mode become readable again while shown
+      const unbiased = document.documentElement.dataset.unbiased === 'true';
+      document.querySelectorAll<HTMLElement>('.pii-name').forEach((el) => {
+        if (unbiased && !shown) el.setAttribute('aria-hidden', 'true');
+        else el.removeAttribute('aria-hidden'); // valid ARIA: "true", never empty
+        el.toggleAttribute('inert', unbiased && !shown);
+      });
+    };
+    btns.forEach((btn) => btn.addEventListener('click', () => setShown(!document.body.classList.contains('names-shown'))));
+    // turning reviewer mode on or off resets the page to "names hidden"
+    document.querySelectorAll('[data-unbiased-toggle]').forEach((t) =>
+      t.addEventListener('click', () => requestAnimationFrame(() => setShown(false))),
+    );
+  }
+
+  // ---------- click-to-enlarge ----------
+  {
+    const box = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+    const big = box?.querySelector<HTMLImageElement>('[data-lightbox-img]');
+    const caption = box?.querySelector<HTMLElement>('[data-lightbox-caption]');
+    let opener: HTMLElement | null = null;
+    // the largest file of an image: article images come in several sizes (srcset), the page shows a small one
+    const largest = (img: HTMLImageElement) => {
+      let best = { url: img.currentSrc || img.src, w: img.naturalWidth };
+      for (const part of img.srcset.split(',')) {
+        const [url, w] = part.trim().split(/\s+/);
+        const width = parseInt(w ?? '', 10);
+        if (url && width > best.w) best = { url, w: width };
+      }
+      return best;
+    };
+    const open = (img: HTMLImageElement) => {
+      if (!box || !big || !caption) return;
+      opener = img;
+      big.src = largest(img).url;
+      big.alt = img.alt;
+      caption.textContent = img.alt;
+      box.showModal();
+    };
+    // worth enlarging = the largest file has clearly more pixels than the space it gets on the page
+    const setup = (img: HTMLImageElement) => {
+      const shown = img.getBoundingClientRect().width;
+      const zoomable = shown > 0 && largest(img).w >= Math.max(shown * 1.3, 500);
+      img.classList.toggle('zoomable', zoomable);
+      if (zoomable) {
+        img.tabIndex = 0;
+        img.setAttribute('role', 'button');
+        img.setAttribute('aria-label', `${box?.dataset.label ?? 'Enlarge'}: ${img.alt}`);
+      } else {
+        img.removeAttribute('tabindex');
+        img.removeAttribute('role');
+        img.removeAttribute('aria-label');
+      }
+    };
+    const imgs = Array.from(document.querySelectorAll<HTMLImageElement>('.prose img'));
+    const check = () => imgs.forEach((img) => (img.complete ? setup(img) : img.addEventListener('load', () => setup(img), { once: true })));
+    check();
+    // images in hidden reading modes get their size when shown, so re-check on tab change and resize
+    document.addEventListener('reading-mode', () => requestAnimationFrame(check));
+    window.addEventListener('resize', () => requestAnimationFrame(check));
+    document.addEventListener('click', (e) => {
+      const img = (e.target as HTMLElement).closest<HTMLImageElement>('.prose img.zoomable');
+      if (img) open(img);
+    });
+    document.addEventListener('keydown', (e) => {
+      const img = (e.target as HTMLElement).closest?.<HTMLImageElement>('.prose img.zoomable');
+      if (!img) return;
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        open(img);
+      } else if (e.key === ' ') {
+        e.preventDefault(); // no page scroll; it opens on keyup
+      }
+    });
+    document.addEventListener('keyup', (e) => {
+      const img = (e.target as HTMLElement).closest?.<HTMLImageElement>('.prose img.zoomable');
+      if (img && e.key === ' ') open(img);
+    });
+    box?.querySelector('[data-lightbox-close]')?.addEventListener('click', () => box.close());
+    big?.addEventListener('click', () => box?.close());
+    box?.addEventListener('click', (e) => {
+      if (e.target === box) box.close(); // click outside the image
+    });
+    box?.addEventListener('close', () => opener?.focus());
+  }
+
+  // ---------- Reading modes (Key points / Full story / Summary) ----------
+  // #full, #key-points, #summary open that version; a heading anchor opens the version that contains it.
+  const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('.mode'));
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-panel]'));
+  const legendItems = Array.from(document.querySelectorAll<HTMLElement>('[data-legend-for]'));
+
+  function select(key: string, focus = false) {
+    const tab = tabs.find((t) => t.dataset.mode === key);
+    if (!tab) return;
+    tabs.forEach((t) => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    panels.forEach((p) => (p.hidden = p.dataset.panel !== key));
+    legendItems.forEach((li) => (li.hidden = li.dataset.legendFor !== key));
+    if (focus) tab.focus();
+    spy();
+    document.dispatchEvent(new Event('reading-mode'));
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => {
+      select(tab.dataset.mode!);
+      history.replaceState(null, '', `#${tab.dataset.mode}`);
+    });
+    tab.addEventListener('keydown', (e) => {
+      const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      const jump = e.key === 'Home' ? tabs[0] : e.key === 'End' ? tabs[tabs.length - 1] : null;
+      if (!dir && !jump) return;
+      e.preventDefault();
+      const next = jump ?? tabs[(i + dir + tabs.length) % tabs.length];
+      select(next.dataset.mode!, true);
+    });
+  });
+
+  function fromHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    if (tabs.some((t) => t.dataset.mode === id)) {
+      select(id);
+      document.getElementById('reader-q')?.scrollIntoView();
+      return;
+    }
+    const target = document.getElementById(id);
+    const panel = target?.closest<HTMLElement>('[data-panel]');
+    if (panel?.dataset.panel) {
+      select(panel.dataset.panel);
+      target!.scrollIntoView();
+    }
+  }
+  window.addEventListener('hashchange', fromHash);
+
+  // ---------- Legend: open on wide screens, collapsible on small ones; highlight current section ----------
+  const legend = document.querySelector<HTMLDetailsElement>('[data-legend]');
+  const wide = matchMedia('(min-width: 1180px)');
+  const syncLegend = () => legend && (legend.open = wide.matches);
+  wide.addEventListener?.('change', syncLegend);
+  syncLegend();
+
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-legend-link]'));
+  let ticking = false;
+  function spy() {
+    ticking = false;
+    const visible = links.filter((a) => !a.closest('[hidden]'));
+    let current = visible[0];
+    const line = window.innerHeight * 0.3;
+    for (const a of visible) {
+      const el = document.getElementById(a.hash.slice(1));
+      if (el && el.getBoundingClientRect().top <= line) current = a;
+    }
+    // reached the bottom of the article → "End"
+    const end = document.getElementById('end');
+    if (end && end.getBoundingClientRect().top < window.innerHeight * 0.85) current = visible[visible.length - 1];
+    links.forEach((a) => (a === current ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+  }
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(spy);
+      }
+    },
+    { passive: true },
+  );
+  // on small screens, close the legend after choosing a section
+  links.forEach((a) => a.addEventListener('click', () => !wide.matches && legend && (legend.open = false)));
+
+  fromHash();
+  spy();
+</script>
+
+<style>
+  /* "Show names" button: only visible in reviewer mode */
+  .names-btn {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 6px 14px;
+    border: 1px solid currentColor;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.85);
+    color: #000;
+    font-size: var(--fs-small);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  :global(:root[data-unbiased='true']) .names-btn {
+    display: inline-flex;
+  }
+
+  .names-btn[data-state='shown'] {
+    background: #000;
+    color: #fff;
+  }
+
+  /* team heading + its smaller switch on one line */
+  .credits-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+  }
+
+  .names-btn--team {
+    margin-top: 0;
+    padding: 4px 11px;
+    font-size: var(--fs-support);
+  }
+
+  /* ---------- click-to-enlarge ---------- */
+  .prose :global(img.zoomable) {
+    cursor: zoom-in;
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  .prose :global(img.zoomable:hover) {
+    transform: scale(1.01);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  .lightbox {
+    width: min(96vw, 1600px);
+    max-height: 94vh;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: #111;
+    color: #fff;
+    overflow: auto;
+  }
+
+  .lightbox::backdrop {
+    background: rgba(0, 0, 0, 0.82);
+  }
+
+  .lightbox figure {
+    margin: 0;
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .lightbox img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: calc(94vh - 80px);
+    margin: 0 auto;
+    object-fit: contain;
+    cursor: zoom-out;
+  }
+
+  .lightbox figcaption {
+    font-size: 0.9rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .lightbox-close {
+    position: sticky;
+    top: 8px;
+    float: right;
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    margin: 8px 8px -52px 0;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: #000;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .case-panel {
+    background: var(--theme-bg);
+    color: var(--theme-ink);
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+    padding-bottom: clamp(32px, 5vw, 64px);
+  }
+
+  /* gradient themes (Burger King vs McDonald's): pin the gradient to the screen so it looks
+     the same whichever reading version (long or short) is open */
+  :global(.theme-bkmc) .case-panel {
+    background-attachment: fixed;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 4px;
+    font-size: var(--fs-small);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .back:hover {
+    text-decoration: underline;
+  }
+
+  /* small text on the coloured header: themes where white is too faint set --theme-small-ink
+     (e.g. Sunfest, Figma shows a black "Back"; white would be 2.2:1) */
+  .back,
+  .topbar :global(.lang) {
+    color: var(--theme-small-ink, inherit);
+  }
+  /* the EN / IT switch takes the same colour as "Back" */
+  .topbar :global(.lang) {
+    --lang-ink: currentColor;
+  }
+
+  .case-head {
+    padding-top: clamp(28px, 5vw, 60px);
+    padding-left: clamp(1rem, 4vw, 90px);
+    display: grid;
+    gap: 12px;
+    text-shadow: var(--theme-text-shadow, none);
+    scroll-margin-top: 80px;
+  }
+
+  .case-title {
+    font-weight: inherit;
+  }
+
+  .case-sub {
+    font-family: var(--theme-sub-font);
+    font-weight: var(--theme-sub-weight);
+    font-size: clamp(1.75rem, 1rem + 3vw, 4rem);
+    line-height: 1.15;
+  }
+
+  :global(.theme-sunfest) .case-sub {
+    text-transform: uppercase;
+    color: var(--theme-small-ink, inherit); /* white on the sky blue was 2.2:1 (WCAG 1.4.3) */
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+  }
+
+  /* ---------- legend + article ---------- */
+  .case-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding-top: clamp(24px, 4vw, 40px);
+  }
+
+  @media (min-width: 1180px) {
+    .case-layout {
+      grid-template-columns: 200px minmax(0, 1fr);
+      gap: 32px;
+    }
+  }
+
+  .legend {
+    align-self: start;
+    font-family: var(--font-display);
+  }
+
+  @media (min-width: 1180px) {
+    .legend {
+      position: sticky;
+      top: 24px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+      padding-top: 120px; /* line up with the first section */
+    }
+    .legend .legend-box > summary {
+      display: none;
+    }
+  }
+
+  .legend-box summary {
+    cursor: pointer;
+    display: inline-flex;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.85);
+    color: #000;
+    font-size: var(--fs-small);
+    font-weight: 500;
+  }
+
+  .legend-list {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  @media (max-width: 1179px) {
+    .legend-list {
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      color: #000;
+    }
+  }
+
+  .legend-list a {
+    position: relative;
+    display: block;
+    padding: 4px 0 4px 18px;
+    font-size: 15px;
+    line-height: 1.3;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .legend-list a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* small square marks the section you are reading (like the reference image) */
+  .legend-list a[aria-current='true'] {
+    opacity: 1;
+    font-weight: 500;
+  }
+
+  .legend-list a[aria-current='true']::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 0.75em;
+    width: 7px;
+    height: 7px;
+    background: currentColor;
+  }
+
+  .legend-list a {
+    color: var(--theme-small-ink, inherit);
+  }
+
+  .reader {
+    background: var(--theme-panel);
+    color: #000;
+    border-radius: var(--radius-md);
+    padding: clamp(16px, 2.4vw, 32px);
+    max-width: 1100px;
+    min-width: 0;
+  }
+
+  .reader-q {
+    font-family: var(--theme-heading-font);
+    font-weight: 500;
+    font-size: clamp(1.4rem, 1.1rem + 1vw, 2.25rem);
+  }
+
+  .modes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0 28px;
+  }
+
+  .mode {
+    padding: 4px 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--theme-tag-bg);
+    background: transparent;
+    color: inherit;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: var(--fs-small);
+    cursor: pointer;
+  }
+
+  :global(.theme-cicerone) .mode {
+    color: #7a00b0;
+  }
+
+  /* MirrorMood tags are white, which would vanish on the white reading panel */
+  :global(.theme-mirrormood) .mode {
+    border-color: #a23b38;
+    color: #8f2f2c;
+  }
+
+  :global(.theme-mirrormood) .mode[aria-selected='true'] {
+    background: #a23b38;
+    color: #fff;
+  }
+
+  .mode[aria-selected='true'] {
+    background: var(--theme-tag-bg);
+    color: var(--theme-tag-ink);
+  }
+
+  .mode:hover:not([aria-selected='true']) {
+    background: color-mix(in srgb, var(--theme-tag-bg) 15%, transparent);
+  }
+
+  .en-only {
+    margin: -14px 0 24px;
+    font-size: var(--fs-small);
+    color: #444;
+  }
+
+  /* ---------- Article text with the timeline down the left ---------- */
+  .prose {
+    --rail: clamp(40px, 7vw, 100px);
+    position: relative;
+    overflow-wrap: break-word; /* long joined words (e.g. "Ingredienti/informazioni") wrap on small phones */
+    padding-left: var(--rail);
+    max-width: 960px;
+    font-family: var(--theme-body-font);
+    font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.25rem);
+    line-height: 1.5;
+  }
+
+  .prose::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--rail) / 2 - 1px);
+    top: 0.6em;
+    bottom: 0;
+    width: 2px;
+    background: currentColor;
+    opacity: 0.85;
+  }
+
+  /* every version starts with a dot, even when it doesn't open with a heading (e.g. Summary) */
+  .prose:not(:has(> h2:first-child))::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--rail) / 2 - 12px);
+    top: 0.25em;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #1e1e1e;
+  }
+
+  .prose :global(h2) {
+    position: relative;
+    font-family: var(--theme-heading-font);
+    font-weight: 600;
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+    line-height: 1.2;
+    margin: 1.6em 0 0.4em;
+    scroll-margin-top: 24px;
+  }
+
+  .prose :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .prose :global(h2)::before {
+    content: '';
+    position: absolute;
+    left: calc(-1 * var(--rail) / 2 - 12px);
+    top: 0.25em;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #1e1e1e;
+  }
+
+  /* small pill next to a heading, e.g. "Live website ↗" (Markdown: <a class="heading-chip" href="…">) */
+  .prose :global(.heading-chip) {
+    display: inline-block;
+    margin-left: 0.6em;
+    padding: 0.3em 0.8em;
+    vertical-align: middle;
+    border-radius: var(--radius-pill);
+    background: var(--theme-tag-bg, var(--color-brand));
+    color: var(--theme-tag-ink, #fff);
+    font-family: var(--font-display);
+    font-size: 0.45em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .prose :global(.heading-chip:hover) {
+    transform: translateY(-2px);
+    text-decoration: underline;
+  }
+
+  .prose :global(h3) {
+    font-family: var(--theme-heading-font);
+    font-weight: 600;
+    font-size: 1.25em;
+    margin: 1.4em 0 0.3em;
+  }
+
+  .prose :global(h4),
+  .prose :global(h5) {
+    font-weight: 700;
+    font-size: 1em;
+    margin: 1.2em 0 0.2em;
+  }
+
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 1em;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.4em;
+  }
+
+  .prose :global(li + li) {
+    margin-top: 0.2em;
+  }
+
+  .prose :global(a) {
+    color: var(--color-link);
+    overflow-wrap: anywhere;
+  }
+
+  /* images: never upscaled, kept moderate in size and centred */
+  /* videos in articles (e.g. <video src="/video/x.mp4" autoplay muted loop playsinline>) look like images */
+  .prose :global(img),
+  .prose :global(video) {
+    display: block;
+    width: auto;
+    max-width: min(100%, 680px);
+    max-height: 70vh;
+    height: auto;
+    object-fit: contain;
+    margin: 1.4em auto;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Image galleries: responsive grid, 1 column on phones */
+  .prose :global(.gallery) {
+    margin: 1.4em auto 1.8em;
+    max-width: 820px;
+  }
+
+  .prose :global(.gallery p) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 16px;
+    align-items: start;
+    margin: 0;
+  }
+
+  .prose :global(.gallery img),
+  .prose :global(.gallery video) {
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+  }
+
+  /* phone screens (our designs): small, side by side */
+  .prose :global(.gallery--phones) {
+    max-width: 720px;
+  }
+
+  .prose :global(.gallery--phones p) {
+    grid-template-columns: repeat(auto-fit, minmax(min(42%, 130px), 180px));
+    justify-content: center;
+  }
+
+  .prose :global(.gallery--phones img),
+  .prose :global(.gallery--phones video) {
+    border-radius: 16px;
+  }
+
+  .prose :global(.gallery--wide) {
+    max-width: 760px;
+  }
+
+  .prose :global(.gallery--wide p) {
+    grid-template-columns: 1fr;
+  }
+
+  /* Instagram: white UIs on a white page need an outline */
+  :global(.theme-instagram) .prose :global(img) {
+    border: 1.5px solid #1a1a1a;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
+
+  :global(.theme-instagram) .prose :global(.gallery--phones img) {
+    border-width: 2px;
+    border-radius: 20px;
+  }
+
+  /* ---------- Persona cards (Cicerone & Sunfest) ---------- */
+  .prose :global(.persona) {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+    margin: 1em 0 1.4em;
+    padding: 16px;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .prose :global(.persona > p:first-child) {
+    margin: 0;
+  }
+
+  .prose :global(.persona img) {
+    width: 140px;
+    height: 140px;
+    max-height: none;
+    object-fit: cover;
+    object-position: 50% 20%;
+    border-radius: 16px;
+    margin: 0;
+  }
+
+  .prose :global(.persona-body > :first-child) {
+    margin-top: 0;
+  }
+
+  .prose :global(.persona h3) {
+    margin: 0 0 0.4em;
+    font-size: 1.15em;
+  }
+
+  /* Needs / Journey pills side by side; an open one expands to full width */
+  .prose :global(.persona-body) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .prose :global(.persona-body > :not(details)) {
+    flex-basis: 100%;
+  }
+
+  .prose :global(.persona details) {
+    flex: 0 0 auto;
+  }
+
+  .prose :global(.persona details[open]) {
+    flex-basis: 100%;
+  }
+
+  .prose :global(.persona summary) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--theme-tag-bg);
+    color: inherit;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: var(--fs-small);
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .prose :global(.persona summary::-webkit-details-marker) {
+    display: none;
+  }
+
+  .prose :global(.persona summary::after) {
+    content: '▸';
+    content: '▸' / '';
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .prose :global(.persona details[open] > summary) {
+    background: var(--theme-tag-bg);
+    color: var(--theme-tag-ink);
+  }
+
+  .prose :global(.persona details[open] > summary::after) {
+    transform: rotate(90deg);
+  }
+
+  .prose :global(.persona details > :not(summary)) {
+    margin-top: 0.6em;
+  }
+
+  .prose :global(.persona h4),
+  .prose :global(.persona h5) {
+    font-size: 0.95em;
+  }
+
+  .prose :global(table) {
+    border-collapse: collapse;
+    margin: 1em 0;
+    font-size: 0.9em;
+    display: block;
+    overflow-x: auto;
+  }
+
+  .prose :global(th),
+  .prose :global(td) {
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    padding: 6px 10px;
+    text-align: left;
+  }
+
+  .prose--small {
+    font-size: 0.95rem;
+  }
+
+  /* References: no timeline line and no dots, for every project */
+  .prose--small::before,
+  .prose--small::after,
+  .prose--small :global(h2)::before,
+  .prose--small :global(h3)::before {
+    display: none;
+  }
+
+  .biblio {
+    margin-top: 32px;
+    padding-left: clamp(40px, 7vw, 100px);
+  }
+
+  .biblio summary {
+    cursor: pointer;
+    font-family: var(--theme-heading-font);
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+  }
+
+  .biblio .prose {
+    padding-left: 0;
+  }
+
+  .credits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px 64px;
+    margin-top: 48px;
+    font-size: var(--fs-support);
+    scroll-margin-top: 24px;
+  }
+
+  .credits ul {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+    line-height: 1.5;
+  }
+
+  .credits a {
+    display: inline-block;
+    min-height: 24px;
+    color: var(--color-link);
+  }
+
+  .credits-title {
+    font-family: var(--theme-heading-font);
+    font-weight: 600;
+    font-size: 1.25rem;
+  }
+
+  .home-link {
+    text-align: center;
+    margin: clamp(32px, 4vw, 48px) 0 clamp(16px, 3vw, 40px);
+    font-size: clamp(1.25rem, 1rem + 1vw, 2.25rem);
+  }
+
+  .home-link a {
+    text-decoration: none;
+  }
+
+  .home-link a:hover {
+    text-decoration: underline;
+    color: var(--color-brand);
+  }
+
+  /* "Hey, I really think you should check this out!" (Figma: Go back Home Section, Text+Sunfest) */
+  .related {
+    display: grid;
+    gap: 14px;
+    margin-bottom: clamp(32px, 5vw, 56px);
+  }
+
+  .related-title {
+    font-size: clamp(1.25rem, 1rem + 0.8vw, 1.75rem);
+  }
+
+  main {
+    display: grid;
+  }
+
+  @media (max-width: 720px) {
+    .prose {
+      --rail: 32px;
+    }
+    .prose :global(h2)::before,
+    .prose:not(:has(> h2:first-child))::after {
+      width: 16px;
+      height: 16px;
+      left: calc(-1 * var(--rail) / 2 - 8px);
+      top: 0.35em;
+    }
+    .prose:not(:has(> h2:first-child))::after {
+      left: calc(var(--rail) / 2 - 8px);
+    }
+    .prose :global(.persona) {
+      grid-template-columns: 1fr;
+    }
+    .prose :global(.persona img) {
+      width: 100%;
+      height: auto;
+      max-height: 260px;
+    }
+  }
+</style>

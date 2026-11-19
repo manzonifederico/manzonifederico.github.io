@@ -1,0 +1,122 @@
+/*
+ * Per-project themes. Each theme sets the same custom properties, which the
+ * project cards, tags and case-study pages read.
+ */
+.theme-cicerone {
+  --theme-bg: var(--cicerone-bg);
+  --theme-ink: #000;
+  --theme-tag-bg: var(--cicerone-accent);
+  --theme-tag-ink: #fff;
+  --theme-border: transparent;
+  --theme-title-font: 'IBM Plex Serif', Georgia, serif;
+  --theme-title-style: italic;
+  --theme-title-weight: 500;
+  --theme-sub-font: 'Manrope', system-ui, sans-serif;
+  --theme-sub-weight: 500;
+  --theme-heading-font: 'IBM Plex Serif', Georgia, serif;
+  --theme-body-font: 'Manrope', system-ui, sans-serif;
+  --theme-panel: #fff;
+}
+
+.theme-sunfest {
+  --theme-bg: var(--sunfest-bg);
+  --theme-ink: #fff;
+  --theme-tag-bg: var(--sunfest-accent);
+  --theme-tag-ink: #000;
+  --theme-border: transparent;
+  --theme-title-font: 'Freckle Face', 'Rubik', system-ui, sans-serif;
+  --theme-title-style: normal;
+  --theme-title-weight: 400;
+  --theme-sub-font: 'Rubik', system-ui, sans-serif;
+  --theme-sub-weight: 500;
+  --theme-heading-font: 'Rubik', system-ui, sans-serif;
+  --theme-body-font: 'Rubik', system-ui, sans-serif;
+  --theme-panel: #fff;
+  /* No text shadow (text stays crisp). White on the Figma sky blue is only 2.2:1:
+     for full WCAG AA, change --sunfest-bg in tokens.css to #0099f2. */
+  --theme-small-ink: #000;
+}
+
+.theme-flashquiz {
+  --theme-bg: var(--flashquiz-bg);
+  --theme-ink: var(--flashquiz-ink);
+  --theme-tag-bg: var(--flashquiz-accent);
+  --theme-tag-ink: #fff;
+  --theme-border: transparent;
+  --theme-title-font: 'Josefin Sans', system-ui, sans-serif;
+  --theme-title-style: italic;
+  --theme-title-weight: 500;
+  --theme-sub-font: 'Manrope', system-ui, sans-serif;
+  --theme-sub-weight: 500;
+  --theme-heading-font: 'Roboto', system-ui, sans-serif;
+  --theme-body-font: 'Roboto', system-ui, sans-serif;
+  --theme-panel: #fff;
+}
+
+.theme-instagram {
+  --theme-bg: #fff;
+  --theme-ink: #000;
+  --theme-tag-bg: var(--instagram-accent);
+  --theme-tag-ink: #fff;
+  --theme-border: #000;
+  --theme-title-font: 'Inter', system-ui, sans-serif;
+  --theme-title-style: normal;
+  --theme-title-weight: 500;
+  --theme-sub-font: 'Inter', system-ui, sans-serif;
+  --theme-sub-weight: 400;
+  --theme-heading-font: 'Inter', system-ui, sans-serif;
+  --theme-body-font: 'Inter', system-ui, sans-serif;
+  --theme-panel: transparent;
+}
+
+.theme-bkmc {
+  --theme-bg: linear-gradient(248deg, var(--bkmc-end) 0%, var(--bkmc-start) 100%);
+  --theme-ink: #000;
+  --theme-tag-bg: #000;
+  --theme-tag-ink: #fff;
+  --theme-border: #000;
+  --theme-title-font: 'Poppins', system-ui, sans-serif;
+  --theme-title-style: normal;
+  --theme-title-weight: 500;
+  --theme-sub-font: 'Poppins', system-ui, sans-serif;
+  --theme-sub-weight: 400;
+  --theme-heading-font: 'Poppins', system-ui, sans-serif;
+  --theme-body-font: 'Poppins', system-ui, sans-serif;
+  --theme-panel: #fff;
+  --theme-small-ink: #000;
+}
+
+/* Agorà: light blue slides, blue accent, serif italic titles */
+.theme-agora {
+  --theme-bg: #d7e9ff;
+  --theme-ink: #0d47b0;
+  --theme-tag-bg: #1458c8;
+  --theme-tag-ink: #fff;
+  --theme-border: transparent;
+  --theme-title-font: 'IBM Plex Serif', Georgia, serif;
+  --theme-title-style: italic;
+  --theme-title-weight: 500;
+  --theme-sub-font: 'Inter', system-ui, sans-serif;
+  --theme-sub-weight: 500;
+  --theme-heading-font: 'IBM Plex Serif', Georgia, serif;
+  --theme-body-font: 'Inter', system-ui, sans-serif;
+  --theme-panel: #fff;
+}
+
+/* MirrorMood: coral red from the research-proposal slides */
+.theme-mirrormood {
+  --theme-bg: #cd615e;
+  --theme-ink: #fff;
+  --theme-tag-bg: #fff;
+  --theme-tag-ink: #8f2f2c;
+  --theme-small-ink: #1f0a09;
+  --theme-border: transparent;
+  --theme-title-font: 'IBM Plex Serif', Georgia, serif;
+  --theme-title-style: italic;
+  --theme-title-weight: 500;
+  --theme-sub-font: 'Inter', system-ui, sans-serif;
+  --theme-sub-weight: 500;
+  --theme-heading-font: 'IBM Plex Serif', Georgia, serif;
+  --theme-body-font: 'Inter', system-ui, sans-serif;
+  --theme-panel: #fff;
+}

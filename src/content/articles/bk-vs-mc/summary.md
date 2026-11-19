@@ -1,0 +1,7 @@
+## Summary
+
+For the *Design Experience: Cognitive Ergonomics* course at the University of Trento, my team (five of us) compared the **McDonald’s** and **Burger King** apps in Italy. The two apps offer almost the same features, yet store ratings clearly favour Burger King. We wanted to know whether real users experience them differently, especially when ordering food. We ran a between-subjects online survey (each person rated only the app they use most, to avoid carryover and contrast effects) and collected 112 responses in three weeks. We measured usability with SUS, user experience with UEQ-S, and the ordering flow with six custom questions, each paired with a screenshot of the matching screen. When early responses skewed heavily towards McDonald’s, we adapted recruitment to reach Burger King users.
+
+In the analysis, done in R, McDonald’s scored significantly higher on usability (SUS 77.37 vs 63.88), on pragmatic quality and on the ordering flow. The biggest gaps were in finding ingredient and nutrition information and in customizing items, even though Burger King offers more customization. Burger King’s slight edge in hedonic quality was not statistically significant. Store ratings and measured usability pointed in opposite directions. The main limitations are self-reported data, imbalanced groups and an Italy-only scope; think-aloud sessions and a broader feature scope would be our next steps.
+
+![Ordering screens: Burger King on the left, McDonald’s on the right](../../../assets/articles/bk-vs-mc/menu-ordering.png)

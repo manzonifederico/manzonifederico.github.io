@@ -1,0 +1,150 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import SunfestLayout from '../../layouts/SunfestLayout.astro';
+import Carousel from '../../components/sunfest/Carousel.astro';
+import JoinUs from '../../components/sunfest/JoinUs.astro';
+import hero from '../../assets/sunfest25/img/volunteer-hero.jpg';
+import activities from '../../assets/sunfest25/img/volunteer-activities.jpg';
+import hungry from '../../assets/sunfest25/img/volunteer-hungry.jpg';
+import portrait from '../../assets/sunfest25/img/volunteer-portrait.jpg';
+import join from '../../assets/sunfest25/img/volunteer-join.jpg';
+
+const gallery = Object.values(
+  import.meta.glob<{ default: ImageMetadata }>('../../assets/sunfest25/gallery/*.jpg', { eager: true }),
+).map((m) => m.default);
+---
+
+<SunfestLayout title="Voluntary" page="volunteer" bg="#f48638" tone="light" next={['about', 'program', 'faqs']}>
+  <h1 class="sf-title">Voluntary</h1>
+
+  <div class="sf-wrap">
+    <section class="hero" aria-labelledby="become">
+      <Image class="hero__img" src={hero} alt="" widths={[600, 1000, 1600]} sizes="(max-width: 1200px) 92vw, 1200px" loading="eager" />
+      <h2 id="become" class="hero__title">Become one of us</h2>
+      <div class="hero__bottom">
+        <p>Get in touch with us and come give us a hand!<br />We always need your help.</p>
+        <a class="sf-btn" href="#sf-join">Join us!</a>
+      </div>
+    </section>
+
+    <div class="sf-section intro">
+      <p><strong>We’re a community. We’re a family.</strong></p>
+      <p>
+        Sunfest comes to life thanks to our amazing volunteer friends. Some of us start planning as soon as the last
+        edition ends, others jump in along the way, and that’s the beauty of it. The key point? Just show up and help out.
+        There’s always a place for you here.
+      </p>
+    </div>
+
+    <section class="sf-split" aria-labelledby="activities">
+      <div>
+        <h2 id="activities" class="sf-h2">Activities</h2>
+        <p>
+          We need all kinds of people on our team, because we run Sunfest entirely by ourselves, without relying on
+          external companies.
+        </p>
+        <p>
+          You’ll be part of a big, hands-on crew: cooks, safety staff, guides, cleaners, sellers, technicians… and
+          whatever else the festival needs!
+        </p>
+        <p>We’re always looking for people with specific skills, but if you don’t have them yet, no worries!</p>
+        <p>
+          We offer training to get you ready, like First Aid with the Croce Rossa Italiana or HACCP certification through
+          our partners.
+        </p>
+      </div>
+      <Image class="sf-photo tall" src={activities} alt="Two volunteers cooking in a kitchen" widths={[400, 819]} sizes="(max-width: 720px) 92vw, 560px" />
+    </section>
+
+    <section class="sf-split sf-split--flip" aria-labelledby="hungry">
+      <div>
+        <h2 id="hungry" class="sf-h2">Hungry? Sleepy?</h2>
+        <p>
+          We work hard (before, during, and after the event), which means we get really HUNGRY. That’s why we make sure
+          our volunteers are always fuelled and happy: breakfast, lunch, dinner, snacks, and even aperitivo are on us.
+        </p>
+        <p>And because we know how exhausting (but rewarding!) it can be, we also provide a cozy sleeping spot.</p>
+        <p>We’ve got your back, always. You take care of the vibes, we’ll take care of you.</p>
+      </div>
+      <Image class="sf-photo" src={hungry} alt="A volunteer resting in a sleeping bag next to the tents" widths={[400, 724]} sizes="(max-width: 720px) 92vw, 560px" />
+    </section>
+
+    <Image class="sf-photo portrait" src={portrait} alt="A smiling volunteer in a Sunfest volunteer T-shirt, holding a sapling" widths={[600, 1000, 1600]} sizes="(max-width: 1200px) 92vw, 1200px" />
+  </div>
+
+  <JoinUs image={join} proto>
+    <p>We are looking for you, especially if you are a light expert, a cook, or a carpenter.</p>
+  </JoinUs>
+
+  <div class="gallery">
+    <Carousel label="Photos of our volunteers" variant="gallery" images={gallery.map((g) => ({ src: g, alt: '' }))} />
+  </div>
+</SunfestLayout>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: clamp(20rem, 55vw, 40rem);
+    border-radius: var(--sf-radius);
+    overflow: hidden;
+  }
+  .hero__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgb(0 0 0 / 0.35), transparent 35%, transparent 55%, rgb(0 0 0 / 0.6));
+  }
+  .hero > :not(img) {
+    position: relative;
+    z-index: 1;
+  }
+  .hero__title {
+    margin: 0 !important;
+    padding: clamp(0.8rem, 2.5vw, 1.5rem);
+    font-size: clamp(2.2rem, 1.2rem + 4vw, 4.5rem);
+  }
+  .hero__bottom {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: clamp(0.8rem, 2.5vw, 1.5rem);
+  }
+  .hero__bottom p {
+    margin: 0;
+    font-weight: 700;
+    font-size: clamp(1rem, 0.85rem + 0.7vw, 1.5rem);
+  }
+  .intro {
+    padding-bottom: clamp(1rem, 3vw, 2rem) !important;
+  }
+  .intro p {
+    max-width: 75ch;
+  }
+  .sf-split .sf-photo {
+    aspect-ratio: 4 / 3;
+  }
+  .sf-split .tall {
+    aspect-ratio: 3 / 4;
+    max-height: 34rem;
+  }
+  .portrait {
+    margin-top: clamp(2.5rem, 6vw, 4.5rem);
+    aspect-ratio: 16 / 9;
+  }
+  .gallery {
+    padding-bottom: 1rem;
+  }
+</style>

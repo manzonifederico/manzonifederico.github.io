@@ -1,0 +1,406 @@
+---
+// "Are you a recruiter?" pop-up with the Unbiased mode switch (Figma: Bias Mode Section).
+// States (data-state): hidden → compact pill (a moment after the page loads) → icon only (after a long time).
+// It never opens by itself: hovering, keyboard focus or a tap on the title shows the full card.
+// The switch sits at the bottom right in every size, so it stays under the pointer while the card grows.
+// When the mode is on, the title reads "Reviewer mode" and the icon turns blue.
+// Turning the switch on blurs every element marked with the `pii` class (see src/scripts/unbiased.ts).
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const s = t(lang);
+---
+
+<aside class="popup" id="unbiased-popup" aria-labelledby="recruiter-title" data-state="hidden">
+  <button type="button" class="popup-head" data-popup-toggle>
+    <span class="icon-wrap">
+      <svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path
+          fill="currentColor"
+          d="M12 12q-1.65 0-2.825-1.175T8 8t1.175-2.825T12 4t2.825 1.175T16 8t-1.175 2.825T12 12m-8 8v-2.8q0-.85.438-1.562T5.6 14.55q1.55-.775 3.15-1.162T12 13t3.25.388t3.15 1.162q.725.375 1.163 1.088T20 17.2V20z"
+        ></path>
+      </svg>
+    </span>
+    <span id="recruiter-title" class="popup-title">
+      <span class="title-off">{s.recruiterTitle}</span>
+      <span class="title-on">{s.reviewerOn}</span>
+    </span>
+  </button>
+
+  <div class="popup-body" id="recruiter-body">
+    <div class="popup-body-inner">
+      <p class="popup-text">{s.recruiterText}</p>
+      <p class="popup-text popup-note">{s.recruiterNote}</p>
+    </div>
+  </div>
+
+  <div class="switch-row">
+    <label id="unbiased-label" for="unbiased-switch">{s.unbiased}</label>
+    <button
+      type="button"
+      role="switch"
+      aria-checked="false"
+      aria-labelledby="unbiased-label"
+      id="unbiased-switch"
+      class="switch"
+      data-unbiased-toggle></button>
+  </div>
+</aside>
+
+<script>
+  const popup = document.getElementById('unbiased-popup');
+  if (popup) {
+    const toggle = popup.querySelector<HTMLButtonElement>('[data-popup-toggle]')!;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ICON_AFTER = 25000; // "a long time" in the small pill before it becomes just an icon
+    type State = 'open' | 'compact' | 'icon';
+    let small: 'compact' | 'icon' = 'compact';
+    let timer: number | undefined;
+    let iconTimer: number | undefined;
+
+    const set = (state: State) => {
+      popup.dataset.state = state;
+      clearTimeout(iconTimer);
+      if (state === 'compact') {
+        iconTimer = window.setTimeout(() => {
+          if (popup.matches(':hover, :focus-within')) return;
+          small = 'icon';
+          set('icon');
+        }, ICON_AFTER);
+      }
+    };
+    const scheduleSmall = (ms: number) => {
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        if (!popup.matches(':hover, :focus-within')) set(small);
+      }, ms);
+    };
+
+    // The pill hugs its text, so the switch sits right after the words (text changes with the mode/language)
+    const fitPill = () => {
+      const visible = Array.from(popup.querySelectorAll<HTMLElement>('.title-off, .title-on')).find(
+        (el) => el.offsetWidth > 0,
+      );
+      if (!visible) return;
+      const probe = visible.cloneNode(true) as HTMLElement;
+      probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font-size:var(--fs-small);font-weight:500';
+      popup.appendChild(probe);
+      const textW = probe.getBoundingClientRect().width;
+      probe.remove();
+      popup.style.setProperty('--pill-w', `${Math.ceil(textW + 116)}px`);
+    };
+    popup.querySelectorAll('[data-unbiased-toggle]').forEach((b) =>
+      b.addEventListener('click', () => requestAnimationFrame(fitPill)),
+    );
+    // measure again once the web font is loaded (the fallback font is narrower) and when the window changes
+    document.fonts?.ready.then(fitPill);
+    window.addEventListener('resize', fitPill);
+
+    // Appears a moment after the page loads, already small
+    window.setTimeout(
+      () => {
+        fitPill();
+        set('compact');
+      },
+      reduce ? 0 : 900,
+    );
+
+    // Hover / keyboard focus → full card (CSS); leaving → back to the small size after a short pause
+    popup.addEventListener('mouseenter', () => {
+      clearTimeout(timer);
+      clearTimeout(iconTimer);
+    });
+    popup.addEventListener('mouseleave', () => scheduleSmall(1200));
+    popup.addEventListener('focusin', () => {
+      clearTimeout(timer);
+      clearTimeout(iconTimer);
+    });
+    popup.addEventListener('focusout', (e) => {
+      if (!popup.contains(e.relatedTarget as Node)) scheduleSmall(1200);
+    });
+
+    // Click/tap on the title toggles (needed on touch screens, where there is no hover)
+    toggle.addEventListener('click', () => {
+      clearTimeout(timer);
+      set(popup.dataset.state === 'open' ? small : 'open');
+    });
+
+    // Touch screens: no hover to leave, and the tapped switch keeps focus, so the card would stay open over the
+    // page. There it shrinks back 4 s after the last tap inside it, right away on a tap elsewhere or a scroll.
+    if (matchMedia('(hover: none), (pointer: coarse)').matches) {
+      const shrink = () => {
+        clearTimeout(timer);
+        const active = document.activeElement as HTMLElement | null;
+        if (active && popup.contains(active)) active.blur();
+        set(small);
+      };
+      popup.addEventListener('click', () => {
+        clearTimeout(timer);
+        timer = window.setTimeout(shrink, 4000);
+      });
+      document.addEventListener(
+        'pointerdown',
+        (e) => {
+          if (!popup.contains(e.target as Node) && (popup.dataset.state === 'open' || popup.matches(':focus-within'))) shrink();
+        },
+        true,
+      );
+      window.addEventListener(
+        'scroll',
+        () => {
+          if (popup.dataset.state === 'open' || popup.matches(':focus-within')) shrink();
+        },
+        { passive: true },
+      );
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && popup.dataset.state === 'open') {
+        const inside = popup.contains(document.activeElement);
+        set(small);
+        if (inside) toggle.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .popup {
+    position: fixed;
+    right: clamp(12px, 2vw, 28px);
+    bottom: clamp(12px, 2vw, 28px);
+    z-index: 50;
+    width: min(400px, calc(100vw - 24px));
+    padding: 12px 14px 12px 16px;
+    border-radius: 24px;
+    background:
+      linear-gradient(var(--color-brand-soft), var(--color-brand-soft)),
+      rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    box-shadow:
+      0 10px 30px rgba(20, 94, 225, 0.18),
+      0 2px 6px rgba(0, 0, 0, 0.08);
+    color: #000;
+    display: grid;
+    gap: 6px;
+    overflow: hidden;
+    transform-origin: bottom right;
+    transition:
+      transform 450ms var(--ease),
+      opacity 450ms var(--ease),
+      visibility 0s linear 0s,
+      width 400ms var(--ease),
+      padding 400ms var(--ease),
+      border-radius 400ms var(--ease),
+      background-color 300ms var(--ease);
+  }
+
+  .popup[data-state='hidden'] {
+    /* rises in from below (never off-screen sideways: that would widen the page on phones) */
+    transform: translateY(24px) scale(0.96);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* small sizes; hover / keyboard focus always brings back the full card */
+  .popup[data-state='compact']:not(:hover):not(:focus-within) {
+    width: min(var(--pill-w, 236px), calc(100vw - 24px));
+    padding: 8px 56px 8px 12px;
+    border-radius: var(--radius-pill);
+    gap: 0;
+  }
+
+  .popup[data-state='icon']:not(:hover):not(:focus-within) {
+    width: 48px;
+    padding: 0;
+    border-radius: 50%;
+    gap: 0;
+  }
+
+  /* touch screens: a taller tap area for the title */
+  @media (pointer: coarse) {
+    .popup-head {
+      min-height: 32px;
+    }
+  }
+
+  .popup-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: var(--fs-body);
+  }
+
+  .icon-wrap {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: var(--color-brand);
+    transition: width 400ms var(--ease), height 400ms var(--ease), background-color 300ms var(--ease), color 300ms var(--ease);
+  }
+
+  .popup[data-state='icon']:not(:hover):not(:focus-within) .icon-wrap {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* mode on: the icon turns into a blue badge, so you can see at a glance that it's active */
+  :global(:root[data-unbiased='true']) .popup[data-state='icon']:not(:hover):not(:focus-within) .icon-wrap {
+    background: var(--color-brand);
+    color: #fff;
+  }
+
+  .popup-title {
+    font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .title-on {
+    display: none;
+  }
+  :global(:root[data-unbiased='true']) .title-on {
+    display: inline;
+  }
+  :global(:root[data-unbiased='true']) .title-off {
+    display: none;
+  }
+
+  .popup[data-state='icon']:not(:hover):not(:focus-within) .popup-title {
+    width: 0;
+    opacity: 0;
+  }
+
+  /* text collapses smoothly (0fr ↔ 1fr) */
+  .popup-body {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 350ms var(--ease), opacity 250ms var(--ease);
+  }
+
+  .popup-body-inner {
+    overflow: hidden;
+    display: grid;
+    gap: 4px;
+  }
+
+  .popup[data-state='compact']:not(:hover):not(:focus-within) .popup-body,
+  .popup[data-state='icon']:not(:hover):not(:focus-within) .popup-body {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+
+  .popup[data-state='compact']:not(:hover):not(:focus-within) .popup-title {
+    font-size: var(--fs-small);
+    font-weight: 500;
+  }
+
+  .popup-text {
+    font-size: var(--fs-support);
+    font-weight: 300;
+    line-height: 1.45;
+  }
+
+  /* label + switch on the right, so the switch keeps the same place in every size */
+  .switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    font-size: var(--fs-support);
+    font-weight: 400;
+    color: var(--color-brand);
+    padding-top: 4px;
+  }
+
+  .popup[data-state='compact']:not(:hover):not(:focus-within) .switch-row {
+    position: absolute;
+    right: 14px;
+    bottom: 10px;
+    padding: 0;
+  }
+
+  .popup[data-state='icon']:not(:hover):not(:focus-within) .switch-row {
+    position: absolute;
+    visibility: hidden;
+  }
+
+  .popup[data-state='compact']:not(:hover):not(:focus-within) #unbiased-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  /* Switch: 34×20, matches Figma "Switch" component */
+  .switch {
+    position: relative;
+    flex: none;
+    width: 34px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .switch::before {
+    content: '';
+    position: absolute;
+    inset: 3px 0;
+    border-radius: 7px;
+    background: rgba(0, 0, 0, 0.34);
+    transition: background var(--dur) var(--ease);
+  }
+
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+  }
+
+  .switch[aria-checked='true']::before {
+    background: rgba(20, 94, 225, 0.38);
+  }
+
+  .switch[aria-checked='true']::after {
+    transform: translateX(14px);
+    background: var(--color-brand);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .popup,
+    .popup-body,
+    .icon-wrap {
+      transition: none;
+    }
+  }
+
+  @media print {
+    .popup {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,10 @@
+<svg overflow="visible" style="display: block;" width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="park">
+<mask id="mask0_0_58" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="60" height="60">
+<rect id="Bounding box" width="60" height="60" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_0_58)">
+<path id="park_2" d="M34.875 55H25.125V45H7.5L17.5 30H12.5L30 5L47.5 30H42.5L52.5 45H34.875V55Z" fill="#185608"/>
+</g>
+</g>
+</svg>

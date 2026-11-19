@@ -1,0 +1,102 @@
+---
+// "Hey!" intro with the blurred blue blob and the language switch (Figma: Intro).
+import LangSwitch from './LangSwitch.astro';
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const s = t(lang);
+---
+
+<header class="hero" id="top">
+  <div class="blob" aria-hidden="true"></div>
+  <div class="hero-inner container">
+    <h1 class="hero-title">{s.heroTitle}</h1>
+    <p class="hero-sub">
+      {s.heroSub1}<br />
+      {s.heroSub2}
+    </p>
+  </div>
+  <div class="hero-lang">
+    <LangSwitch lang={lang} />
+  </div>
+</header>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: clamp(420px, 40vw, 597px);
+    /* let the blurred blob fade out below the hero, but never cause sideways scrolling */
+    overflow-x: clip;
+    overflow-y: visible;
+    color: var(--color-text-inverse);
+  }
+
+  /* Blurred ellipse: 1195×709 at (-223, -184) in the 1440 frame */
+  .blob {
+    position: absolute;
+    /* follow the centred content column on screens wider than 1440px */
+    left: calc(max(0px, (100% - var(--content-max)) / 2) - min(15.5vw, 223px));
+    top: -184px;
+    /* 1195px wide in Figma; never smaller than ~980px so the white text always sits on blue */
+    width: max(83%, 980px);
+    max-width: 1195px;
+    aspect-ratio: 1195 / 709;
+    border-radius: 50%;
+    background: var(--color-brand);
+    filter: blur(100px);
+    transform: translateZ(0);
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(96px, 5.3vw + 40px, 128px);
+    padding-left: clamp(1rem, 4vw, 57px);
+  }
+
+  .hero-title {
+    font-size: var(--fs-title);
+    letter-spacing: var(--tracking-title);
+    line-height: 1.17;
+  }
+
+  .hero-sub {
+    font-size: var(--fs-lead);
+    letter-spacing: var(--tracking-lead);
+    line-height: 1.5;
+  }
+
+  .hero-lang {
+    position: absolute;
+    z-index: 2;
+    top: 44px;
+    right: 26px;
+  }
+
+  /* below ~860px the blob reaches the top-right corner, so the switch turns white */
+  @media (max-width: 860px) {
+    .hero-lang :global(.lang) {
+      --lang-ink: #fff;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .hero {
+      min-height: 360px;
+    }
+    .hero-lang {
+      top: 14px;
+      right: 12px;
+    }
+    /* bigger blob on phones so the white text always sits on blue */
+    .blob {
+      left: -60%;
+      top: -90px;
+      width: 240%;
+      filter: blur(50px);
+    }
+  }
+</style>

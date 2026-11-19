@@ -1,0 +1,66 @@
+/*
+ * Design tokens, taken from the Figma file (variables + component styles).
+ * Change a value here and it updates everywhere on the site.
+ * Desktop sizes match the 1440px Figma frames; clamp() scales them down on
+ * smaller screens (the design has no mobile frames).
+ */
+:root {
+  /* ---------- Colour: brand ---------- */
+  --color-brand: #145ee1;            /* Figma "Royal Blue/700" */
+  --color-brand-soft: rgba(20, 94, 225, 0.09);
+  --color-link: #1257d4;             /* brand blue, a touch darker so links pass 4.5:1 on tinted panels */
+  --color-text: #000000;
+  --color-text-inverse: #ffffff;
+  --color-bg: #ffffff;
+
+  /* ---------- Colour: project themes ---------- */
+  --cicerone-bg: #f4dbff;
+  --cicerone-accent: #b71eff;        /* Figma #B924FF, nudged for 4.5:1 contrast with white */
+  --sunfest-bg: #43baff;
+  --sunfest-accent: #ffe100;
+  --flashquiz-bg: #d7e2ff;
+  --flashquiz-accent: #005cbb;
+  --flashquiz-ink: #00458f;
+  --instagram-accent: #0b6ed3;
+  --bkmc-start: rgb(255, 204, 0);
+  --bkmc-end: rgb(214, 35, 0);
+
+  /* ---------- Typography ---------- */
+  --font-display: 'Poppins', system-ui, sans-serif;
+  --font-footer: 'Commissioner', 'Poppins', system-ui, sans-serif;
+
+  /* Figma text styles: Title / H2 / H3 / Normal text / Support text */
+  --fs-title: clamp(3.25rem, 1.6rem + 7vw, 8rem);        /* 128px */
+  --fs-display: clamp(2.5rem, 1.2rem + 4.6vw, 5rem);     /* 80px (footer) */
+  --fs-h2: clamp(2rem, 1.5rem + 1.6vw, 3rem);            /* 48px */
+  --fs-lead: clamp(1.25rem, 1.1rem + 0.5vw, 1.75rem);    /* 28px */
+  --fs-body: clamp(1rem, 0.92rem + 0.3vw, 1.1875rem);      /* 19px: body text across the site */
+  --fs-small: 0.875rem;                                  /* 14px */
+  --fs-support: 0.8125rem;                               /* 13px */
+
+  --tracking-title: 0.05em;   /* 6.4px at 128px */
+  --tracking-lead: 0.05em;
+
+  /* ---------- Spacing (Figma uses 8 / 16 / 20 / 30 / 45 / 60) ---------- */
+  --space-2xs: 0.5rem;   /* 8 */
+  --space-xs: 1rem;      /* 16 */
+  --gutter: clamp(1rem, 0.4rem + 2.6vw, 2.8125rem); /* 45px side padding on desktop */
+  --content-max: 1440px;
+  --timeline-col: clamp(3.5rem, 2rem + 10vw, 18rem); /* 288px left column in CV sections */
+
+  /* ---------- Shape ---------- */
+  --radius-pill: 100px;
+  --radius-card: 30px;
+  --radius-md: 20px;
+  --radius-sm: 10px;
+
+  /* ---------- Motion ---------- */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+  }
+}

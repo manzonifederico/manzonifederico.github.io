@@ -1,0 +1,144 @@
+---
+// Shared page shell: <head> with SEO and social preview tags, fonts, global CSS.
+// Fonts are self-hosted from npm packages (@fontsource), no Google Fonts requests. Only the Latin subset is
+// loaded (latin-*.css): it covers English and Italian, and keeps the CSS and the font files small.
+import '@fontsource/poppins/latin-300.css';
+import '@fontsource/poppins/latin-400.css';
+import '@fontsource/poppins/latin-400-italic.css';
+import '@fontsource/poppins/latin-500.css';
+import '@fontsource/poppins/latin-700.css';
+import '@fontsource/manrope/latin-500.css';
+import '@fontsource/manrope/latin-700.css';
+import '@fontsource/commissioner/latin-300.css';
+// Project wordmark fonts
+import '@fontsource/ibm-plex-serif/latin-500-italic.css';
+import '@fontsource/ibm-plex-serif/latin-500.css';
+import '@fontsource/freckle-face/latin-400.css';
+import '@fontsource/rubik/latin-400.css';
+import '@fontsource/rubik/latin-500.css';
+import '@fontsource/rubik/latin-700.css';
+import '@fontsource/josefin-sans/latin-500-italic.css';
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/roboto/latin-400.css';
+import '@fontsource/roboto/latin-500.css';
+import '@fontsource/roboto/latin-700.css';
+import '../styles/global.css';
+import '../styles/themes.css';
+import { site, siteText } from '../data/site';
+import { t, localePath, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang?: Lang;
+  title?: string;
+  description?: string;
+  image?: string;
+  /** text description of the social preview image */
+  imageAlt?: string;
+  /** pixel size of the social preview image (default: the 1200×630 og-image.png) */
+  imageWidth?: number;
+  imageHeight?: number;
+  /** 'article' on case studies, 'website' elsewhere (social previews) */
+  type?: 'website' | 'article';
+  /** keep the page out of search results (e.g. 404) */
+  noindex?: boolean;
+  /** CSS class on <body>, used for per-project themes */
+  bodyClass?: string;
+  /** false on pages that only exist in one language (e.g. 404) */
+  alternates?: boolean;
+}
+
+const { lang = 'en', bodyClass, alternates = true, type = 'website', noindex = false } = Astro.props;
+const title = Astro.props.title ?? siteText[lang].title;
+const description = Astro.props.description ?? siteText[lang].description;
+const image = Astro.props.image ?? site.ogImage;
+const imageAlt = Astro.props.imageAlt ?? siteText[lang].title;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const imageUrl = new URL(image, Astro.site);
+const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.site);
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    {
+      /* Security (GitHub Pages can't send HTTP headers, so the policy is a meta tag; published build only,
+         the dev server needs its live-reload connection): the page may only load scripts, styles, fonts,
+         images, audio and video from this site; no plug-ins, no frames, no form posts elsewhere. */
+      import.meta.env.PROD && (
+        <meta
+          http-equiv="Content-Security-Policy"
+          content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+        />
+      )
+    }
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
+    <link rel="canonical" href={canonical} />
+    {
+      alternates && (
+        <>
+          <link rel="alternate" hreflang="en" href={altUrl('en')} />
+          <link rel="alternate" hreflang="it" href={altUrl('it')} />
+          <link rel="alternate" hreflang="x-default" href={altUrl('en')} />
+        </>
+      )
+    }
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#145ee1" />
+    <meta name="author" content={site.name} />
+
+    <!-- Social previews (LinkedIn, WhatsApp, Slack, X…) -->
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={lang === 'it' ? 'it_IT' : 'en_GB'} />
+    {alternates && <meta property="og:locale:alternate" content={lang === 'it' ? 'en_GB' : 'it_IT'} />}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imageUrl} />
+    {
+      /* size only when it is known for sure: the default image, or a size passed in */
+      (!Astro.props.image || Astro.props.imageWidth) && (
+        <>
+          <meta property="og:image:width" content={String(Astro.props.imageWidth ?? 1200)} />
+          <meta property="og:image:height" content={String(Astro.props.imageHeight ?? 630)} />
+        </>
+      )
+    }
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+    <!-- summary of the site and AI use policy for AI assistants: /llms.txt (see src/pages/llms.txt.ts) -->
+
+    <!-- Restore unbiased mode before the page paints, so names never flash -->
+    <script is:inline>
+      try {
+        localStorage.removeItem('unbiased-mode');
+        if (sessionStorage.getItem('unbiased-mode') === '1') document.documentElement.dataset.unbiased = 'true';
+        var pointerPref = localStorage.getItem('pointer-classic');
+        var highContrast = matchMedia('(forced-colors: active), (prefers-contrast: more)').matches;
+        if (pointerPref === '1' || (pointerPref === null && highContrast))
+          document.documentElement.classList.add('classic-pointer');
+      } catch (e) {}
+    </script>
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main">{t(lang).skip}</a>
+    <slot />
+    <script>
+      import '../scripts/unbiased';
+      import '../scripts/view-cursor';
+    </script>
+  </body>
+</html>

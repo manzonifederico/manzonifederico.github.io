@@ -1,0 +1,77 @@
+---
+// The project "wordmark": each project title is typeset in its own font, as in Figma.
+// Sunfest titles also include the sun graphic.
+import sun from '../assets/projects/sunfest-sun.svg?url';
+import type { Project } from '../data/projects';
+
+interface Props {
+  project: Project;
+  size?: 'card' | 'hero';
+}
+const { project, size = 'card' } = Astro.props;
+const isSunfest = project.slug === 'sunfest' || project.slug === 'sunfest-usability';
+---
+
+<span class:list={['logo', `logo--${size}`, `logo--${project.slug}`]}>
+  {
+    isSunfest ? (
+      <>
+        <img class="sun" src={sun} alt="" width="64" height="104" decoding="async" loading={size === 'card' ? 'lazy' : 'eager'} />
+        <span class="sunfest-word">{project.slug === 'sunfest' && size === 'hero' ? 'SUNFEST25' : 'SUNFEST'}</span>
+        {project.slug === 'sunfest-usability' && (
+          <>
+            <span class="vs-word"> vs </span>
+            <span class="poplar-word">Poplar Utopia</span>
+          </>
+        )}
+      </>
+    ) : (
+      project.title
+    )
+  }
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 0.25em;
+    font-family: var(--theme-title-font);
+    font-style: var(--theme-title-style);
+    font-weight: var(--theme-title-weight);
+    line-height: 1.15;
+  }
+
+  .logo--card {
+    font-size: clamp(2.1rem, 1.3rem + 2.7vw, 3.6rem); /* 64px in Figma, cards scaled to 90% */
+  }
+
+  .logo--hero {
+    font-size: clamp(3rem, 1.6rem + 6vw, 8rem); /* 128px */
+  }
+
+  .sun {
+    width: 0.85em;
+    height: auto;
+    align-self: center;
+    transform: rotate(-8.24deg);
+    margin-right: 0.1em;
+  }
+
+  .sunfest-word {
+    font-family: 'Freckle Face', system-ui, sans-serif;
+    font-size: 1.17em; /* 75px against 64px */
+    letter-spacing: 0.02em;
+  }
+
+  .vs-word {
+    font-family: 'Roboto', system-ui, sans-serif;
+    font-weight: 400;
+  }
+
+  .poplar-word {
+    font-family: 'Roboto', system-ui, sans-serif;
+    font-weight: 500;
+  }
+</style>

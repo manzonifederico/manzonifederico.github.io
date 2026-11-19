@@ -1,0 +1,338 @@
+---
+// One collapsible CV section (Education, Work experience, …) with the blue timeline.
+// Uses native <details>/<summary>, so it works with keyboard and without JavaScript.
+import type { CvSection, TimelineItem } from '../data/cv';
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  section: CvSection;
+  lang?: Lang;
+  open?: boolean;
+}
+const { section, lang = 'en', open = true } = Astro.props;
+
+// "Current" chip: entries with a start and end date (MM/YY) where today falls in between,
+// or whose end is "Present" / "Oggi". Worked out when the site is built.
+const now = new Date();
+const parse = (d: string) => {
+  const m = d.match(/^(\d{2})\/(\d{2})$/);
+  return m ? new Date(2000 + Number(m[2]), Number(m[1]) - 1, 1) : null;
+};
+const isCurrent = (item: TimelineItem) => {
+  if (!item.dates || item.dates.length < 2) return false;
+  const [startRaw, endRaw = ''] = item.dates;
+  const start = parse(startRaw);
+  if (!start || start > now) return false;
+  if (/^(present|oggi)$/i.test(endRaw)) return true;
+  const end = parse(endRaw);
+  return !!end && now < new Date(end.getFullYear(), end.getMonth() + 1, 1);
+};
+---
+
+<details class="cv-section" id={section.id} open={open}>
+  <summary>
+    <h3 class="cv-title">{section.title}</h3>
+    <svg class="caret" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true">
+      <path d="M14 20l10 10 10-10z" fill="currentColor"></path>
+    </svg>
+  </summary>
+
+  {
+    section.items && (
+      <ol class="timeline" role="list">
+        {section.items.map((item) => (
+          <li class="entry">
+            <div class="when" aria-hidden="true">
+              <span class="dot" />
+              {isCurrent(item) && <span class="now">{t(lang).current}</span>}
+              <span class="dates">
+                {item.dates?.map((d) => (
+                  <span>{d}</span>
+                ))}
+              </span>
+              <span class="line" />
+            </div>
+            <div class="what">
+              <h4 class="entry-title">{item.title}</h4>
+              {isCurrent(item) && <p class="visually-hidden">{t(lang).current}</p>}
+              {item.dates && <p class="visually-hidden">{item.dates.join(' – ')}</p>}
+              {item.org && <p class="org" set:html={item.org} />}
+              {item.summary && <p class="summary" set:html={item.summary} />}
+              {item.bullets && (
+                <ul class="bullets">
+                  {item.bullets.map((b) => (
+                    <li set:html={b} />
+                  ))}
+                </ul>
+              )}
+              {item.link && (
+                <p class="org">
+                  {item.link.href.startsWith('/') ? (
+                    <a class="case-chip" href={item.link.href}>
+                      {item.link.label} <span aria-hidden="true">→</span>
+                    </a>
+                  ) : (
+                    <a href={item.link.href}>{item.link.label}</a>
+                  )}
+                </p>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    )
+  }
+
+  {
+    section.lists && (
+      <div class="lists">
+        {section.lists.map((list) => (
+          <div>
+            <h4 class="list-title">{list.title}</h4>
+            <ul class="bullets">
+              {list.items.map((i) => (
+                <li set:html={i} />
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )
+  }
+</details>
+
+<style>
+  .cv-section {
+    --left: var(--timeline-col);
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    padding-block: 4px 12px;
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 10vw, 150px);
+    padding-left: var(--left);
+    list-style: none;
+    cursor: pointer;
+    width: fit-content;
+    border-radius: var(--radius-sm);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .cv-title {
+    font-size: var(--fs-h2);
+    font-weight: 500;
+  }
+
+  .caret {
+    flex: none;
+    width: clamp(32px, 3.3vw, 48px);
+    height: auto;
+    transition: transform var(--dur) var(--ease);
+    transform: rotate(-90deg);
+  }
+
+  details[open] .caret {
+    transform: rotate(0deg);
+  }
+
+  .timeline {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 20px;
+  }
+
+  .entry {
+    display: grid;
+    grid-template-columns: var(--left) minmax(0, 1fr);
+  }
+
+  .when {
+    justify-self: center;
+    width: 46px;
+    padding-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--fs-support);
+    font-weight: 300;
+    text-align: center;
+  }
+
+  /* "Current" chip, LinkedIn-style, in the brand blue: beside the dot on wide screens, under it otherwise */
+  .now {
+    order: 3;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: #e3ecfc;
+    color: var(--color-brand);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 1100px) {
+    .when {
+      position: relative;
+    }
+    .now {
+      position: absolute;
+      top: 18px;
+      right: calc(100% + 10px);
+    }
+  }
+
+  /* link to a case study on this site: a small pill */
+  .case-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    padding: 3px 10px;
+    border: 1px solid var(--color-brand);
+    border-radius: var(--radius-pill);
+    background: #fff;
+    color: var(--color-brand);
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  .case-chip:hover,
+  .case-chip:focus-visible {
+    background: var(--color-brand);
+    color: #fff;
+  }
+
+  .dot {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--color-brand);
+    flex: none;
+  }
+
+  .dates {
+    display: flex;
+    flex-direction: column;
+    white-space: nowrap;
+  }
+
+  .line {
+    order: 4;
+    flex: 1;
+    width: 2px;
+    min-height: 40px;
+    border-radius: var(--radius-pill);
+    background: var(--color-brand);
+  }
+
+  .what {
+    min-width: 0;
+    overflow-wrap: anywhere; /* long titles, DOIs and links wrap on small phones */
+    display: grid;
+    gap: 8px;
+    max-width: 1048px;
+  }
+
+  /* hierarchy: section title (h2) → entry title → organisation → details */
+  .entry-title {
+    font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.75rem); /* 28px */
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
+  .org {
+    font-size: 0.9375rem; /* 15px */
+    font-weight: 500;
+    color: #3d3d45;
+    margin-top: -2px;
+  }
+
+  .org :global(a) {
+    color: var(--color-link);
+  }
+
+  .org :global(strong) {
+    font-weight: 700;
+    color: #000;
+  }
+
+  .summary {
+    font-size: var(--fs-body);
+    line-height: 1.5;
+  }
+
+  .bullets {
+    margin: 0;
+    padding-left: 1.5em;
+    list-style: disc;
+    font-size: var(--fs-body);
+    line-height: 1.5;
+  }
+
+  .bullets > li + li {
+    margin-top: 4px;
+  }
+
+  .bullets :global(a) {
+    color: var(--color-link);
+  }
+
+  /* Skills: 2 × 2 grid, so each group has room to breathe */
+  .lists {
+    margin-top: 24px;
+    padding-left: var(--left);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(28px, 3.5vw, 48px) clamp(24px, 4vw, 64px);
+  }
+
+  .lists .bullets {
+    font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
+    line-height: 1.35;
+  }
+
+  .lists .bullets li + li {
+    margin-top: 8px;
+  }
+
+  .lists .bullets li::marker {
+    color: var(--color-brand);
+  }
+
+  .list-title {
+    font-size: var(--fs-support);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-brand);
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 720px) {
+    .cv-section {
+      --left: 0px;
+    }
+    .entry {
+      grid-template-columns: 56px minmax(0, 1fr);
+    }
+    .when {
+      justify-self: start;
+    }
+    .lists {
+      padding-left: 0;
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,305 @@
+---
+// Printable CV (A4), built from the same data as the CV section of the site (src/data/cv.ts).
+// Used only to make the PDF in public/cv/: open it on the dev server and print it to PDF
+// (see scripts/make-cv-pdf.md). Not linked from the site and kept out of search engines.
+import '@fontsource/poppins/latin-400.css';
+import '@fontsource/poppins/latin-500.css';
+import '@fontsource/poppins/latin-600.css';
+import '@fontsource/manrope/latin-400.css';
+import '@fontsource/manrope/latin-600.css';
+import '@fontsource/manrope/latin-700.css';
+import { cvByLang, cvProfile } from '../../data/cv';
+import { contact, site } from '../../data/site';
+import type { Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'en' } }, { params: { lang: 'it' } }];
+}
+
+const lang = Astro.params.lang as Lang;
+const sections = cvByLang[lang];
+const sideIds = ['skills', 'certificates'];
+const main = sections.filter((s) => !sideIds.includes(s.id));
+const side = sections.filter((s) => sideIds.includes(s.id));
+// the published address of the portfolio (`site` in astro.config.mjs)
+const portfolio = Astro.site ? Astro.site.href : '';
+const abs = (href: string) => (/^https?:/.test(href) ? href : portfolio ? new URL(href, portfolio).href : '');
+const role = lang === 'it' ? 'UX Researcher · Games & UX · Laurea magistrale in HCI' : 'UX Researcher · Games & UX · MSc in Human-Computer Interaction';
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{site.name} CV</title>
+  </head>
+  <body>
+    <header class="head">
+      <div>
+        <h1>{site.name}</h1>
+        <p class="role">{role}</p>
+      </div>
+      <ul class="contacts">
+        {contact.emails.map((e) => <li><a href={`mailto:${e}`}>{e}</a></li>)}
+        <li><a href={contact.linkedin}>LinkedIn</a> · <a href={contact.orcid}>ORCID</a></li>
+        {portfolio && <li><a href={portfolio}>{portfolio.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a></li>}
+        <li>{contact.locations[lang][0]}</li>
+      </ul>
+    </header>
+
+    <p class="bio" set:html={cvProfile[lang]} />
+
+    <div class="cols">
+      <main>
+        {
+          main.map((section) => (
+            <section>
+              <h2>{section.title}</h2>
+              {section.items?.map((item) => (
+                <article class="item">
+                  <div class="item-head">
+                    <h3 set:html={item.title} />
+                    {item.dates && <span class="dates">{item.dates.join(' – ')}</span>}
+                  </div>
+                  {item.org && <p class="org" set:html={item.org} />}
+                  {item.summary && <p class="summary" set:html={item.summary} />}
+                  {item.bullets && (
+                    <ul class="bullets">
+                      {item.bullets.map((b) => (
+                        <li set:html={b} />
+                      ))}
+                    </ul>
+                  )}
+                  {item.link && abs(item.link.href) && (
+                    <p class="link">
+                      <a href={abs(item.link.href)}>{item.link.label} ›</a>
+                    </p>
+                  )}
+                </article>
+              ))}
+            </section>
+          ))
+        }
+      </main>
+      <aside>
+        {
+          side.map((section) => (
+            <section>
+              <h2>{section.title}</h2>
+              {section.lists?.map((l) => (
+                <div class="list">
+                  <h3>{l.title}</h3>
+                  <ul>
+                    {l.items.map((x) => (
+                      <li set:html={x} />
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              {section.items?.map((item) => (
+                <div class="cert">
+                  <p class="cert-title" set:html={item.title} />
+                  <p class="cert-org">
+                    {item.org}
+                    {item.dates && `, ${item.dates.join(' – ')}`}
+                  </p>
+                </div>
+              ))}
+            </section>
+          ))
+        }
+      </aside>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  @page {
+    size: A4;
+    margin: 13mm 13mm 12mm;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    margin: 0;
+    font: 400 8.6pt/1.42 'Manrope', system-ui, sans-serif;
+    color: #15171c;
+    background: #fff;
+  }
+
+  a {
+    color: #1257d4;
+    text-decoration: none;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #145ee1;
+  }
+
+  h1 {
+    font-size: 24pt;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+  }
+
+  .role {
+    margin: 4px 0 0;
+    font: 500 10pt 'Poppins', sans-serif;
+    color: #145ee1;
+  }
+
+  .contacts {
+    margin: 2px 0 0;
+    padding: 0;
+    list-style: none;
+    text-align: right;
+    font-size: 8pt;
+    line-height: 1.55;
+  }
+
+  .bio {
+    margin: 10px 0 12px;
+    font-size: 9pt;
+    line-height: 1.5;
+  }
+
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 30%;
+    gap: 20px;
+  }
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0 0 6px;
+    font-size: 11.5pt;
+    font-weight: 600;
+    color: #145ee1;
+    break-after: avoid;
+  }
+
+  /* the small square used across the site */
+  h2::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 1.5px;
+    background: #145ee1;
+  }
+
+  section {
+    margin-bottom: 11px;
+  }
+
+  .item {
+    margin-bottom: 8px;
+    break-inside: avoid;
+  }
+
+  .item-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: baseline;
+  }
+
+  h3 {
+    font-size: 9.4pt;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .dates {
+    flex: none;
+    font-size: 8pt;
+    color: #4b5563;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .org {
+    margin: 1px 0 2px;
+    font-size: 8.2pt;
+    color: #374151;
+    font-style: italic;
+  }
+
+  .summary {
+    margin: 2px 0;
+  }
+
+  .bullets {
+    margin: 2px 0 0;
+    padding-left: 13px;
+  }
+
+  .bullets li {
+    margin: 1px 0;
+  }
+
+  .link {
+    margin: 2px 0 0;
+    font-size: 8pt;
+  }
+
+  aside .list {
+    margin-bottom: 8px;
+    break-inside: avoid;
+  }
+
+  aside h3 {
+    margin-bottom: 2px;
+    font-size: 8.8pt;
+  }
+
+  aside ul {
+    margin: 0;
+    padding-left: 12px;
+    font-size: 8.2pt;
+  }
+
+  .cert {
+    margin-bottom: 6px;
+    break-inside: avoid;
+  }
+
+  .cert p {
+    margin: 0;
+    font-size: 8.2pt;
+  }
+
+  .cert-title {
+    font-weight: 600;
+  }
+
+  .cert-org {
+    color: #4b5563;
+  }
+</style>

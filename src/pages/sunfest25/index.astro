@@ -1,0 +1,392 @@
+---
+import { inlineSvg } from '../../utils/svg';
+import { Image } from 'astro:assets';
+import SunfestLayout from '../../layouts/SunfestLayout.astro';
+import { homeLineup } from '../../data/sunfest25';
+import sunBig from '../../assets/sunfest25/sun-big.svg?raw';
+import star from '../../assets/sunfest25/star-small.svg?raw';
+import hero from '../../assets/sunfest25/img/home-hero.jpg';
+import programImg from '../../assets/sunfest25/img/program-teaser.jpg';
+import locationImg from '../../assets/sunfest25/img/home-location.jpg';
+import overnightImg from '../../assets/sunfest25/img/home-overnight.jpg';
+import volunteerImg from '../../assets/sunfest25/img/home-volunteer.jpg';
+import faqsImg from '../../assets/sunfest25/img/home-faqs.jpg';
+---
+
+<SunfestLayout title="Home" page="" bg="#43baff" tone="light">
+  <header class="home-brand">
+    <h1 class="home-logo">
+      <span class="home-logo__sun" set:html={inlineSvg(sunBig)} aria-hidden="true" />
+      <span class="home-logo__text">Sunfest25</span>
+    </h1>
+    <p class="home-brand__meta">
+      <span>20–21 June</span>
+      <span>Bosco della città</span>
+    </p>
+  </header>
+
+  <section class="home-hero" aria-label="Embrace nature, party hard">
+    <Image class="home-hero__img" src={hero} alt="" widths={[600, 1000, 1466]} sizes="100vw" loading="eager" />
+    <div class="home-hero__text">
+      <p class="home-hero__claim">Embrace nature<br />party hard</p>
+      <p class="home-hero__sub">2 stages with 33 big name artists!<br />From 4pm to 1am</p>
+    </div>
+    <p class="home-hero__big" aria-hidden="true">Sunfest25</p>
+  </section>
+
+  <div class="sf-wrap home-stack">
+    <a class="home-banner" href="/sunfest25/program/">
+      <Image src={programImg} alt="" widths={[600, 1000, 1214]} sizes="(max-width: 1200px) 92vw, 1200px" />
+      <h2 class="home-banner__title">Program</h2>
+      <span class="sf-btn">Check the program!</span>
+    </a>
+
+    <section class="poster" aria-labelledby="poster-title">
+      <h2 id="poster-title" class="sf-visually-hidden">Lineup</h2>
+      {
+        homeLineup.map((d) => (
+          <div class="poster__day">
+            <h3 class="poster__date">{d.day}</h3>
+            <p class="poster__head">{d.headliner}</p>
+            <ul class="poster__names poster__names--big">
+              {d.big.map((n) => (
+                <li>
+                  {n}
+                  <span class="poster__star" set:html={inlineSvg(star)} aria-hidden="true" />
+                </li>
+              ))}
+            </ul>
+            <ul class="poster__names poster__names--small">
+              {d.small.map((n) => (
+                <li>
+                  {n}
+                  <span class="poster__star" set:html={inlineSvg(star)} aria-hidden="true" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+      <a class="sf-btn" href="/sunfest25/lineup/">Go to lineup</a>
+    </section>
+
+    <section class="home-card home-card--text-first" aria-labelledby="h-location">
+      <div>
+        <h2 id="h-location" class="sf-h2 home-card__title">Location</h2>
+        <p>Sunfest rocks in Rovereto city forest since 2001</p>
+        <a class="sf-btn" href="/sunfest25/location/">Discover the place</a>
+      </div>
+      <Image class="sf-photo" src={locationImg} alt="A person hugging a tall tree in the forest" widths={[400, 735]} sizes="(max-width: 720px) 92vw, 560px" />
+    </section>
+
+    <a class="home-banner home-banner--bottom" href="/sunfest25/overnight/">
+      <Image src={overnightImg} alt="" widths={[600, 1000, 1259]} sizes="(max-width: 1200px) 92vw, 1200px" />
+      <h2 class="home-banner__title">Overnight</h2>
+      <span class="home-banner__text">As always we offer a place for a good night’s rest!<br />Check out our sleeping partners.</span>
+      <span class="sf-btn">Book your spot</span>
+    </a>
+
+    <section class="home-volunteer" aria-labelledby="h-volunteer">
+      <Image class="home-volunteer__img" src={volunteerImg} alt="A volunteer digging in a meadow" widths={[384]} sizes="384px" />
+      <div>
+        <h2 id="h-volunteer" class="sf-h2">Volunteer</h2>
+        <p>Be one of the cool kids, be part of the fest!<br />We always need some helping hands.<br />Join the family.</p>
+        <a class="sf-btn" href="/sunfest25/volunteer/">Learn more</a>
+      </div>
+    </section>
+
+    <section class="home-card home-card--text-first" aria-labelledby="h-faqs">
+      <div>
+        <h2 id="h-faqs" class="sf-h2 home-card__title">FAQs</h2>
+        <p>Get an answer to all of your questions!</p>
+        <a class="sf-btn" href="/sunfest25/faqs/">Get to the FAQs</a>
+      </div>
+      <Image class="sf-photo" src={faqsImg} alt="Sunflowers against a blue sky" widths={[400, 800, 1260]} sizes="(max-width: 720px) 92vw, 560px" />
+    </section>
+  </div>
+</SunfestLayout>
+
+<style>
+  .home-brand {
+    padding: clamp(2rem, 6vw, 5rem) var(--sf-gutter) clamp(2rem, 5vw, 4rem);
+    display: grid;
+    justify-content: center;
+  }
+  .home-logo {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.5rem, 2vw, 1.5rem);
+    margin: 0;
+    font-family: var(--sf-title);
+    font-weight: 400;
+    font-size: clamp(3rem, 0.5rem + 12vw, 10.5rem);
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .home-logo__sun {
+    flex: none;
+    width: 0.62em;
+    display: flex;
+  }
+  .home-logo__sun :global(svg) {
+    width: 100%;
+    height: auto;
+  }
+  .home-brand__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.3rem 0 0 clamp(3rem, 0.5rem + 9vw, 8rem);
+    max-width: none;
+    font-family: 'Inter', var(--sf-text);
+    font-weight: 600;
+    font-size: clamp(0.95rem, 0.7rem + 1vw, 1.6rem);
+  }
+
+  .home-hero {
+    position: relative;
+    min-height: min(160vw, 110vh);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    color: #fff;
+  }
+  .home-hero__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .home-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgb(0 0 0 / 0.45), rgb(0 0 0 / 0) 45%, rgb(0 0 0 / 0) 70%, rgb(0 0 0 / 0.4));
+  }
+  .home-hero__text,
+  .home-hero__big {
+    position: relative;
+    z-index: 1;
+  }
+  .home-hero__text {
+    padding: clamp(1.5rem, 4vw, 3rem) var(--sf-gutter);
+  }
+  .home-hero p {
+  }
+  .home-hero__claim {
+    margin: 0 0 0.6rem;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 1rem + 5.5vw, 6rem);
+    line-height: 1.1;
+    text-transform: uppercase;
+    max-width: none;
+  }
+  .home-hero__sub {
+    font-weight: 700;
+    font-size: clamp(1.15rem, 0.8rem + 1.8vw, 2.6rem);
+    line-height: 1.25;
+    max-width: none;
+  }
+  .home-hero__big {
+    margin: 0;
+    padding: 0 var(--sf-gutter) clamp(1rem, 3vw, 2rem);
+    font-family: var(--sf-title);
+    font-size: clamp(3rem, 0.5rem + 14vw, 13rem);
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    max-width: none;
+  }
+
+  .home-stack {
+    display: grid;
+    gap: clamp(3rem, 8vw, 7rem);
+    padding-block: clamp(2.5rem, 6vw, 5rem) clamp(3rem, 6vw, 5rem);
+  }
+
+  /* full-width photo with a title (Program, Overnight) */
+  .home-banner {
+    position: relative;
+    display: block;
+    border-radius: var(--sf-radius);
+    overflow: hidden;
+    color: #fff;
+    text-decoration: none;
+    min-height: clamp(9rem, 22vw, 14rem);
+  }
+  .home-banner img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .home-banner:hover img {
+    transform: scale(1.03);
+  }
+  .home-banner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgb(0 0 0 / 0.5), transparent 55%);
+  }
+  .home-banner > :not(img) {
+    position: relative;
+    z-index: 1;
+  }
+  .home-banner__title {
+    margin: 0 !important;
+    padding: clamp(0.8rem, 2vw, 1.3rem) clamp(1rem, 2.5vw, 1.6rem);
+    font-size: clamp(2.2rem, 1.2rem + 4vw, 4.5rem);
+  }
+  .home-banner .sf-btn {
+    position: absolute;
+    right: clamp(0.8rem, 2vw, 1.3rem);
+    bottom: clamp(0.8rem, 2vw, 1.3rem);
+  }
+  .home-banner--bottom {
+    aspect-ratio: 3 / 2;
+    display: flex;
+    flex-direction: column;
+  }
+  .home-banner--bottom::after {
+    background: linear-gradient(to bottom, rgb(0 0 0 / 0.45), transparent 35%, transparent 60%, rgb(0 0 0 / 0.65));
+  }
+  .home-banner__text {
+    margin-top: auto;
+    padding: 0 clamp(8rem, 30%, 16rem) clamp(1rem, 2.5vw, 1.6rem) clamp(1rem, 2.5vw, 1.6rem);
+    font-weight: 700;
+    font-size: clamp(0.95rem, 0.8rem + 0.6vw, 1.3rem);
+  }
+  @media (max-width: 560px) {
+    .home-banner--bottom {
+      aspect-ratio: auto;
+      min-height: 26rem;
+    }
+    .home-banner__text {
+      padding-right: clamp(1rem, 2.5vw, 1.6rem);
+      padding-bottom: 4.5rem;
+    }
+  }
+
+  /* lineup poster */
+  .poster {
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .poster__day {
+    display: grid;
+    justify-items: center;
+    gap: 0.4rem;
+  }
+  .poster__date {
+    font-family: 'Inter', var(--sf-text) !important;
+    font-weight: 600 !important;
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.4rem);
+    margin: 0 !important;
+  }
+  .poster__head {
+    margin: 0 0 0.3rem;
+    max-width: none;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 1.4rem + 3.4vw, 4.4rem);
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+  .poster__names {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.1em 0.35em;
+    max-width: 60rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+  .poster__names--big {
+    font-size: clamp(1.25rem, 0.8rem + 2vw, 2.6rem);
+  }
+  .poster__names--small {
+    margin-top: 0.6rem;
+    font-size: clamp(0.95rem, 0.75rem + 0.9vw, 1.5rem);
+    font-weight: 600;
+  }
+  .poster__names li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+  }
+  .poster__star {
+    display: inline-flex;
+    width: 0.7em;
+  }
+  .poster__star :global(svg) {
+    width: 100%;
+    height: auto;
+  }
+  .poster__names li:last-child .poster__star {
+    display: none;
+  }
+
+  /* title + text next to a photo */
+  .home-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: center;
+  }
+  .home-card .sf-photo {
+    aspect-ratio: 4 / 3;
+  }
+  .home-card__title {
+    font-size: clamp(2.6rem, 1.4rem + 4.5vw, 5.5rem) !important;
+  }
+
+  .home-volunteer {
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding: clamp(0.75rem, 2vw, 1rem);
+    background: #fff;
+    color: #000;
+    border-radius: var(--sf-radius);
+  }
+  .home-volunteer h2,
+  .home-volunteer p {
+  }
+  .home-volunteer h2 {
+    font-size: clamp(2.4rem, 1.4rem + 4vw, 4.4rem);
+  }
+  .home-volunteer p {
+    font-weight: 600;
+  }
+  .home-volunteer__img {
+    width: 100%;
+    height: 100%;
+    max-height: 22rem;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  @media (max-width: 720px) {
+    .home-card {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 560px) {
+    .home-volunteer {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .home-volunteer__img {
+      max-height: 16rem;
+    }
+  }
+</style>

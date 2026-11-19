@@ -1,0 +1,48 @@
+---
+import { Image } from 'astro:assets';
+import SunfestLayout from '../../layouts/SunfestLayout.astro';
+import JoinUs from '../../components/sunfest/JoinUs.astro';
+import founders from '../../assets/sunfest25/img/about-founders.jpg';
+import team from '../../assets/sunfest25/img/about-join.jpg';
+---
+
+<SunfestLayout title="About us" page="about" bg="#8c8abc" tone="light" next={['volunteer', 'location', 'faqs']}>
+  <h1 class="sf-title">About us</h1>
+
+  <div class="sf-wrap narrow">
+    <Image class="sf-photo founders" src={founders} alt="Federico and Michele, arm in arm in front of a university building" widths={[600, 1000, 1650]} sizes="(max-width: 900px) 92vw, 880px" loading="eager" />
+
+    <section class="sf-section" aria-labelledby="bros">
+      <h2 id="bros" class="sf-h2">2 bros rockin’ around</h2>
+      <p>
+        We are Federico and Michele, two Human-Computer Interaction master’s students with a love for music and parties.
+        Sunfest is our little dream, our prodigy, that comes to life every summer.
+      </p>
+
+      <h2 class="sf-h3 project">The project</h2>
+      <p>
+        This is actually our final project for the Visual Design course by Prof. Giorgia D’Annibale. The exercise was to
+        build a fully functioning prototype of a static website, with at least 5 sections or functionalities, and to
+        document the whole process. We went through every step of design: from getting to know our client, to their
+        business and competitors, through mock interviews, personas, moodboards and more.
+      </p>
+      <p>Do you want to see the process? Read the case study in Federico’s portfolio!</p>
+      <a class="sf-btn" href="/work/sunfest/">See the design process</a>
+    </section>
+  </div>
+
+  <JoinUs lead="Join the team, join the party!" image={team} alt="A team planning at a whiteboard covered in sticky notes" />
+</SunfestLayout>
+
+<style>
+  .narrow {
+    max-width: 880px;
+  }
+  .founders {
+    aspect-ratio: 2 / 1;
+    object-position: 50% 62%;
+  }
+  .project {
+    margin-top: clamp(2rem, 5vw, 3rem) !important;
+  }
+</style>

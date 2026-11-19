@@ -1,0 +1,185 @@
+---
+import { inlineSvg } from '../../utils/svg';
+import { Image } from 'astro:assets';
+import SunfestLayout from '../../layouts/SunfestLayout.astro';
+import Carousel from '../../components/sunfest/Carousel.astro';
+import sunSmall from '../../assets/sunfest25/sun-small.svg?raw';
+import left from '../../assets/sunfest25/img/strip-forest-left.jpg';
+import center from '../../assets/sunfest25/img/strip-stage-center.jpg';
+import right from '../../assets/sunfest25/img/strip-forest-right.jpg';
+import bosco from '../../assets/sunfest25/img/location-bosco.jpg';
+import map from '../../assets/sunfest25/img/festival-map.jpg';
+import stands from '../../assets/sunfest25/img/location-stands.jpg';
+import crowd from '../../assets/sunfest25/img/location-crowd.jpg';
+import food from '../../assets/sunfest25/img/location-food.jpg';
+import lounge from '../../assets/sunfest25/img/location-lounge.jpg';
+import route from '../../assets/sunfest25/img/location-route-map.jpg';
+---
+
+<SunfestLayout title="Location" page="location" bg="#8c9e4d" tone="light" next={['program', 'overnight', 'faqs']}>
+  <h1 class="sf-title">Location</h1>
+
+  <Carousel
+    label="Photos of the festival area"
+    start={1}
+    images={[
+      { src: left, alt: 'Tall trees of the city woods, seen from below' },
+      { src: center, alt: 'The Sun Stage in a forest clearing at sunset, with the crowd in front' },
+      { src: right, alt: 'Rovereto seen from the hills, with the mountains behind' },
+    ]}
+  />
+
+  <div class="sf-wrap sf-section narrow">
+    <Image class="sf-photo wide" src={bosco} alt="People relaxing in the woods under yellow shade sails" widths={[500, 736]} sizes="(max-width: 900px) 92vw, 880px" />
+    <h2 class="sf-h2 heading">Bosco della città</h2>
+    <p>
+      Sunfest takes place in the heart of the historic Woods of the city of Rovereto. A place rich in history that brings
+      people into close contact with nature. Explore our two stages, relax in the chill-out zone, enjoy delicious local
+      food, and discover what local craftsmanship has to offer.
+    </p>
+
+    <figure class="map">
+      <p class="map__badge">
+        <span class="sf-sun" set:html={inlineSvg(sunSmall)} aria-hidden="true"></span>
+        <span class="sf-wordmark">Sunfest25</span>
+        <span class="map__meta">Bosco della città<br />20–21 Jun</span>
+      </p>
+      <Image
+        class="sf-photo"
+        src={map}
+        alt="Illustrated map of the festival: Sun Stage, Forest Lounge, Woods Stage, DIY craft stalls, food and drink, and the camping area."
+        widths={[600, 1000, 1536]}
+        sizes="(max-width: 900px) 92vw, 880px"
+      />
+    </figure>
+
+    <section class="sf-split" aria-labelledby="stands">
+      <div>
+        <h2 id="stands" class="sf-h3">Stands</h2>
+        <p>Discover eco-friendly treasures!</p>
+        <p>Our artisan craft stands offer unique, sustainable souvenirs to remember your Sunfest experience.</p>
+      </div>
+      <Image class="sf-photo" src={stands} alt="A craft stand with handmade souvenirs" widths={[400, 736]} sizes="(max-width: 720px) 92vw, 430px" />
+    </section>
+
+    <Image class="sf-photo wide crowd" src={crowd} alt="People sitting on rugs and cushions in the forest lounge, seen from above" widths={[500, 736]} sizes="(max-width: 900px) 92vw, 880px" />
+
+    <section class="sf-split sf-split--flip" aria-labelledby="food">
+      <div>
+        <h2 id="food" class="sf-h3">Food stands</h2>
+        <p>
+          Savor authentic Trentino flavors at our food trucks! Don’t miss the Lucanica sausage, a local specialty bursting
+          with flavor.
+        </p>
+        <p>If you’re into chocolate instead, you have to try the locally baked Sacher cake!</p>
+      </div>
+      <Image class="sf-photo" src={food} alt="Food stands and picnic tables under string lights" widths={[400, 736]} sizes="(max-width: 720px) 92vw, 430px" />
+    </section>
+
+    <section class="sf-split sf-split--flip" aria-labelledby="lounge">
+      <div>
+        <h2 id="lounge" class="sf-h3">Forest lounge</h2>
+        <p>
+          We value your space! Feel free to take a break whenever you want in our spacious chill-out area, equipped with
+          games, pillows and all the amenities.
+        </p>
+      </div>
+      <Image class="sf-photo" src={lounge} alt="Rugs, cushions and hammocks in the chill-out area" widths={[400, 736]} sizes="(max-width: 720px) 92vw, 430px" />
+    </section>
+
+    <section class="sf-split arrive" id="how-to-arrive" aria-labelledby="arrive">
+      <div>
+        <h2 id="arrive" class="sf-h3">How to arrive</h2>
+        <p>Getting to Sunfest in Rovereto’s Bosco della Città is easy with eco-friendly options:</p>
+        <ol>
+          <li>
+            Take the train to Rovereto station, just 15 minutes from Trento or well connected from major cities. From
+            there, hop on the free festival shuttle (every 30 mins) or walk 20 minutes through the city. Local buses (#1,
+            #3) also stop nearby.
+          </li>
+          <li>
+            Avoid driving: there is no parking. Instead, use bikes (free valet parking) or the free shuttles from
+            Rovereto’s center and nearby lots. For schedules, check @SunFestRovereto. Walk, ride, or shuttle: keep it
+            green!
+          </li>
+        </ol>
+      </div>
+      <figure>
+        <Image class="sf-photo route" src={route} alt="Street map with the walking route from Rovereto station to the festival" widths={[400, 818]} sizes="(max-width: 720px) 92vw, 430px" />
+        <figcaption>(Need details? Ask for the full transport guide!)</figcaption>
+      </figure>
+    </section>
+  </div>
+</SunfestLayout>
+
+<style>
+  .narrow {
+    max-width: 880px;
+  }
+  .wide {
+    aspect-ratio: 16 / 9;
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .heading {
+    margin-top: 0 !important;
+  }
+  .map {
+    position: relative;
+    margin: clamp(2.5rem, 6vw, 4.5rem) 0;
+  }
+  .map__badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -40%);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 !important;
+    max-width: none !important;
+    width: max-content;
+    padding: 0.4rem 1rem;
+    background: #43baff;
+    border-radius: 10px;
+    color: #fff;
+    font-size: clamp(1rem, 0.7rem + 1.4vw, 1.8rem);
+  }
+  .map__badge .sf-sun {
+    color: var(--sf-yellow);
+    width: 0.8em;
+  }
+  .map__badge :global(.sf-sun path) {
+    fill: var(--sf-yellow);
+  }
+  .map__meta {
+    font-size: 0.5em;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .crowd {
+    margin-top: clamp(2.5rem, 6vw, 4.5rem);
+    margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .arrive {
+    align-items: start;
+  }
+  .arrive ol {
+    padding-left: 1.3rem;
+  }
+  .arrive li {
+    margin-bottom: 0.75rem;
+  }
+  .arrive figure {
+    margin: 0;
+  }
+  .route {
+    aspect-ratio: auto !important;
+    background: #fff;
+  }
+  figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+</style>

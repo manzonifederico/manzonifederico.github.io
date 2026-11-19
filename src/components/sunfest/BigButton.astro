@@ -1,0 +1,92 @@
+---
+// "Big Button" from the Sunfest Figma component (8:21560): white by default; on hover a black outline,
+// the page's pale tint and small illustrations (trees, question marks, music notes…); pressed = drop shadow.
+// Positions come from the 387×91 Figma button and scale with the button (container query units).
+import { sfHref } from '../../data/sunfest25';
+
+interface Props {
+  slug: string;
+  label: string;
+}
+const { slug, label } = Astro.props;
+
+const svgs = import.meta.glob<string>('../../assets/sunfest25/bigbutton/*.svg', { query: '?url', import: 'default', eager: true });
+const src = (name: string) => svgs[`../../assets/sunfest25/bigbutton/${name}.svg`];
+
+type Deco = { img: string; l: number; t: number; w: number; h?: number; r?: number };
+const designs: Record<string, { tint: string; deco?: Deco[]; before?: string[]; after?: string[] }> = {
+  location: {
+    tint: 'rgb(25 79 18 / 0.1)',
+    deco: [
+      { img: 'forest', l: -16, t: 37, w: 60 },
+      { img: 'park', l: 357, t: 33, w: 60 },
+      { img: 'park', l: 318, t: 37, w: 60 },
+      { img: 'signpost', l: 180, t: 67, w: 28 },
+    ],
+  },
+  faqs: {
+    tint: 'rgb(148 76 76 / 0.15)',
+    deco: [
+      { img: 'qm0', l: -7, t: 33, w: 60 },
+      { img: 'qm1', l: 32, t: 15, w: 43 },
+      { img: 'qm2', l: 6, t: 2, w: 26 },
+      { img: 'qm3', l: 57, t: 67, w: 18 },
+      { img: 'qm4', l: 318, t: 31, w: 60 },
+      { img: 'qm5', l: 367.6, t: 11, w: 11.2, h: 19.5 },
+      { img: 'qm6', l: 342, t: 16, w: 5.7, h: 10 },
+      { img: 'qm6', l: 72, t: 46, w: 5.7, h: 10 },
+      { img: 'qm6', l: 297, t: 41, w: 5.7, h: 10 },
+      { img: 'qm7', l: 305, t: 61, w: 12.6, h: 22 },
+      { img: 'qm8', l: 309, t: 5, w: 18, h: 31.6 },
+    ],
+  },
+  program: {
+    tint: 'rgb(16 37 66 / 0.15)',
+    deco: [
+      { img: 'music-note', l: 8, t: 21, w: 60, r: 16.4 },
+      { img: 'music-note-small', l: 322.8, t: 38.8, w: 33.6, r: -37.91 },
+    ],
+  },
+  lineup: { tint: 'rgb(125 187 253 / 0.15)', before: ['fast-rewind'], after: ['fast-forward'] },
+  overnight: {
+    tint: 'rgb(0 79 45 / 0.1)',
+    deco: [
+      { img: 'moon-stars', l: 13, t: 8, w: 32 },
+      { img: 'stars', l: 341, t: 13, w: 24 },
+      { img: 'seat-flat', l: 29, t: 51, w: 16 },
+    ],
+  },
+  about: { tint: 'rgb(140 138 188 / 0.2)', before: ['groups'], after: ['kabaddi'] },
+  volunteer: { tint: 'rgb(244 134 56 / 0.15)', after: ['volunteer'] },
+};
+const d = designs[slug] ?? { tint: 'rgb(0 0 0 / 0.03)' };
+// In "Program" the O becomes a comedy mask on hover, as in the design
+const programO = slug === 'program' && label.toUpperCase() === 'PROGRAM';
+---
+
+<a class="big" href={sfHref(slug)} style={`--tint: ${d.tint}`}>
+  {
+    d.deco && (
+      <span class="big__deco" aria-hidden="true">
+        {d.deco.map((x) => (
+          <img
+            src={src(x.img)}
+            alt=""
+            style={`--l: ${x.l}; --t: ${x.t}; --w: ${x.w}; --h: ${x.h ?? x.w}; --r: ${x.r ?? 0}deg`}
+          />
+        ))}
+      </span>
+    )
+  }
+  <span class="big__label">
+    {d.before?.map((i) => <img class="big__icon" src={src(i)} alt="" aria-hidden="true" />)}
+    {
+      programO ? (
+        <span>PR<span class="big__o" style={`--o: url("${src('comedy-mask')}")`}>O</span>GRAM</span>
+      ) : (
+        <span>{label}</span>
+      )
+    }
+    {d.after?.map((i) => <img class="big__icon" src={src(i)} alt="" aria-hidden="true" />)}
+  </span>
+</a>

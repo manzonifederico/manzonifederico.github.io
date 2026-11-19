@@ -1,0 +1,335 @@
+---
+// A project card for "My work". Shows images in card view; list view hides them (CSS).
+// The whole card is one link to the case study. On mouse devices a "View project" label
+// follows the pointer (src/scripts/view-cursor.ts), coloured per project.
+import { Image, getImage } from 'astro:assets';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { projectText, type Project } from '../data/projects';
+import { t, tagLabel, localePath, type Lang } from '../i18n/ui';
+import Tag from './Tag.astro';
+import ProjectLogo from './ProjectLogo.astro';
+
+interface Props {
+  project: Project;
+  lang: Lang;
+  headingLevel?: 'h3' | 'h4';
+  /** inside the joined Sunfest pair: hover is handled by the group */
+  grouped?: boolean;
+}
+const { project, lang, headingLevel = 'h3', grouped = false } = Astro.props;
+const Heading = headingLevel;
+const text = projectText(project, lang);
+const href = localePath(lang, `/work/${project.slug}/`);
+
+// A card image with `video` becomes a looping, muted video once the file is in public/ (the image is its poster)
+const media = await Promise.all(
+  project.cardImages.map(async (img) => {
+    const video = img.video && existsSync(join(process.cwd(), 'public', img.video)) ? img.video : undefined;
+    const poster = video ? (await getImage({ src: img.src, width: 640, format: 'webp' })).src : undefined;
+    return { ...img, video, poster };
+  }),
+);
+---
+
+<article
+  class:list={['card', project.theme, `card--${project.slug}`, { 'card--grouped': grouped }]}
+  data-cursor={t(lang).viewProject}
+  style={`--cursor-color: ${project.cursor}`}>
+  <div class="card-head">
+    <Heading class="card-title">
+      <a class="card-link" href={href}>
+        <ProjectLogo project={project} size="card" />
+      </a>
+    </Heading>
+    <p class="card-sub">{text.subtitle}</p>
+    <ul class="tags" role="list" aria-label={t(lang).tags}>
+      {project.tags.map((tag) => <Tag label={tagLabel(lang, tag)} />)}
+    </ul>
+  </div>
+
+  <div class="card-media" aria-hidden="true">
+    {
+      media.map((img, i) =>
+        img.video ? (
+          <video
+            class:list={['media', `media--${img.kind}`, `media-${i}`]}
+            src={img.video}
+            poster={img.poster}
+            width={img.src.width}
+            height={img.src.height}
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            data-card-video
+          />
+        ) : (
+        <Image
+          class:list={['media', `media--${img.kind}`, `media-${i}`]}
+          src={img.src}
+          alt=""
+          widths={[320, 480, 640, 960, 1280]}
+          sizes={img.kind === 'desktop' || img.kind === 'screen' ? '(max-width: 720px) 85vw, 600px' : '(max-width: 720px) 45vw, 320px'}
+          loading="lazy"
+          decoding="async"
+        />
+        ),
+      )
+    }
+    {project.slug === 'bk-vs-mc' && <span class="vs">VS</span>}
+  </div>
+</article>
+
+<script>
+  // respect "reduce motion": card videos stay on their first frame
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll<HTMLVideoElement>('[data-card-video]').forEach((v) => {
+      v.removeAttribute('autoplay');
+      v.pause();
+    });
+  }
+</script>
+
+<style>
+  .card {
+    position: relative;
+    display: grid;
+    gap: 36px;
+    padding: 26px 28px 40px;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--theme-border);
+    background: var(--theme-bg);
+    color: var(--theme-ink);
+    text-shadow: var(--theme-text-shadow, none);
+    overflow: hidden;
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  .card:not(.card--grouped):hover,
+  .card:not(.card--grouped):focus-within {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+  }
+
+  .card-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'title tags'
+      'sub   tags';
+    column-gap: 48px;
+    align-items: start;
+  }
+
+  .card-title {
+    grid-area: title;
+    font-weight: inherit;
+  }
+
+  .card-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Stretch the link over the whole card (above the images) so everything is clickable */
+  .card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    border-radius: inherit;
+  }
+
+  .card-link:focus-visible {
+    outline: none;
+  }
+
+  .card:has(.card-link:focus-visible) {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 4px;
+  }
+
+  /* Sunfest cards: white on the sky blue is 2.2:1, so the subtitle uses the theme's dark ink (WCAG 1.4.3);
+     the SUNFEST word is part of the logo, which the contrast rule exempts */
+  .theme-sunfest .card-sub {
+    color: var(--theme-small-ink, inherit);
+  }
+
+  .card-sub {
+    grid-area: sub;
+    font-family: var(--theme-sub-font);
+    font-weight: var(--theme-sub-weight);
+    font-size: clamp(1.25rem, 1rem + 1vw, 1.875rem); /* 30px (Figma 36, scaled to 90%) */
+    line-height: 1.3;
+  }
+
+  .tags {
+    grid-area: tags;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-content: flex-start;
+    gap: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 12px 0 0;
+  }
+
+  /* ---------- media row (≈ 90% of the Figma sizes) ---------- */
+  .card-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 4.5vw, 64px);
+    flex-wrap: wrap;
+  }
+
+  .card-media :global(.media) {
+    height: auto;
+  }
+
+  .card-media :global(.media--phone) {
+    width: clamp(100px, 12.5vw, 180px);
+  }
+
+  .card-media :global(.media--phone-framed) {
+    width: clamp(100px, 12.5vw, 180px);
+    border: 2px solid #000;
+    border-radius: 18px;
+  }
+
+  .card-media :global(.media--desktop) {
+    width: clamp(220px, 40vw, 580px);
+    border: 1px solid #000;
+    border-radius: 14px;
+  }
+
+  .card-media :global(.media--logo) {
+    width: clamp(110px, 19vw, 260px);
+  }
+
+  .card-media :global(.media--screen) {
+    width: clamp(190px, 23vw, 300px);
+    border-radius: 10px;
+  }
+
+  .vs {
+    order: 1;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: clamp(2rem, 3.6vw, 3.5rem);
+  }
+
+  /* Agorà: kiosk render and kiosk screen side by side */
+  .card--agora :global(.media--desktop) {
+    width: clamp(220px, 36vw, 500px);
+  }
+
+  .card--bk-vs-mc :global(.media-1) {
+    order: 2;
+  }
+
+  /* Flash Quiz: logo grows to fill the remaining space */
+  .card--flash-quiz :global(.media--logo) {
+    flex: 1 1 180px;
+    max-width: 310px;
+  }
+
+  /* Sunfest: two overlapping stacks of three screens */
+  .card--sunfest .card-media {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+    justify-items: center;
+    padding-block: 36px 54px;
+  }
+
+  .card--sunfest :global(.media--screen) {
+    grid-row: 1;
+    width: min(300px, 80%);
+  }
+
+  .card--sunfest :global(.media-0),
+  .card--sunfest :global(.media-1),
+  .card--sunfest :global(.media-2) {
+    grid-column: 1;
+  }
+
+  .card--sunfest :global(.media-3),
+  .card--sunfest :global(.media-4),
+  .card--sunfest :global(.media-5) {
+    grid-column: 2;
+  }
+
+  .card--sunfest :global(.media-0),
+  .card--sunfest :global(.media-3) {
+    transform: translate(-30%, -20%);
+  }
+
+  .card--sunfest :global(.media-1),
+  .card--sunfest :global(.media-4) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .card--sunfest :global(.media-2),
+  .card--sunfest :global(.media-5) {
+    position: relative;
+    z-index: 2;
+    transform: translate(30%, 30%);
+  }
+
+  /* ---------- list view (set on the parent .work-list) ---------- */
+  :global(.work-list[data-view='list']) .card {
+    gap: 0;
+  }
+
+  :global(.work-list[data-view='list']) .card-media {
+    display: none;
+  }
+
+  /* custom cursor: hide the system pointer only where the "View project" label is shown */
+  @media (hover: hover) and (pointer: fine) {
+    :global(html.has-view-cursor) .card,
+    :global(html.has-view-cursor) .card :global(*) {
+      cursor: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .card {
+      padding: 22px 18px 28px;
+      gap: 24px;
+    }
+    .card-head {
+      grid-template-columns: 1fr;
+      grid-template-areas: 'title' 'sub' 'tags';
+    }
+    .tags {
+      justify-content: flex-start;
+      gap: 8px;
+      padding-top: 14px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .card--sunfest .card-media {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .card--sunfest :global(.media-3),
+    .card--sunfest :global(.media-4),
+    .card--sunfest :global(.media-5) {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card:hover,
+    .card:focus-within {
+      transform: none;
+    }
+  }
+</style>

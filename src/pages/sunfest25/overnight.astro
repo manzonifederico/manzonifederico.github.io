@@ -1,0 +1,172 @@
+---
+import { Image } from 'astro:assets';
+import SunfestLayout from '../../layouts/SunfestLayout.astro';
+import JoinUs from '../../components/sunfest/JoinUs.astro';
+import camping from '../../assets/sunfest25/img/overnight-camping.jpg';
+import couch from '../../assets/sunfest25/img/overnight-couch.jpg';
+import hotel from '../../assets/sunfest25/img/overnight-hotel.jpg';
+
+const booking = 'Sunfest is a fictional festival, so there is nothing to book.';
+---
+
+<SunfestLayout title="Overnight" page="overnight" bg="#004f2d" next={['faqs', 'location', 'program']}>
+  <h1 class="sf-title">Overnight</h1>
+
+  <div class="sf-wrap">
+    <section class="sf-split" aria-labelledby="camping">
+      <div>
+        <h2 id="camping" class="sf-h2">Camping</h2>
+        <p>
+          Want the full Sunfest experience? Camp on-site, where volunteers and festival-goers live, laugh, and dance
+          together, day and night.
+        </p>
+        <p>
+          Bring your tent, sleeping bag, and good vibes. You’ll be steps from the action, with access to showers, toilets,
+          and chill zones. It’s basic, it’s beautiful, and the energy is unmatched.
+        </p>
+        <p>Prefer elsewhere? Use code <strong>SF25</strong> for discounts at other campsites!</p>
+        <button type="button" class="sf-btn" data-proto={booking}>Book your spot</button>
+      </div>
+      <Image class="sf-photo" src={camping} alt="A tent and a pink camping chair on a meadow" widths={[400, 821]} sizes="(max-width: 720px) 92vw, 560px" />
+    </section>
+
+    <section class="sf-split sf-split--flip" aria-labelledby="couch">
+      <div>
+        <h2 id="couch" class="sf-h2">Couch surfing</h2>
+        <p>Looking for a roof but still want that community vibe?</p>
+        <p>
+          We’ve got a network of amazing local hosts opening up their homes for everybody, couchsurfing-style. You’ll
+          sleep indoors, meet new people, and get a little glimpse of local life in the area.
+        </p>
+        <p>It’s cozy, cheap, and all about connection. Spots are limited, but we’ll do our best to match you!</p>
+        <button type="button" class="sf-btn" data-proto={booking}>Get a couch</button>
+      </div>
+      <Image class="sf-photo" src={couch} alt="A leather armchair with a blanket and cushion" widths={[400, 924]} sizes="(max-width: 720px) 92vw, 560px" />
+    </section>
+
+    <section class="sf-split" aria-labelledby="hotel">
+      <div>
+        <h2 id="hotel" class="sf-h2">Hotel and B&amp;Bs</h2>
+        <p>
+          Prefer a soft bed and a quiet room after a long day? No problem. We can help you find nearby hotels or B&amp;Bs
+          with special deals for Sunfest people.
+        </p>
+        <p>
+          This option’s perfect if you want to give your all during the day and recharge in comfort at night. Have a look
+          at our partners all around the Trentino region! Also don’t forget to use the <strong>SF25</strong> code when
+          booking to get your discounts!
+        </p>
+        <button type="button" class="sf-btn" data-proto={booking}>Book your stay</button>
+      </div>
+      <Image class="sf-photo" src={hotel} alt="A tidy hotel room with a double bed" widths={[400, 800, 1232]} sizes="(max-width: 720px) 92vw, 560px" />
+    </section>
+  </div>
+
+  <div class="sf-wrap sf-section qa">
+    <section class="qa__row" aria-labelledby="q-book">
+      <h2 id="q-book" class="sf-h3">How do I book?</h2>
+      <div>
+        <p>
+          You can book directly on our partners’ websites (<button type="button" class="link" data-proto={booking}>here is the full list</button>). Just remember to use the <strong>“SF25” code</strong> to get your discounts! You will receive:
+        </p>
+        <ul>
+          <li>15% discount on tent/camper/caravan spots;</li>
+          <li>35% discount for couches;</li>
+          <li>12% for hotels and B&amp;Bs;</li>
+        </ul>
+        <p>for bookings from June 18 to 23.</p>
+        <button type="button" class="sf-btn" data-proto={booking}>Book your nights</button>
+      </div>
+    </section>
+
+    <section class="qa__row" aria-labelledby="q-safe">
+      <h2 id="q-safe" class="sf-h3">Is couch surfing safe?</h2>
+      <div>
+        <p>
+          Yes, it is! But of course it has its risks. We partner with couchsurfing.com, the most trusted platform for
+          couch surfing by far! Check out their tips for a safe stay.
+        </p>
+        <button type="button" class="sf-btn" data-proto="In the real site this would open the partner’s safety tips.">Safety tips</button>
+      </div>
+    </section>
+
+    <section class="qa__row" aria-labelledby="q-move">
+      <h2 id="q-move" class="sf-h3">How do I move between accommodation and the festival?</h2>
+      <div>
+        <p>
+          Each accommodation has its own options, so we suggest checking each accommodation page to be sure! Also keep in
+          mind that:
+        </p>
+        <ul>
+          <li><strong>you can’t arrive at the festival by car;</strong></li>
+          <li>we offer shuttles from key points of Rovereto to get you to the party;</li>
+          <li>each partner has at least one public transport option to get to key points of the festival;</li>
+          <li>we encourage you to use public transport or other green mobility options, like bikes or your feet!</li>
+        </ul>
+        <a class="sf-btn" href="/sunfest25/location/#how-to-arrive">Take a look at transportation</a>
+      </div>
+    </section>
+
+    <section class="qa__row" aria-labelledby="q-contact">
+      <h2 id="q-contact" class="sf-h3">Who should I contact if I need information?</h2>
+      <div>
+        <p>Don’t hesitate to contact us at <strong>info@sunfest.it</strong> for any kind of information!</p>
+      </div>
+    </section>
+
+    <section class="qa__row" aria-labelledby="q-more">
+      <h2 id="q-more" class="sf-h3">Need more FAQs?</h2>
+      <div>
+        <a class="sf-btn" href="/sunfest25/faqs/">Get all the FAQs</a>
+      </div>
+    </section>
+  </div>
+
+  <JoinUs>
+    <p>
+      If you want a free spot, come join us! We are looking for you, especially if you are a light expert, a cook, or a
+      carpenter.
+    </p>
+  </JoinUs>
+</SunfestLayout>
+
+<style>
+  .qa {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+  }
+  .qa__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: clamp(1rem, 4vw, 3rem);
+    align-items: start;
+  }
+  .qa__row h2 {
+    font-size: clamp(1.6rem, 1.1rem + 2vw, 2.6rem);
+  }
+  .qa ul {
+    padding-left: 1.2rem;
+    margin: 0 0 1rem;
+  }
+  .qa li {
+    margin-bottom: 0.3rem;
+  }
+  .link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  @media (max-width: 720px) {
+    .qa__row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.5rem;
+    }
+  }
+  .sf-split .sf-photo {
+    aspect-ratio: 1;
+  }
+</style>

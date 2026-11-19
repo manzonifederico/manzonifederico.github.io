@@ -1,0 +1,80 @@
+---
+// EN / IT switch. Links to the same page in the other language.
+import { t, localePath, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const path = Astro.url.pathname;
+const other: Lang = lang === 'en' ? 'it' : 'en';
+---
+
+<nav class="lang" aria-label={t(lang).langLabel}>
+  {
+    (['en', 'it'] as Lang[]).map((l, i) => (
+      <>
+        {i > 0 && <span aria-hidden="true">/</span>}
+        {l === lang ? (
+          <span class="current" aria-current="page" lang={l}>
+            {l.toUpperCase()}
+            <span class="visually-hidden" lang={lang}> – {t(lang).langNames[l]}</span>
+          </span>
+        ) : (
+          <a href={localePath(other, path)} hreflang={l} lang={l} title={t(lang).switchTo}>
+            {l.toUpperCase()}
+            <span class="visually-hidden"> – {t(lang).switchTo}</span>
+          </a>
+        )}
+      </>
+    ))
+  }
+</nav>
+
+<style>
+  /* Both languages at full colour (a pale one failed WCAG 1.4.3 contrast): the current one is bold and
+     underlined, the other one lighter. The colour comes from --lang-ink: brand blue by default, white on
+     the blue blob, the "Back" colour on project pages. */
+  .lang {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--lang-ink, var(--color-brand));
+  }
+
+  .lang > span[aria-hidden] {
+    opacity: 0.35;
+  }
+
+  .current {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+
+  .lang a {
+    color: inherit;
+    font-weight: 400;
+    text-decoration: none;
+    padding: 6px 4px;
+    border-radius: 4px;
+  }
+
+  /* touch screens: a bigger tap area around the letters, same look */
+  @media (pointer: coarse) {
+    .lang a {
+      padding: 10px 8px;
+      margin: -4px -4px;
+    }
+  }
+
+  .lang a:hover,
+  .lang a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+</style>

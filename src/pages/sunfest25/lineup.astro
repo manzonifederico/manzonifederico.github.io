@@ -1,0 +1,390 @@
+---
+import { inlineSvg } from '../../utils/svg';
+import { Image, getImage } from 'astro:assets';
+import SunfestLayout from '../../layouts/SunfestLayout.astro';
+import CheckProgram from '../../components/sunfest/CheckProgram.astro';
+import { acts, days, homeLineup, type Act } from '../../data/sunfest25';
+import sunBig from '../../assets/sunfest25/sun-big.svg?raw';
+
+// Lineup order = poster order (headliner, big names, small names); one tile per artist
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+const byDay = days.map((d, i) => {
+  const poster = homeLineup[i];
+  const names = [poster.headliner, ...poster.big, ...poster.small];
+  const list = names
+    .map((n) => acts.find((a) => a.day === d.n && norm(a.name) === norm(n)))
+    .filter((a): a is Act => Boolean(a));
+  return { ...d, list };
+});
+
+const all = byDay.flatMap((d) => d.list);
+const data = await Promise.all(
+  all.map(async (a) => ({
+    name: a.name,
+    stage: a.stage,
+    time: a.time,
+    day: days.find((d) => d.n === a.day)!.long,
+    dayN: a.day,
+    photo: a.photo ? (await getImage({ src: a.photo, width: 700, format: 'webp' })).src : '',
+  })),
+);
+---
+
+<SunfestLayout title="Lineup" page="lineup" bg="#7dbbfd" tone="light" next={['program', 'location', 'faqs']}>
+  <h1 class="sf-title">Lineup</h1>
+
+  <div class="days" role="group" aria-label="Choose a day">
+    {
+      byDay.map((d, i) => (
+        <button type="button" class="day-btn" data-day={d.n} aria-pressed={i === 0 ? 'true' : 'false'}>
+          {d.label}
+        </button>
+      ))
+    }
+  </div>
+
+  {
+    byDay.map((d, di) => (
+      <section class="lineup" data-day-panel={d.n} aria-labelledby={`day-${d.n}`}>
+        <h2 id={`day-${d.n}`} class="sf-visually-hidden">
+          Day {d.n}, {d.long}
+        </h2>
+        <ul class="tiles">
+          {d.list.map((a, i) => {
+            const index = byDay.slice(0, di).reduce((n, x) => n + x.list.length, 0) + i;
+            return (
+              <li>
+                <button type="button" class="tile" data-index={index} aria-haspopup="dialog">
+                  {a.photo ? (
+                    <Image class="tile__img" src={a.photo} alt="" widths={[240, 360]} sizes="(max-width: 600px) 46vw, 25vw" />
+                  ) : (
+                    <span class="tile__img tile__img--none" set:html={inlineSvg(sunBig)} aria-hidden="true" />
+                  )}
+                  <span class="tile__name">{a.name}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        {d.n === 2 && <p class="note sf-wrap">Day 2 artist photos weren’t part of the design, so these tiles show the Sunfest sun.</p>}
+      </section>
+    ))
+  }
+
+  <CheckProgram />
+
+  <dialog class="artist" aria-labelledby="artist-name">
+    <div class="artist__inner">
+      <button type="button" class="artist__close" data-close aria-label="Close">×</button>
+      <div class="artist__media">
+        <img class="artist__img" alt="" width="700" height="700" hidden />
+        <span class="artist__none" set:html={inlineSvg(sunBig)} aria-hidden="true"></span>
+      </div>
+      <div class="artist__info">
+        <p class="artist__day"></p>
+        <h2 id="artist-name" class="artist__name"></h2>
+        <dl>
+          <div><dt>Stage</dt><dd class="artist__stage"></dd></div>
+          <div><dt>Time</dt><dd class="artist__time"></dd></div>
+        </dl>
+        <div class="artist__nav">
+          <button type="button" class="artist__step" data-step="-1"><span aria-hidden="true">←</span> Previous</button>
+          <button type="button" class="artist__step" data-step="1">Next <span aria-hidden="true">→</span></button>
+        </div>
+        <a class="sf-btn" href="/sunfest25/program/">See the full program</a>
+      </div>
+    </div>
+  </dialog>
+
+  <script is:inline type="application/json" id="artists-data" set:html={JSON.stringify(data).replace(/</g, '\\u003c')} />
+</SunfestLayout>
+
+<script>
+  type Artist = { name: string; stage: string; time: string; day: string; dayN: number; photo: string };
+  const artists: Artist[] = JSON.parse(document.getElementById('artists-data')?.textContent || '[]');
+
+  // Day switch: show one day at a time (without JavaScript both days stay visible)
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('.day-btn')];
+  const panels = [...document.querySelectorAll<HTMLElement>('[data-day-panel]')];
+  const showDay = (n: string) => {
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.day === n)));
+    panels.forEach((p) => (p.hidden = p.dataset.dayPanel !== n));
+  };
+  buttons.forEach((b) => b.addEventListener('click', () => showDay(b.dataset.day!)));
+  showDay('1');
+
+  // Artist dialog
+  const dialog = document.querySelector<HTMLDialogElement>('.artist')!;
+  const img = dialog.querySelector<HTMLImageElement>('.artist__img')!;
+  const none = dialog.querySelector<HTMLElement>('.artist__none')!;
+  let current = 0;
+  let opener: HTMLElement | null = null;
+
+  const fill = (i: number) => {
+    current = i;
+    const a = artists[i];
+    dialog.querySelector('.artist__name')!.textContent = a.name;
+    dialog.querySelector('.artist__day')!.textContent = a.day;
+    dialog.querySelector('.artist__stage')!.textContent = a.stage;
+    dialog.querySelector('.artist__time')!.textContent = a.time;
+    if (a.photo) {
+      img.src = a.photo;
+      img.alt = `Photo of ${a.name}`;
+      img.hidden = false;
+      none.hidden = true;
+    } else {
+      img.removeAttribute('src');
+      img.hidden = true;
+      none.hidden = false;
+    }
+  };
+
+  // previous/next stay within the same day
+  const step = (dir: number) => {
+    const day = artists[current].dayN;
+    const sameDay = artists.map((a, idx) => ({ a, idx })).filter((x) => x.a.dayN === day);
+    const pos = sameDay.findIndex((x) => x.idx === current);
+    const next = sameDay[(pos + dir + sameDay.length) % sameDay.length];
+    fill(next.idx);
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('.tile').forEach((t) =>
+    t.addEventListener('click', () => {
+      opener = t;
+      fill(Number(t.dataset.index));
+      dialog.showModal();
+    }),
+  );
+  dialog.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
+    b.addEventListener('click', () => step(Number(b.dataset.step))),
+  );
+  dialog.querySelector('[data-close]')!.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) dialog.close(); // click on the backdrop
+  });
+  dialog.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
+  });
+  dialog.addEventListener('close', () => opener?.focus());
+</script>
+
+<style>
+  .days {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+    padding-inline: var(--sf-gutter);
+  }
+  .day-btn {
+    min-height: 2.6rem;
+    padding: 0.3rem 1.1rem;
+    border: 0;
+    border-radius: 999px;
+    background: #fff;
+    color: #000;
+    font: 600 1.05rem var(--sf-text);
+    cursor: pointer;
+  }
+  .day-btn[aria-pressed='true'] {
+    background: var(--sf-yellow);
+  }
+  .day-btn:hover {
+    box-shadow: 0 3px 0 #000;
+  }
+
+  .tiles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    background: #fff;
+    gap: 0;
+  }
+  .tiles li {
+    border: 1px solid #fff;
+  }
+  .tile {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: #fff;
+    color: #000;
+    cursor: pointer;
+    text-align: center;
+  }
+  .tile__img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    transition: filter 0.2s ease;
+  }
+  .tile__img--none {
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 50% 40%, #ffe100 0 18%, #43baff 19% 100%);
+  }
+  .tile__img--none :global(svg) {
+    width: 45%;
+    height: auto;
+  }
+  .tile__name {
+    display: block;
+    padding: 0.5rem 0.4rem 0.6rem;
+    font-weight: 600;
+    font-size: clamp(0.9rem, 0.7rem + 0.8vw, 1.5rem);
+    text-transform: uppercase;
+    line-height: 1.15;
+    text-shadow: none;
+  }
+  .tile:hover .tile__img,
+  .tile:focus-visible .tile__img {
+    filter: saturate(1.25) brightness(1.05);
+  }
+  .tile:hover .tile__name {
+    background: var(--sf-yellow);
+  }
+  @media (max-width: 760px) {
+    .tiles {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 520px) {
+    .tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .note {
+    margin-top: 1rem !important;
+    font-size: 0.9rem;
+    opacity: 0.95;
+  }
+
+  /* artist dialog */
+  .artist {
+    width: min(92vw, 1050px);
+    max-height: 92vh;
+    padding: 0;
+    border: 0;
+    border-radius: 16px;
+    background: #fff;
+    color: #000;
+    overflow: auto;
+  }
+  .artist::backdrop {
+    background: rgb(16 37 66 / 0.75);
+  }
+  .artist__inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .artist__media {
+    background: #43baff;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+  }
+  .artist__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .artist__none {
+    width: 45%;
+  }
+  .artist__none :global(svg) {
+    width: 100%;
+    height: auto;
+  }
+  .artist__info {
+    padding: clamp(1.25rem, 4vw, 3rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .artist__info p,
+  .artist__info h2 {
+    text-shadow: none !important;
+  }
+  .artist__day {
+    margin: 0 !important;
+    font-weight: 600;
+    background: var(--sf-yellow);
+    padding: 0.15rem 0.7rem;
+    border-radius: 999px;
+  }
+  .artist__name {
+    margin: 0 !important;
+    font-family: var(--sf-title) !important;
+    font-weight: 400 !important;
+    font-size: clamp(2rem, 1.2rem + 3vw, 3.6rem) !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1 !important;
+    overflow-wrap: anywhere;
+  }
+  .artist dl {
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .artist dl div {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 1.15rem;
+  }
+  .artist dt {
+    font-weight: 700;
+    min-width: 3.5rem;
+  }
+  .artist dd {
+    margin: 0;
+  }
+  .artist__nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+  }
+  .artist__step {
+    min-height: 2.6rem;
+    padding: 0.3rem 0.9rem;
+    border: 2px solid #000;
+    border-radius: 999px;
+    background: #fff;
+    font: 600 1rem var(--sf-text);
+    cursor: pointer;
+  }
+  .artist__step:hover {
+    background: var(--sf-yellow);
+  }
+  .artist__close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    z-index: 2;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 50%;
+    background: #000;
+    color: #fff;
+    font-size: 1.8rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  @media (max-width: 680px) {
+    .artist__inner {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .artist__media {
+      aspect-ratio: 4 / 3;
+    }
+  }
+</style>
