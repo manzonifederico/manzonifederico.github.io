@@ -1,0 +1,91 @@
+---
+// Easter egg: pull the page down past its top and a line appears above it ("Nothing to see here, mate.").
+// - iPhone / Mac (Safari, trackpads): the page's elastic bounce uncovers the line, which sits just above the page.
+// - Android: no bounce, so a pull at the very top (finger dragging down) slides the same line in at the top.
+// Decorative only: hidden from screen readers. Nothing changes with "reduce motion" except it appears without sliding.
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+---
+
+<p class="overscroll-note" aria-hidden="true" data-overscroll>{t(lang).overscroll}</p>
+
+<script>
+  const note = document.querySelector<HTMLElement>('[data-overscroll]');
+  if (note) {
+    let startY: number | null = null;
+    let hideTimer: number | undefined;
+    document.addEventListener(
+      'touchstart',
+      (e) => {
+        startY = window.scrollY <= 0 && e.touches.length === 1 ? e.touches[0].clientY : null;
+      },
+      { passive: true },
+    );
+    document.addEventListener(
+      'touchmove',
+      (e) => {
+        if (startY === null || window.scrollY > 0) return;
+        if (e.touches[0].clientY - startY > 70) {
+          window.clearTimeout(hideTimer);
+          note.classList.add('is-pulled');
+        }
+      },
+      { passive: true },
+    );
+    document.addEventListener(
+      'touchend',
+      () => {
+        startY = null;
+        if (!note.classList.contains('is-pulled')) return;
+        window.clearTimeout(hideTimer);
+        hideTimer = window.setTimeout(() => note.classList.remove('is-pulled'), 1400);
+      },
+      { passive: true },
+    );
+  }
+</script>
+
+<style>
+  /* sits just above the top of the page: only an elastic bounce at the top shows it */
+  .overscroll-note {
+    position: absolute;
+    top: -56px;
+    left: 0;
+    right: 0;
+    margin: 0;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Android pull: slides in at the top of the screen for a moment */
+  .overscroll-note.is-pulled {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    right: auto;
+    z-index: 60;
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--popup-bg, rgba(255, 255, 255, 0.95));
+    color: var(--color-text);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    transform: translateX(-50%);
+    animation: pull-in 220ms ease-out;
+  }
+
+  @keyframes pull-in {
+    from {
+      transform: translate(-50%, -24px);
+      opacity: 0;
+    }
+  }
+</style>

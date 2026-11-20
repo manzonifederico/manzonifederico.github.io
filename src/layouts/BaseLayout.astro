@@ -2,6 +2,7 @@
 // Shared page shell: <head> with SEO and social preview tags, fonts, global CSS.
 // Fonts are self-hosted from npm packages (@fontsource), no Google Fonts requests. Only the Latin subset is
 // loaded (latin-*.css): it covers English and Italian, and keeps the CSS and the font files small.
+import OverscrollNote from '../components/OverscrollNote.astro';
 import '@fontsource/poppins/latin-300.css';
 import '@fontsource/poppins/latin-400.css';
 import '@fontsource/poppins/latin-400-italic.css';
@@ -145,6 +146,7 @@ const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.sit
   <body class={bodyClass}>
     <a class="skip-link" href="#main">{t(lang).skip}</a>
     <slot />
+    <OverscrollNote lang={lang} />
     <script>
       import '../scripts/unbiased';
       import '../scripts/view-cursor';

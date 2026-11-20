@@ -217,6 +217,8 @@ const emailLabel = (email: string) => {
     border-radius: 50%;
     background: var(--color-block);
     filter: blur(80px);
+    translate: var(--tilt-x, 0) var(--tilt-y, 0); /* a tilted phone moves the glow (ArrowBugs.astro) */
+    transition: translate 400ms ease-out;
     transform: translateZ(0);
     /* a slow, gentle drift so the glow feels alive */
     animation:

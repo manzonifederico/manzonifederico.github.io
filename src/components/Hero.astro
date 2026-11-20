@@ -49,6 +49,8 @@ const s = t(lang);
     border-radius: 50%;
     background: var(--color-block);
     filter: blur(80px); /* a little less blur than Figma's 100px, so the wavy edge shows */
+    translate: var(--tilt-x, 0) var(--tilt-y, 0); /* a tilted phone moves the glow (ArrowBugs.astro) */
+    transition: translate 400ms ease-out;
     transform: translateZ(0);
     /* breathes: drifts a little side to side and swells, slow enough not to distract */
     animation:

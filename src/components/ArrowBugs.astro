@@ -140,6 +140,8 @@ const s = t(lang);
   let pageAnims: Animation[] = []; // shakes applied to the page (cancelled when the game restarts)
   const wait = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
   let panicUntil = 0; // arrows scattered by a shake of the phone run fast until then
+  let tiltX = 0; // phone tilt, -1…1 (left/right, towards/away)
+  let tiltY = 0;
 
   // haptics: short buzzes on phones that support them (Android; iPhones ignore it). Never with a mouse.
   const buzz = (pattern: number | number[]) => {
@@ -182,8 +184,8 @@ const s = t(lang);
     for (const b of bugs) {
       if (!b.alive) continue;
       b.wander += (Math.random() - 0.5) * 0.35;
-      let ax = Math.cos(b.wander) * 0.05;
-      let ay = Math.sin(b.wander) * 0.05;
+      let ax = Math.cos(b.wander) * 0.05 + tiltX * 0.05; // a tilted phone: they slide downhill a little
+      let ay = Math.sin(b.wander) * 0.05 + tiltY * 0.05;
       const dx = b.x - mx;
       const dy = b.y - my;
       const d = Math.hypot(dx, dy) || 1;
@@ -793,6 +795,11 @@ const s = t(lang);
       cancelAnimationFrame(raf);
       raf = 0;
     }
+    if (!on) {
+      tiltX = tiltY = 0;
+      html.style.removeProperty('--tilt-x');
+      html.style.removeProperty('--tilt-y');
+    }
   }
 
   // squash: a main-button press near a living arrow, on empty page (never on a link, button or other control)
@@ -821,7 +828,6 @@ const s = t(lang);
         return;
       }
       touchMode = finger;
-      if (finger) askMotion();
       e.preventDefault();
       squash(hit);
     },
@@ -891,8 +897,8 @@ const s = t(lang);
   }
   // ---------- shake the phone: the arrows scatter and the blue glows tremble ----------
   // A shake = three hard jolts within 0.7 s. The first time, a small pop-up says what happened (once per device).
-  // iPhones only send motion data after asking: that happens on the first arrow squashed with a finger (browsers that
-  // also have the request but don't need it answer "granted" without showing anything).
+  // iPhones only send motion data after a permission prompt: on purpose there is none, so on iPhone shaking and tilting
+  // do nothing (Android sends the data without asking).
   const shakeHint = document.querySelector<HTMLElement>('[data-shake-hint]');
   const SHAKE_KEY = 'shake-hint-seen';
   const tremble = () =>
@@ -967,28 +973,17 @@ const s = t(lang);
     }
     last = [g.x, g.y, g.z];
   };
-  type MotionPermission = { requestPermission?: () => Promise<'granted' | 'denied'> };
-  const needsAsk =
-    typeof DeviceMotionEvent !== 'undefined' &&
-    typeof (DeviceMotionEvent as unknown as MotionPermission).requestPermission === 'function';
-  let motionAsked = false;
-  function askMotion() {
-    if (!needsAsk || motionAsked) return;
-    motionAsked = true;
-    // iOS wants the request inside a tap: the click that follows this squash
-    document.addEventListener(
-      'click',
-      () => {
-        (DeviceMotionEvent as unknown as MotionPermission)
-          .requestPermission?.()
-          .then((r) => r === 'granted' && addEventListener('devicemotion', onMotion))
-          .catch(() => {});
-      },
-      { once: true, capture: true },
-    );
-  }
-  // listen straight away: Android sends motion data without asking; iPhones start only once allowed (askMotion)
+  // tilt: the blue glows lean towards the low side (CSS reads --tilt-x / --tilt-y) and the arrows slide downhill
+  const clamp = (v: number) => Math.max(-1, Math.min(1, v));
+  const onTilt = (e: DeviceOrientationEvent) => {
+    if (e.gamma == null || e.beta == null || !enabled() || fine.matches) return;
+    tiltX = clamp(e.gamma / 30);
+    tiltY = clamp((e.beta - 45) / 30); // a phone in the hand usually sits at about 45°
+    html.style.setProperty('--tilt-x', `${(tiltX * 22).toFixed(1)}px`);
+    html.style.setProperty('--tilt-y', `${(tiltY * 16).toFixed(1)}px`);
+  };
   if (typeof DeviceMotionEvent !== 'undefined') addEventListener('devicemotion', onMotion);
+  if (typeof DeviceOrientationEvent !== 'undefined') addEventListener('deviceorientation', onTilt);
 
   document.addEventListener('arrows-mode', sync);
   fine.addEventListener?.('change', sync);
