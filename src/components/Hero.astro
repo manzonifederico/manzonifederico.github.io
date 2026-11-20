@@ -55,7 +55,7 @@ const s = t(lang);
     /* breathes: drifts a little side to side and swells, slow enough not to distract */
     animation:
       hero-breathe 9s ease-in-out infinite alternate,
-      blob-wave 7s ease-in-out infinite;
+      blob-wave 6s ease-in-out infinite;
   }
 
   @keyframes hero-breathe {
@@ -76,13 +76,13 @@ const s = t(lang);
       border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
     }
     25% {
-      border-radius: 58% 42% 55% 45% / 44% 56% 46% 54%;
+      border-radius: 64% 36% 58% 42% / 40% 60% 42% 58%;
     }
     50% {
-      border-radius: 44% 56% 46% 54% / 56% 44% 58% 42%;
+      border-radius: 38% 62% 42% 58% / 60% 40% 64% 36%;
     }
     75% {
-      border-radius: 55% 45% 60% 40% / 47% 53% 43% 57%;
+      border-radius: 60% 40% 66% 34% / 44% 56% 38% 62%;
     }
     100% {
       border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
@@ -132,25 +132,23 @@ const s = t(lang);
   }
 
   @media (max-width: 720px) {
-    /* phones: the blue intro takes most of the first screen and the big name below starts on white (never black
-       on blue), at the bottom of the screen: there's time to notice the recruiter pop-up first */
+    /* phones: the blue intro fills the whole first screen, so the big name only appears once you scroll. That leaves
+       time to choose recruiter mode (its card opens by itself on a first visit) before the name is ever on screen */
     .hero {
-      min-height: 70vh;
-      min-height: 70svh;
+      min-height: 100vh;
+      min-height: 100svh;
     }
     .hero-lang {
       top: 14px;
       right: 12px;
     }
-    /* phones: a smaller blob, just big enough for the white text to sit on blue; it fades out well before the
-       big name below */
+    /* phones: the blob fills most of the first screen and fades out just before the big name below */
     .blob {
       left: -50%;
       top: -80px;
       width: 200%;
-      /* a fixed height, so the longer wrapped text on narrow phones is still on blue */
       aspect-ratio: auto;
-      height: 440px;
+      height: max(440px, calc(100svh - 20px)); /* never shorter than the text needs on narrow phones */
       filter: blur(45px);
     }
   }
