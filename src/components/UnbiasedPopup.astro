@@ -1,6 +1,6 @@
 ---
 // "Are you a recruiter?" pop-up with the Unbiased mode switch (Figma: Bias Mode Section).
-// States (data-state): hidden → compact pill (a moment after the page loads) → icon only (after a long time).
+// States (data-state): hidden → compact pill with its text (a moment after the page loads) ⇄ open card.
 // It opens by itself only once, on the first visit (~7 s); then hovering, keyboard focus or a tap on the title
 // shows the full card.
 // The switch sits at the bottom right in every size, so it stays under the pointer while the card grows.
@@ -56,22 +56,13 @@ const s = t(lang);
   if (popup) {
     const toggle = popup.querySelector<HTMLButtonElement>('[data-popup-toggle]')!;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const ICON_AFTER = 25000; // "a long time" in the small pill before it becomes just an icon
-    type State = 'open' | 'compact' | 'icon';
-    let small: 'compact' | 'icon' = 'compact';
+    // the small size always keeps its text ("Are you a recruiter?"): it never shrinks to the icon alone
+    type State = 'open' | 'compact';
+    const small = 'compact';
     let timer: number | undefined;
-    let iconTimer: number | undefined;
 
     const set = (state: State) => {
       popup.dataset.state = state;
-      clearTimeout(iconTimer);
-      if (state === 'compact') {
-        iconTimer = window.setTimeout(() => {
-          if (popup.matches(':hover, :focus-within')) return;
-          small = 'icon';
-          set('icon');
-        }, ICON_AFTER);
-      }
     };
     const scheduleSmall = (ms: number) => {
       clearTimeout(timer);
@@ -126,12 +117,10 @@ const s = t(lang);
     // Hover / keyboard focus → full card (CSS); leaving → back to the small size after a short pause
     popup.addEventListener('mouseenter', () => {
       clearTimeout(timer);
-      clearTimeout(iconTimer);
     });
     popup.addEventListener('mouseleave', () => scheduleSmall(1200));
     popup.addEventListener('focusin', () => {
       clearTimeout(timer);
-      clearTimeout(iconTimer);
     });
     popup.addEventListener('focusout', (e) => {
       if (!popup.contains(e.relatedTarget as Node)) scheduleSmall(1200);
