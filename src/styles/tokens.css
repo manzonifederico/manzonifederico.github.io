@@ -96,6 +96,7 @@
   --color-on-fill: #d3e3ff;
   --color-fill-line: #7fb2ff;
   --bug-edge: #1a1a1a; /* edge around the pixel arrows of the game */
+  --bug-light: #cfe0ff;
   --color-link: #8fbcff;
   --color-brand-soft: rgba(111, 168, 255, 0.14);
   --color-line: #b3b3b3;
@@ -188,6 +189,7 @@
     --color-on-fill: #d3e3ff;
     --color-fill-line: #7fb2ff;
     --bug-edge: #1a1a1a;
+    --bug-light: #cfe0ff;
     --color-link: #8fbcff;
     --color-brand-soft: rgba(111, 168, 255, 0.14);
     --color-line: #b3b3b3;

@@ -96,49 +96,43 @@ const s = t(lang);
   const COUNT = 5;
   const FLEE = 90; // px: how close the pointer can get before an arrow runs
   const HEAD = 0; // degrees: direction the drawn arrow points to (its tip), so it can face where it goes
-  // 8-bit arrows: a dashed shaft and a V-shaped tip drawn in pixels (22 × 11 grid, '#' = a pixel). Two frames whose
-  // dashes are shifted by two pixels alternate, so the shaft "walks" in steps like an old game sprite. Every pixel
-  // gets a 1-pixel edge in the page colour (white / dark grey), so the arrows stay visible on the blue glow.
-  const FRAME_A = [
+  // 8-bit arrows, lance-shaped: a thin shaft, a long sharp tip and a small light knob at the back, drawn in pixels
+  // (22 × 11 grid: '#' = arrow colour, 'o' = light blue). Every pixel gets a 1-pixel edge in the page colour
+  // (white / dark grey), so the arrows stay visible on the blue glow.
+  const ARROW = [
     '......................',
     '..............#.......',
-    '...............#......',
-    '................#.....',
-    '.................#....',
-    '##..##..##..##..###...',
-    '.................#....',
-    '................#.....',
-    '...............#......',
+    '..............##......',
+    '..............####....',
+    'o.............######..',
+    '.o####################',
+    'o.............######..',
+    '..............####....',
+    '..............##......',
     '..............#.......',
     '......................',
   ];
-  const FRAME_B = FRAME_A.map((row, y) => (y === 5 ? '..##..##..##..#####...' : row));
   const pixelArrow = (scale: number, cls = '') => {
-    const frame = (rows: string[], frameCls: string) => {
-      const on = new Set<string>();
-      rows.forEach((row, y) => [...row].forEach((c, x) => c !== '.' && on.add(`${x},${y}`)));
-      const edge = new Set<string>();
-      on.forEach((k) => {
-        const [x, y] = k.split(',').map(Number);
-        for (let dx = -1; dx <= 1; dx++)
-          for (let dy = -1; dy <= 1; dy++) if (!on.has(`${x + dx},${y + dy}`)) edge.add(`${x + dx},${y + dy}`);
-      });
-      const rects = (cells: Set<string>) =>
-        [...cells]
-          .map((k) => {
-            const [x, y] = k.split(',');
-            return `<rect x="${x}" y="${y}" width="1" height="1"/>`;
-          })
-          .join('');
-      return `<g class="${frameCls}"><g class="px-edge">${rects(edge)}</g><g class="px-body">${rects(on)}</g></g>`;
+    const on = new Map<string, string>();
+    ARROW.forEach((row, y) => [...row].forEach((c, x) => c !== '.' && on.set(`${x},${y}`, c)));
+    const edge = new Set<string>();
+    on.forEach((_, k) => {
+      const [x, y] = k.split(',').map(Number);
+      for (let dx = -1; dx <= 1; dx++)
+        for (let dy = -1; dy <= 1; dy++) if (!on.has(`${x + dx},${y + dy}`)) edge.add(`${x + dx},${y + dy}`);
+    });
+    const rect = (k: string) => {
+      const [x, y] = k.split(',');
+      return `<rect x="${x}" y="${y}" width="1" height="1"/>`;
     };
-    return `<svg class="${cls}" viewBox="-1 -1 24 13" width="${24 * scale}" height="${13 * scale}" shape-rendering="crispEdges">${frame(FRAME_A, 'px-a')}${frame(FRAME_B, 'px-b')}</svg>`;
+    const pick = (c: string) => [...on].filter(([, v]) => v === c).map(([k]) => rect(k)).join('');
+    return `<svg class="${cls}" viewBox="-1 -1 24 13" width="${24 * scale}" height="${13 * scale}" shape-rendering="crispEdges"><g class="px-edge">${[...edge].map(rect).join('')}</g><g class="px-body">${pick('#')}</g><g class="px-light">${pick('o')}</g></svg>`;
   };
   const SMALL = `${pixelArrow(2, 'bug-svg')}
   <svg class="splat" viewBox="-20 -20 40 40" width="40" height="40">
     <path d="M0-6V-14M5 4L11 9M-5 4L-11 9M6-3L13-6M-6-3L-13-6" stroke-width="2" stroke-linecap="round"/>
   </svg>`;
-  // the big one: the same arrow, six times bigger (12 px pixels; its tip is at 240, 78)
+  // the big one: the same arrow, six times bigger (12 px pixels; its tip is at 276, 78)
   const BIG = pixelArrow(12);
   const POINTER = `<svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 2 L3 18 L14.5 12.5 Z" fill="#145ee1" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
 
@@ -471,7 +465,7 @@ const s = t(lang);
     const big = document.createElement('div');
     big.className = 'boss';
     big.innerHTML = BIG;
-    big.style.left = `${x - 240}px`;
+    big.style.left = `${x - 276}px`;
     big.style.top = `${y - 78}px`;
     document.body.append(ptr, big);
     sfxWhoosh(0.75);
@@ -625,7 +619,7 @@ const s = t(lang);
     const big = document.createElement('div');
     big.className = 'boss';
     big.innerHTML = BIG;
-    big.style.left = `${cx - 240}px`; // tip of the big arrow on the centre of the screen
+    big.style.left = `${cx - 276}px`; // tip of the big arrow on the centre of the screen
     big.style.top = `${cy - 78}px`;
     document.body.append(big);
     fx.push(big);
@@ -1053,35 +1047,17 @@ const s = t(lang);
     stroke: currentColor;
   }
 
-  /* pixel arrows: body in the arrow colour, a 1-pixel edge in the page colour; the two frames alternate so the
-     dashes walk along the shaft, like little legs */
+  /* pixel arrows: body in the arrow colour, a light knob, a 1-pixel edge in the page colour */
   :global(.px-body) {
     fill: currentColor;
   }
 
+  :global(.px-light) {
+    fill: var(--bug-light, #7fb2ff);
+  }
+
   :global(.px-edge) {
     fill: var(--bug-edge, #ffffff);
-  }
-
-  :global(.px-a) {
-    animation: px-a 0.5s steps(1) infinite;
-  }
-
-  :global(.px-b) {
-    opacity: 0;
-    animation: px-b 0.5s steps(1) infinite;
-  }
-
-  @keyframes px-a {
-    50% {
-      opacity: 0;
-    }
-  }
-
-  @keyframes px-b {
-    50% {
-      opacity: 1;
-    }
   }
 
   .bugs :global(.splat) {
@@ -1104,10 +1080,6 @@ const s = t(lang);
     transition: transform 90ms ease-in;
   }
 
-  .bugs :global(.bug.is-squashed .px-a),
-  .bugs :global(.bug.is-squashed .px-b) {
-    animation: none;
-  }
 
   .bugs :global(.bug.is-squashed .splat) {
     opacity: 1;
