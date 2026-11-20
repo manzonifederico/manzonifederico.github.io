@@ -1,6 +1,7 @@
 ---
 // "Are you a recruiter?" pop-up with the Unbiased mode switch (Figma: Bias Mode Section).
-// States (data-state): hidden → compact pill with its text (a moment after the page loads) ⇄ open card.
+// States (data-state): hidden → compact pill with its text (a moment after the page loads) ⇄ open card. Once
+// recruiter mode is on, the small size is just the round icon (a blue badge), since the visitor already knows it.
 // It opens by itself only once, on the first visit (~7 s); then hovering, keyboard focus or a tap on the title
 // shows the full card.
 // The switch sits at the bottom right in every size, so it stays under the pointer while the card grows.
@@ -56,9 +57,9 @@ const s = t(lang);
   if (popup) {
     const toggle = popup.querySelector<HTMLButtonElement>('[data-popup-toggle]')!;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // the small size always keeps its text ("Are you a recruiter?"): it never shrinks to the icon alone
-    type State = 'open' | 'compact';
-    const small = 'compact';
+    // the small size keeps its text ("Are you a recruiter?") until recruiter mode is on; then it is the icon alone
+    type State = 'open' | 'compact' | 'icon';
+    const small = (): State => (document.documentElement.dataset.unbiased === 'true' ? 'icon' : 'compact');
     let timer: number | undefined;
 
     const set = (state: State) => {
@@ -67,7 +68,7 @@ const s = t(lang);
     const scheduleSmall = (ms: number) => {
       clearTimeout(timer);
       timer = window.setTimeout(() => {
-        if (!popup.matches(':hover, :focus-within')) set(small);
+        if (!popup.matches(':hover, :focus-within')) set(small());
       }, ms);
     };
 
@@ -85,7 +86,13 @@ const s = t(lang);
       popup.style.setProperty('--pill-w', `${Math.ceil(textW + 116)}px`);
     };
     popup.querySelectorAll('[data-unbiased-toggle]').forEach((b) =>
-      b.addEventListener('click', () => requestAnimationFrame(fitPill)),
+      b.addEventListener('click', () =>
+        requestAnimationFrame(() => {
+          fitPill();
+          // already small when the mode changes (e.g. switched from the keyboard): take the matching small size
+          if (popup.dataset.state !== 'open') set(small());
+        }),
+      ),
     );
     // measure again once the web font is loaded (the fallback font is narrower) and when the window changes
     document.fonts?.ready.then(fitPill);
@@ -102,7 +109,7 @@ const s = t(lang);
     window.setTimeout(
       () => {
         fitPill();
-        if (introSeen) return set('compact');
+        if (introSeen) return set(small());
         try {
           localStorage.setItem('recruiter-intro-seen', '1');
         } catch {
@@ -129,7 +136,7 @@ const s = t(lang);
     // Click/tap on the title toggles (needed on touch screens, where there is no hover)
     toggle.addEventListener('click', () => {
       clearTimeout(timer);
-      set(popup.dataset.state === 'open' ? small : 'open');
+      set(popup.dataset.state === 'open' ? small() : 'open');
     });
 
     // Touch screens: no hover to leave, and the tapped switch keeps focus, so the card would stay open over the
@@ -139,7 +146,7 @@ const s = t(lang);
         clearTimeout(timer);
         const active = document.activeElement as HTMLElement | null;
         if (active && popup.contains(active)) active.blur();
-        set(small);
+        set(small());
       };
       popup.addEventListener('click', () => {
         clearTimeout(timer);
@@ -176,7 +183,7 @@ const s = t(lang);
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && popup.dataset.state === 'open') {
         const inside = popup.contains(document.activeElement);
-        set(small);
+        set(small());
         if (inside) toggle.focus();
       }
     });

@@ -871,17 +871,11 @@ const s = t(lang);
   };
   if (hint && enabled() && !seenHint()) {
     hint.classList.toggle('is-touch', !fine.matches);
-    let firstVisit = false; // the recruiter card opens by itself on a first visit: the snackbar comes after it
-    try {
-      firstVisit = localStorage.getItem('recruiter-intro-seen') !== '1';
-    } catch {
-      /* storage blocked */
-    }
     window.setTimeout(() => {
       if (!enabled()) return;
       hint.hidden = false;
       window.setTimeout(() => hint.classList.add('is-in'), 20);
-    }, !fine.matches ? 1500 : firstVisit ? 9000 : 2500); // phones: right away (it sits at the top, the recruiter card at the bottom)
+    }, 1500); // right away on every device: bottom left (top on phones), clear of the recruiter card at the bottom right
     hint.querySelector('[data-bugs-hint-ok]')?.addEventListener('click', closeHint);
     hint.querySelector('[data-bugs-hint-off]')?.addEventListener('click', () => {
       try {
@@ -1178,8 +1172,8 @@ const s = t(lang);
     outline-offset: 2px;
   }
 
-  /* phones: at the top, so it doesn't sit on the recruiter pop-up */
-  @media (max-width: 600px) {
+  /* phones and tablets: at the top, so it never sits on the recruiter pop-up (both appear in the first seconds) */
+  @media (max-width: 900px) {
     .bugs-hint {
       top: 16px;
       bottom: auto;
