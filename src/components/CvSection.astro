@@ -172,8 +172,8 @@ const isCurrent = (item: TimelineItem) => {
     order: 3;
     padding: 2px 8px;
     border-radius: 6px;
-    background: #e3ecfc;
-    color: var(--color-brand);
+    background: var(--color-chip-soft);
+    color: var(--color-brand-ink);
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -198,10 +198,10 @@ const isCurrent = (item: TimelineItem) => {
     gap: 4px;
     margin-top: 6px;
     padding: 3px 10px;
-    border: 1px solid var(--color-brand);
+    border: 1px solid var(--color-brand-ink);
     border-radius: var(--radius-pill);
-    background: #fff;
-    color: var(--color-brand);
+    background: var(--color-surface);
+    color: var(--color-brand-ink);
     font-size: 12px;
     font-weight: 500;
     text-decoration: none;
@@ -255,7 +255,7 @@ const isCurrent = (item: TimelineItem) => {
   .org {
     font-size: 0.9375rem; /* 15px */
     font-weight: 500;
-    color: #3d3d45;
+    color: var(--color-text-muted);
     margin-top: -2px;
   }
 
@@ -265,7 +265,7 @@ const isCurrent = (item: TimelineItem) => {
 
   .org :global(strong) {
     font-weight: 700;
-    color: #000;
+    color: var(--color-text);
   }
 
   .summary {
@@ -308,7 +308,7 @@ const isCurrent = (item: TimelineItem) => {
   }
 
   .lists .bullets li::marker {
-    color: var(--color-brand);
+    color: var(--color-brand-ink);
   }
 
   .list-title {
@@ -316,7 +316,7 @@ const isCurrent = (item: TimelineItem) => {
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--color-brand);
+    color: var(--color-brand-ink);
     margin-bottom: 8px;
   }
 

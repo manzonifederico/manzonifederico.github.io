@@ -12,6 +12,13 @@
   --color-text: #000000;
   --color-text-inverse: #ffffff;
   --color-bg: #ffffff;
+  /* brand blue used as text or thin lines on the page background (in dark mode a lighter blue, so it stays
+     readable); --color-brand itself stays the fill colour for blue areas with white text */
+  --color-brand-ink: #145ee1;
+  --color-surface: #ffffff;          /* chips, buttons and small panels on the page */
+  --color-line: #000000;             /* thin outlines (e.g. device frames on cards) */
+  --color-text-muted: #3d3d45;       /* secondary lines, e.g. the organisation under a CV entry */
+  --color-chip-soft: #e3ecfc;        /* pale blue chip ("Current" in the CV) */
 
   /* ---------- Colour: project themes ---------- */
   --cicerone-bg: #f4dbff;
@@ -57,6 +64,41 @@
   /* ---------- Motion ---------- */
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --dur: 200ms;
+}
+
+/* ---------- Dark mode: follows the system setting (prefers-color-scheme) ----------
+   Only the page itself changes: the blue areas (top of the page, footer) and the project colours (cards and
+   article sheets) keep their own colours. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-text: #e8ebf1;
+    --color-bg: #0f1218;
+    --color-brand-ink: #82acff;
+    --color-link: #8fb5ff;
+    --color-brand-soft: rgba(130, 172, 255, 0.14);
+    --color-surface: #1a1f29;
+    --color-line: #c9cfda;
+    --popup-bg: rgba(26, 31, 41, 0.94);
+    --color-text-muted: #b3bbc8;
+    --color-chip-soft: rgba(130, 172, 255, 0.16);
+    --switch-track: rgba(255, 255, 255, 0.3);
+  }
+
+  /* the project colours keep their light look: inside a card or an article sheet the light values return */
+  .card,
+  #main > .case {
+    color-scheme: light;
+    --color-text: #000000;
+    --color-bg: #ffffff;
+    --color-brand-ink: #145ee1;
+    --color-link: #1257d4;
+    --color-brand-soft: rgba(20, 94, 225, 0.09);
+    --color-surface: #ffffff;
+    --color-line: #000000;
+    --color-text-muted: #3d3d45;
+    --color-chip-soft: #e3ecfc;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

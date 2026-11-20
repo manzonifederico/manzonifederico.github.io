@@ -178,12 +178,12 @@ const s = t(lang);
     border-radius: 24px;
     background:
       linear-gradient(var(--color-brand-soft), var(--color-brand-soft)),
-      rgba(255, 255, 255, 0.92);
+      var(--popup-bg, rgba(255, 255, 255, 0.92));
     backdrop-filter: blur(10px);
     box-shadow:
       0 10px 30px rgba(20, 94, 225, 0.18),
       0 2px 6px rgba(0, 0, 0, 0.08);
-    color: #000;
+    color: var(--color-text);
     display: grid;
     gap: 6px;
     overflow: hidden;
@@ -248,7 +248,7 @@ const s = t(lang);
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    color: var(--color-brand);
+    color: var(--color-brand-ink);
     transition: width 400ms var(--ease), height 400ms var(--ease), background-color 300ms var(--ease), color 300ms var(--ease);
   }
 
@@ -323,7 +323,7 @@ const s = t(lang);
     gap: 14px;
     font-size: var(--fs-support);
     font-weight: 400;
-    color: var(--color-brand);
+    color: var(--color-brand-ink);
     padding-top: 4px;
   }
 
@@ -364,7 +364,7 @@ const s = t(lang);
     position: absolute;
     inset: 3px 0;
     border-radius: 7px;
-    background: rgba(0, 0, 0, 0.34);
+    background: var(--switch-track, rgba(0, 0, 0, 0.34));
     transition: background var(--dur) var(--ease);
   }
 

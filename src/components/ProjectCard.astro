@@ -153,6 +153,11 @@ const media = await Promise.all(
 
   /* Sunfest cards: white on the sky blue is 2.2:1, so the subtitle uses the theme's dark ink (WCAG 1.4.3);
      the SUNFEST word is part of the logo, which the contrast rule exempts */
+  /* MirrorMood: white on the coral red is 3.8:1, enough only for large text, so the subtitle is bold */
+  .theme-mirrormood .card-sub {
+    font-weight: 700;
+  }
+
   .theme-sunfest .card-sub {
     color: var(--theme-small-ink, inherit);
   }
@@ -196,13 +201,13 @@ const media = await Promise.all(
 
   .card-media :global(.media--phone-framed) {
     width: clamp(100px, 12.5vw, 180px);
-    border: 2px solid #000;
+    border: 2px solid var(--color-line);
     border-radius: 18px;
   }
 
   .card-media :global(.media--desktop) {
     width: clamp(220px, 40vw, 580px);
-    border: 1px solid #000;
+    border: 1px solid var(--color-line);
     border-radius: 14px;
   }
 
