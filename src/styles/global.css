@@ -679,3 +679,33 @@ html.classic-pointer #view-cursor {
   letter-spacing: var(--tracking-title);
   line-height: 1.1;
 }
+
+/* ---------- Game controller (src/scripts/gamepad.ts) ---------- */
+/* the selected element is always outlined while moving with a controller */
+html.gamepad-nav :focus {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 3px;
+}
+
+.gamepad-note {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  z-index: 70;
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 10px 18px;
+  border-radius: 16px;
+  background: var(--popup-bg, rgba(255, 255, 255, 0.96));
+  color: var(--color-text);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  font-size: 0.9375rem;
+  transform: translateX(-50%);
+  transition: opacity 400ms ease;
+}
+
+.gamepad-note.is-out {
+  opacity: 0;
+}
