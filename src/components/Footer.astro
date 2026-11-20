@@ -219,7 +219,9 @@ const emailLabel = (email: string) => {
     filter: blur(80px);
     transform: translateZ(0);
     /* a slow, gentle drift so the glow feels alive */
-    animation: glow-drift 12s ease-in-out infinite alternate;
+    animation:
+      glow-drift 10s ease-in-out infinite alternate,
+      blob-wave 8s ease-in-out infinite;
   }
 
   @keyframes glow-drift {
@@ -227,10 +229,29 @@ const emailLabel = (email: string) => {
       transform: translate3d(-3%, 0, 0) scale(1);
     }
     50% {
-      transform: translate3d(2%, -24px, 0) scale(1.04);
+      transform: translate3d(2%, -34px, 0) scale(1.05);
     }
     100% {
       transform: translate3d(3.5%, 8px, 0) scale(0.99);
+    }
+  }
+
+  /* the edge ripples: the ellipse's four corners swell and shrink out of step, like a slow wave */
+  @keyframes blob-wave {
+    0% {
+      border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+    }
+    25% {
+      border-radius: 58% 42% 55% 45% / 44% 56% 46% 54%;
+    }
+    50% {
+      border-radius: 44% 56% 46% 54% / 56% 44% 58% 42%;
+    }
+    75% {
+      border-radius: 55% 45% 60% 40% / 47% 53% 43% 57%;
+    }
+    100% {
+      border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
     }
   }
 

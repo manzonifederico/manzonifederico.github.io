@@ -48,21 +48,42 @@ const s = t(lang);
     aspect-ratio: 1195 / 709;
     border-radius: 50%;
     background: var(--color-block);
-    filter: blur(100px);
+    filter: blur(80px); /* a little less blur than Figma's 100px, so the wavy edge shows */
     transform: translateZ(0);
     /* breathes: drifts a little side to side and swells, slow enough not to distract */
-    animation: hero-breathe 11s ease-in-out infinite alternate;
+    animation:
+      hero-breathe 9s ease-in-out infinite alternate,
+      blob-wave 7s ease-in-out infinite;
   }
 
   @keyframes hero-breathe {
     0% {
-      transform: translate3d(-2%, 8px, 0) scale(1);
+      transform: translate3d(-3%, 12px, 0) rotate(-2deg) scale(1);
     }
     45% {
-      transform: translate3d(1.5%, -14px, 0) scale(1.05);
+      transform: translate3d(2.5%, -22px, 0) rotate(1.5deg) scale(1.07);
     }
     100% {
-      transform: translate3d(3%, 4px, 0) scale(1.02);
+      transform: translate3d(4%, 6px, 0) rotate(3deg) scale(1.03);
+    }
+  }
+
+  /* the edge ripples: the ellipse's four corners swell and shrink out of step, like a slow wave */
+  @keyframes blob-wave {
+    0% {
+      border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+    }
+    25% {
+      border-radius: 58% 42% 55% 45% / 44% 56% 46% 54%;
+    }
+    50% {
+      border-radius: 44% 56% 46% 54% / 56% 44% 58% 42%;
+    }
+    75% {
+      border-radius: 55% 45% 60% 40% / 47% 53% 43% 57%;
+    }
+    100% {
+      border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
     }
   }
 
