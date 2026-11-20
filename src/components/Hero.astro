@@ -29,7 +29,13 @@ const s = t(lang);
 <style>
   .hero {
     position: relative;
-    min-height: clamp(420px, 40vw, 597px);
+    /* the intro fills the first screen, so only the very top of the big name below peeks out at the bottom edge,
+       like a hint to scroll (and it can't be read before recruiter mode is chosen). The name starts the About
+       section's top padding plus ~0.14em of line spacing below the hero, and its capitals start ~0.35em into its
+       line box: showing ~0.5em of it shows only the top fifth of the capitals. Never shorter than the Figma height on wide, short windows. */
+    --name-peek: calc(clamp(16px, 2vw, 28px) + 0.79 * var(--fs-title));
+    min-height: max(clamp(420px, 40vw, 597px), calc(100vh - var(--name-peek)));
+    min-height: max(clamp(420px, 40vw, 597px), calc(100svh - var(--name-peek)));
     /* let the blurred blob fade out below the hero, but never cause sideways scrolling */
     overflow-x: clip;
     overflow-y: visible;
@@ -46,6 +52,8 @@ const s = t(lang);
     width: max(83%, 980px);
     max-width: 1195px;
     aspect-ratio: 1195 / 709;
+    /* on tall windows the glow stretches down with the intro and fades out just above the name */
+    min-height: calc(100% + 104px);
     translate: var(--tilt-x, 0) var(--tilt-y, 0); /* a tilted phone moves the glow (ArrowBugs.astro) */
     transition: translate 400ms ease-out;
     will-change: transform;
@@ -151,12 +159,6 @@ const s = t(lang);
   }
 
   @media (max-width: 720px) {
-    /* phones: the blue intro fills the whole first screen, so the big name only appears once you scroll. That leaves
-       time to choose recruiter mode (its card opens by itself on a first visit) before the name is ever on screen */
-    .hero {
-      min-height: 100vh;
-      min-height: 100svh;
-    }
     .hero-lang {
       top: 14px;
       right: 12px;
@@ -168,6 +170,7 @@ const s = t(lang);
       width: 200%;
       aspect-ratio: auto;
       height: max(440px, calc(100svh - 20px)); /* never shorter than the text needs on narrow phones */
+      min-height: 0;
     }
     .blob::before,
     .blob::after {
