@@ -35,6 +35,15 @@ const s = t(lang);
   </div>
 </section>
 
+<!-- shown only after the first shake of the phone (once per device) -->
+<section class="bugs-hint" aria-labelledby="shake-hint-title" data-shake-hint hidden>
+  <p class="bugs-hint-title" id="shake-hint-title">{s.shakeTitle}</p>
+  <p class="bugs-hint-text">{s.shakeText}</p>
+  <div class="bugs-hint-actions">
+    <button type="button" class="hint-btn hint-ok" data-shake-ok>{s.shakeOk}</button>
+  </div>
+</section>
+
 <dialog class="death" aria-labelledby="death-title" aria-describedby="death-sub" data-bugs-death data-deaths={JSON.stringify(s.bugsDeaths)}>
   <!-- the little soldiers pop up here: a separate layer over the whole screen, so they never move the text -->
   <div class="praise-layer" aria-hidden="true" data-praise></div>
@@ -130,6 +139,17 @@ const s = t(lang);
   let fx: HTMLElement[] = []; // attack effects on screen (removed when the game restarts)
   let pageAnims: Animation[] = []; // shakes applied to the page (cancelled when the game restarts)
   const wait = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
+  let panicUntil = 0; // arrows scattered by a shake of the phone run fast until then
+
+  // haptics: short buzzes on phones that support them (Android; iPhones ignore it). Never with a mouse.
+  const buzz = (pattern: number | number[]) => {
+    if (!touchMode) return;
+    try {
+      navigator.vibrate?.(pattern);
+    } catch {
+      /* not supported */
+    }
+  };
 
   function spawn() {
     if (!layer) return;
@@ -176,7 +196,7 @@ const s = t(lang);
       b.vx = (b.vx + ax) * 0.94;
       b.vy = (b.vy + ay) * 0.94;
       const sp = Math.hypot(b.vx, b.vy);
-      const max = scared ? 2.6 : 0.8;
+      const max = performance.now() < panicUntil ? 9 : scared ? 2.6 : 0.8; // after a shake they run fast for a moment
       if (sp > max) {
         b.vx *= max / sp;
         b.vy *= max / sp;
@@ -389,6 +409,7 @@ const s = t(lang);
     document.querySelector<HTMLButtonElement>('[data-bugs-hint-ok]')?.click(); // they've found out how to play
     b.alive = false;
     b.el.classList.add('is-squashed');
+    buzz(caught === COUNT - 1 ? [40, 60, 90] : 25); // the last one buzzes twice
     window.setTimeout(() => b.el.remove(), 1600);
     sfxSquash();
     prepareTracks();
@@ -459,6 +480,7 @@ const s = t(lang);
   };
   // the page itself shakes (and with "fall" breaks apart and drops)
   const shakePage = (ms: number, fall = false) => {
+    buzz(fall ? [120, 60, 200, 60, 320] : [90, 40, 140]);
     document.querySelectorAll<HTMLElement>('.hero, #main, body > footer').forEach((el, i) => {
       const dir = i % 2 ? 1 : -1;
       const frames: Keyframe[] = [
@@ -672,6 +694,7 @@ const s = t(lang);
     if (corner) corner.inert = true;
     death.showModal();
     deathOpen = true;
+    buzz([400, 120, 700]); // YOU DIED
     window.setTimeout(
       () => {
         if (form) form.inert = false;
@@ -790,10 +813,15 @@ const s = t(lang);
           const d = dist(near) || 1;
           near.vx = ((near.x - e.clientX) / d) * 7;
           near.vy = ((near.y - e.clientY) / d) * 7;
+          if (finger) {
+            touchMode = true;
+            buzz(8);
+          }
         }
         return;
       }
       touchMode = finger;
+      if (finger) askMotion();
       e.preventDefault();
       squash(hit);
     },
@@ -861,6 +889,107 @@ const s = t(lang);
       if (e.key === 'Escape') closeHint();
     });
   }
+  // ---------- shake the phone: the arrows scatter and the blue glows tremble ----------
+  // A shake = three hard jolts within 0.7 s. The first time, a small pop-up says what happened (once per device).
+  // iPhones only send motion data after asking: that happens on the first arrow squashed with a finger (browsers that
+  // also have the request but don't need it answer "granted" without showing anything).
+  const shakeHint = document.querySelector<HTMLElement>('[data-shake-hint]');
+  const SHAKE_KEY = 'shake-hint-seen';
+  const tremble = () =>
+    document.querySelectorAll<HTMLElement>('.hero .blob, .footer .blob').forEach((el) =>
+      el.animate(
+        [
+          { transform: 'translate(0, 0)' },
+          { transform: 'translate(-18px, 10px)' },
+          { transform: 'translate(16px, -12px)' },
+          { transform: 'translate(-10px, -8px)' },
+          { transform: 'translate(8px, 12px)' },
+          { transform: 'translate(0, 0)' },
+        ],
+        { duration: 650, easing: 'ease-out', composite: 'add' },
+      ),
+    );
+  const showShakeHint = () => {
+    if (!shakeHint || shakeHint.dataset.shown) return;
+    try {
+      if (localStorage.getItem(SHAKE_KEY) === '1') return;
+      localStorage.setItem(SHAKE_KEY, '1');
+    } catch {
+      /* storage blocked: shown once per visit */
+    }
+    shakeHint.dataset.shown = '1';
+    closeHint(); // the how-to-play snackbar makes room
+    shakeHint.hidden = false;
+    window.setTimeout(() => shakeHint.classList.add('is-in'), 20);
+  };
+  const closeShakeHint = () => {
+    if (!shakeHint || shakeHint.hidden) return;
+    shakeHint.classList.remove('is-in');
+    window.setTimeout(() => (shakeHint.hidden = true), reduce.matches ? 0 : 250);
+  };
+  shakeHint?.querySelector('[data-shake-ok]')?.addEventListener('click', closeShakeHint);
+  shakeHint?.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeShakeHint();
+  });
+  const onShake = () => {
+    if (!enabled() || busy || death?.open) return;
+    touchMode = true;
+    panicUntil = performance.now() + 900;
+    for (const b of bugs) {
+      if (!b.alive) continue;
+      const a = Math.random() * Math.PI * 2;
+      b.vx = Math.cos(a) * 9;
+      b.vy = Math.sin(a) * 9;
+      b.wander = a;
+    }
+    tremble();
+    buzz([60, 40, 60, 40, 120]);
+    showShakeHint();
+  };
+  let last: [number, number, number] | null = null;
+  let jolts: number[] = [];
+  let calmUntil = 0;
+  const onMotion = (e: DeviceMotionEvent) => {
+    const g = e.accelerationIncludingGravity;
+    if (!g || g.x == null || g.y == null || g.z == null) return;
+    const now = performance.now();
+    if (last) {
+      const jolt = Math.abs(g.x - last[0]) + Math.abs(g.y - last[1]) + Math.abs(g.z - last[2]);
+      if (jolt > 25) {
+        jolts = jolts.filter((t) => now - t < 700);
+        jolts.push(now);
+        if (jolts.length >= 3 && now > calmUntil) {
+          jolts = [];
+          calmUntil = now + 1500;
+          onShake();
+        }
+      }
+    }
+    last = [g.x, g.y, g.z];
+  };
+  type MotionPermission = { requestPermission?: () => Promise<'granted' | 'denied'> };
+  const needsAsk =
+    typeof DeviceMotionEvent !== 'undefined' &&
+    typeof (DeviceMotionEvent as unknown as MotionPermission).requestPermission === 'function';
+  let motionAsked = false;
+  function askMotion() {
+    if (!needsAsk || motionAsked) return;
+    motionAsked = true;
+    // iOS wants the request inside a tap: the click that follows this squash
+    document.addEventListener(
+      'click',
+      () => {
+        (DeviceMotionEvent as unknown as MotionPermission)
+          .requestPermission?.()
+          .then((r) => r === 'granted' && addEventListener('devicemotion', onMotion))
+          .catch(() => {});
+      },
+      { once: true, capture: true },
+    );
+  }
+  // listen straight away: Android sends motion data without asking; iPhones start only once allowed (askMotion)
+  if (typeof DeviceMotionEvent !== 'undefined') addEventListener('devicemotion', onMotion);
+
   document.addEventListener('arrows-mode', sync);
   fine.addEventListener?.('change', sync);
   coarse.addEventListener?.('change', sync);

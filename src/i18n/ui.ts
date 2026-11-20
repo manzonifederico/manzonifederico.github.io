@@ -84,6 +84,9 @@ export const ui = {
     bugsHintNote: 'Too distracting? Turn them off here or at the bottom of the page.',
     bugsHintOff: 'Turn off',
     bugsHintOk: 'Got it',
+    shakeTitle: 'Earthquake! 📳',
+    shakeText: 'You shook your phone and the arrows ran for cover. Shake it again whenever you like.',
+    shakeOk: 'Got it',
     bugsDeathsCount: 'Deaths',
     bugsDeaths: {
       // the big arrow steals the pointer (mouse only)
@@ -197,6 +200,9 @@ export const ui = {
     bugsHintNote: 'Ti distraggono? Spegnile qui o in fondo alla pagina.',
     bugsHintOff: 'Spegni',
     bugsHintOk: 'Ok, ho capito',
+    shakeTitle: 'Terremoto! 📳',
+    shakeText: 'Hai scosso il telefono e le frecce sono scappate. Scuotilo di nuovo quando vuoi.',
+    shakeOk: 'Ok',
     bugsDeathsCount: 'Morti',
     bugsDeaths: {
       steal: [
