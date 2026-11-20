@@ -36,6 +36,8 @@ const s = t(lang);
 </section>
 
 <dialog class="death" aria-labelledby="death-title" aria-describedby="death-sub" data-bugs-death data-deaths={JSON.stringify(s.bugsDeaths)}>
+  <!-- the little soldiers pop up here: a separate layer over the whole screen, so they never move the text -->
+  <div class="praise-layer" aria-hidden="true" data-praise></div>
   <div class="death-band">
     <p class="visually-hidden">{s.bugsDeathLabel}</p>
     <h2 class="death-title" id="death-title"></h2>
@@ -51,6 +53,10 @@ const s = t(lang);
     <div class="death-sound">
       <label id="death-sound-label" for="death-sound-switch">{s.bugsSound}</label>
       <button type="button" role="switch" aria-checked="true" aria-labelledby="death-sound-label" id="death-sound-switch" class="sound-switch" data-bugs-sound></button>
+    </div>
+    <div class="death-sound">
+      <label id="death-game-label" for="death-game-switch">{s.arrowGame}</label>
+      <button type="button" role="switch" aria-checked="true" aria-labelledby="death-game-label" id="death-game-switch" class="sound-switch" data-bugs-game></button>
     </div>
   </div>
   <p class="death-save">
@@ -627,7 +633,7 @@ const s = t(lang);
           const side = Math.random() < 0.5;
           fig.style.left = `${side ? 3 + Math.random() * 22 : 68 + Math.random() * 24}%`;
           fig.style.top = `${5 + Math.random() * 78}%`;
-          death.appendChild(fig);
+          (death.querySelector('[data-praise]') ?? death).appendChild(fig);
           window.setTimeout(() => fig.remove(), 650);
         }, at),
       );
@@ -716,6 +722,21 @@ const s = t(lang);
     }
     if (!soundOn) silence(); // stops whatever is playing right away
     syncSound();
+  });
+
+  // "Arrow game" switch on the death screen: same setting as the footer switch (arrows-off). Off = no new arrows
+  // after this screen; the footer switch follows through the arrows-mode event.
+  const gameSwitch = document.querySelector<HTMLButtonElement>('[data-bugs-game]');
+  const syncGame = () => gameSwitch?.setAttribute('aria-checked', String(!switchedOff()));
+  syncGame();
+  document.addEventListener('arrows-mode', syncGame);
+  gameSwitch?.addEventListener('click', () => {
+    try {
+      localStorage.setItem('arrows-off', switchedOff() ? '0' : '1');
+    } catch {
+      /* storage blocked: nothing to change */
+    }
+    document.dispatchEvent(new Event('arrows-mode'));
   });
 
   // dev server only (removed from the published build): a hook for automated tests
@@ -1101,6 +1122,48 @@ const s = t(lang);
     grid-template-columns: minmax(0, 1fr);
     place-items: center;
     animation: death-in 1.4s ease both;
+  }
+
+  .praise-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .praise-layer :global(.praise) {
+    position: absolute;
+    transform: rotate(var(--rot, 0deg));
+    animation: praise 0.65s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  }
+
+  .praise-layer :global(.praise svg) {
+    display: block;
+    width: auto;
+    height: var(--h, 70px);
+  }
+
+  @keyframes praise {
+    0% {
+      opacity: 0;
+      transform: rotate(var(--rot, 0deg)) scale(0.2);
+    }
+    25%,
+    75% {
+      opacity: 1;
+      transform: rotate(var(--rot, 0deg)) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: rotate(var(--rot, 0deg)) scale(0.9);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .praise-layer :global(.praise) {
+      animation: none;
+    }
   }
 
   .death::backdrop {

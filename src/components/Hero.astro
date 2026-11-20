@@ -84,19 +84,26 @@ const s = t(lang);
   }
 
   @media (max-width: 720px) {
+    /* phones: the blue intro takes most of the first screen and the big name below starts on white (never black
+       on blue), at the bottom of the screen: there's time to notice the recruiter pop-up first */
     .hero {
-      min-height: 360px;
+      min-height: 70vh;
+      min-height: 70svh;
     }
     .hero-lang {
       top: 14px;
       right: 12px;
     }
-    /* bigger blob on phones so the white text always sits on blue */
+    /* phones: a smaller blob, just big enough for the white text to sit on blue; it fades out well before the
+       big name below */
     .blob {
-      left: -60%;
-      top: -90px;
-      width: 240%;
-      filter: blur(50px);
+      left: -50%;
+      top: -80px;
+      width: 200%;
+      /* a fixed height, so the longer wrapped text on narrow phones is still on blue */
+      aspect-ratio: auto;
+      height: 440px;
+      filter: blur(45px);
     }
   }
 </style>
