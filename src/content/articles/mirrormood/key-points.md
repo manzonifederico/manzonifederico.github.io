@@ -39,4 +39,4 @@
 
 - Design guidelines for empathetic ambient systems that balance emotional support and privacy.
 - Four work packages, starting with 10 prototypes and a pilot study.
-- Estimated budget of about €22,370.
+- Estimated budget of about €27,770.

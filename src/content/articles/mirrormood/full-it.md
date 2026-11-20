@@ -131,9 +131,11 @@ Quattro work package, in sequenza:
 3. **Installazione sul campo** (prevista come la fase più lunga).
 4. **Analisi e diffusione,** compreso un articolo scientifico.
 
-Il budget stimato è di circa **22.370 €**: 6.000 € per i materiali (prototipi da circa 600 € l’uno), 1.250 € per i compensi ai partecipanti e 20.520 € per il personale (tre sperimentatori).
+Il budget stimato è di circa **27.770 €**: 6.000 € per i materiali (prototipi da circa 600 € l’uno), 1.250 € per i compensi ai partecipanti e 20.520 € per il personale (tre sperimentatori).
 
 ![Tabella dei costi](../../../assets/articles/mirrormood/30-costs.png)
+
+*Nota: il totale nella nostra slide e nel report, 22.370 €, è un refuso: le tre voci sommate danno 27.770 €, il valore usato qui.*
 
 ## Compromessi e limiti
 

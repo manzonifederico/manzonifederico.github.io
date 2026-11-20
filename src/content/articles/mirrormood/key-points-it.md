@@ -39,4 +39,4 @@
 
 - Linee guida di design per sistemi ambientali empatici che bilancino supporto emotivo e privacy.
 - Quattro work package, a partire da 10 prototipi e uno studio pilota.
-- Budget stimato di circa 22.370 €.
+- Budget stimato di circa 27.770 €.

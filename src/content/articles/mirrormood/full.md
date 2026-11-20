@@ -131,9 +131,11 @@ Four work packages, run in order:
 3. **In-the-wild deployment** (expected to be the most time-intensive).
 4. **Analysis and dissemination,** including a scientific paper.
 
-The estimated budget is about **€22,370**: €6,000 for materials (prototypes at about €600 each), €1,250 for participant compensation and €20,520 for personnel (three experimenters).
+The estimated budget is about **€27,770**: €6,000 for materials (prototypes at about €600 each), €1,250 for participant compensation and €20,520 for personnel (three experimenters).
 
 ![Costs table](../../../assets/articles/mirrormood/30-costs.png)
+
+*Note: the total in our slide and report, €22,370, is a typo: the three items add up to €27,770, the value used here.*
 
 ## Trade-offs and limitations
 
