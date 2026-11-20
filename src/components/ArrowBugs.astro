@@ -22,6 +22,19 @@ const s = t(lang);
 
 <div class="bugs" aria-hidden="true" data-bugs hidden></div>
 
+<!-- shown once (per device), a few seconds after the page opens: how to play, and a way to turn the game off -->
+<section class="bugs-hint" aria-labelledby="bugs-hint-title" data-bugs-hint hidden>
+  <p class="bugs-hint-title" id="bugs-hint-title">{s.bugsHintTitle}</p>
+  <p class="bugs-hint-text">
+    <span class="hint-mouse">{s.bugsHintMouse}</span><span class="hint-touch">{s.bugsHintTouch}</span>
+    {' '}{s.bugsHintNote}
+  </p>
+  <div class="bugs-hint-actions">
+    <button type="button" class="hint-btn hint-off" data-bugs-hint-off>{s.bugsHintOff}</button>
+    <button type="button" class="hint-btn hint-ok" data-bugs-hint-ok>{s.bugsHintOk}</button>
+  </div>
+</section>
+
 <dialog class="death" aria-labelledby="death-title" aria-describedby="death-sub" data-bugs-death data-deaths={JSON.stringify(s.bugsDeaths)}>
   <div class="death-band">
     <p class="visually-hidden">{s.bugsDeathLabel}</p>
@@ -367,6 +380,7 @@ const s = t(lang);
 
   function squash(b: Bug) {
     if (!b.alive || busy) return;
+    document.querySelector<HTMLButtonElement>('[data-bugs-hint-ok]')?.click(); // they've found out how to play
     b.alive = false;
     b.el.classList.add('is-squashed');
     window.setTimeout(() => b.el.remove(), 1600);
@@ -778,6 +792,48 @@ const s = t(lang);
     my = -9999;
   });
   document.addEventListener('pointer-mode', sync);
+
+  // ---------- snackbar: how to play / turn it off (once per device, a few seconds after the page opens) ----------
+  const hint = document.querySelector<HTMLElement>('[data-bugs-hint]');
+  const HINT_KEY = 'arrows-hint-seen';
+  const seenHint = () => {
+    try {
+      return localStorage.getItem(HINT_KEY) === '1';
+    } catch {
+      return false;
+    }
+  };
+  const closeHint = () => {
+    if (!hint || hint.hidden) return;
+    try {
+      localStorage.setItem(HINT_KEY, '1');
+    } catch {
+      /* storage blocked: it may show again next visit */
+    }
+    hint.classList.remove('is-in');
+    window.setTimeout(() => (hint.hidden = true), reduce.matches ? 0 : 250);
+  };
+  if (hint && enabled() && !seenHint()) {
+    hint.classList.toggle('is-touch', !fine.matches);
+    window.setTimeout(() => {
+      if (!enabled()) return;
+      hint.hidden = false;
+      window.setTimeout(() => hint.classList.add('is-in'), 20);
+    }, 2500);
+    hint.querySelector('[data-bugs-hint-ok]')?.addEventListener('click', closeHint);
+    hint.querySelector('[data-bugs-hint-off]')?.addEventListener('click', () => {
+      try {
+        localStorage.setItem('arrows-off', '1');
+      } catch {
+        /* storage blocked: off for this visit only */
+      }
+      document.dispatchEvent(new Event('arrows-mode')); // the game stops; the footer switch follows
+      closeHint();
+    });
+    hint.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeHint();
+    });
+  }
   document.addEventListener('arrows-mode', sync);
   fine.addEventListener?.('change', sync);
   coarse.addEventListener?.('change', sync);
@@ -885,6 +941,100 @@ const s = t(lang);
   :global(html.cursor-stolen),
   :global(html.cursor-stolen *) {
     cursor: none !important;
+  }
+
+  /* ---------- snackbar (how to play / turn off) ---------- */
+  .bugs-hint {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    z-index: 55;
+    width: min(400px, calc(100vw - 32px));
+    padding: 16px 18px 14px;
+    border-radius: 16px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow:
+      0 10px 30px rgba(0, 0, 0, 0.18),
+      0 0 0 1px rgba(20, 94, 225, 0.25);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 250ms ease,
+      transform 250ms ease;
+  }
+
+  .bugs-hint.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .bugs-hint[hidden] {
+    display: none;
+  }
+
+  .bugs-hint-title {
+    margin: 0 0 4px;
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  .bugs-hint-text {
+    margin: 0;
+  }
+
+  .hint-touch,
+  .bugs-hint.is-touch .hint-mouse {
+    display: none;
+  }
+
+  .bugs-hint.is-touch .hint-touch {
+    display: inline;
+  }
+
+  .bugs-hint-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .hint-btn {
+    min-height: 36px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--color-brand-ink);
+    background: transparent;
+    color: var(--color-brand-ink);
+    font: 600 0.875rem var(--font-display);
+  }
+
+  .hint-ok {
+    background: var(--color-brand);
+    border-color: var(--color-brand);
+    color: #fff;
+  }
+
+  .hint-btn:focus-visible {
+    outline: 3px solid var(--color-brand-ink);
+    outline-offset: 2px;
+  }
+
+  /* phones: at the top, so it doesn't sit on the recruiter pop-up */
+  @media (max-width: 600px) {
+    .bugs-hint {
+      top: 16px;
+      bottom: auto;
+      transform: translateY(-12px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bugs-hint {
+      transition: none;
+    }
   }
 
   /* ---------- touch attacks ---------- */

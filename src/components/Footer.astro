@@ -149,6 +149,7 @@ const emailLabel = (email: string) => {
     }
   };
   arrowSwitch?.setAttribute('aria-checked', String(!arrowsOff()));
+  document.addEventListener('arrows-mode', () => arrowSwitch?.setAttribute('aria-checked', String(!arrowsOff())));
   arrowSwitch?.addEventListener('click', () => {
     const off = !arrowsOff();
     try {

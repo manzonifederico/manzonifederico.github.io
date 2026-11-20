@@ -71,6 +71,13 @@ export const ui = {
     bugsRetry: 'Rest at the bonfire (try again)',
     bugsSaved: 'Progress saved at the bonfire',
     bugsSound: 'Sound',
+    // snackbar shown once, early on the home page
+    bugsHintTitle: 'Little arrows are loose on this page 🏹',
+    bugsHintMouse: 'Click near one to squash it. Squash them all… if you dare.',
+    bugsHintTouch: 'Tap near one to squash it. Squash them all… if you dare.',
+    bugsHintNote: 'Too distracting? Turn them off here or at the bottom of the page.',
+    bugsHintOff: 'Turn off',
+    bugsHintOk: 'Got it',
     bugsDeathsCount: 'Deaths',
     bugsDeaths: {
       // the big arrow steals the pointer (mouse only)
@@ -172,6 +179,12 @@ export const ui = {
     bugsRetry: 'Riposa al falò (riprova)',
     bugsSaved: 'Progressi salvati al falò',
     bugsSound: 'Suoni',
+    bugsHintTitle: 'Su questa pagina girano delle frecce 🏹',
+    bugsHintMouse: 'Clicca vicino a una per schiacciarla. Prendile tutte… se hai coraggio.',
+    bugsHintTouch: 'Tocca vicino a una per schiacciarla. Prendile tutte… se hai coraggio.',
+    bugsHintNote: 'Ti distraggono? Spegnile qui o in fondo alla pagina.',
+    bugsHintOff: 'Spegni',
+    bugsHintOk: 'Ok, ho capito',
     bugsDeathsCount: 'Morti',
     bugsDeaths: {
       steal: [
