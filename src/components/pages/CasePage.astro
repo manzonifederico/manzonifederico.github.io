@@ -7,6 +7,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectLogo from '../ProjectLogo.astro';
 import ProjectCard from '../ProjectCard.astro';
 import LangSwitch from '../LangSwitch.astro';
+import ThemeSwitch from '../ThemeSwitch.astro';
 import Tag from '../Tag.astro';
 import MyWork from '../MyWork.astro';
 import Footer from '../Footer.astro';
@@ -41,7 +42,10 @@ const rendered = await Promise.all(
     // optional front matter `legend:` maps a heading to a shorter label for the quick links on the left
     const short = (entry.data?.legend ?? {}) as Record<string, string>;
     const headings = r.headings.filter((h) => h.depth === 2).map((h) => ({ ...h, text: short[h.text] ?? h.text }));
-    return { ...v, Content: r.Content, headings, lang: entry === byVersion[v.key] ? 'en' : 'it' };
+    // rough reading time shown on the tab (about 220 words a minute)
+    const words = (entry.body ?? '').split(/\s+/).filter(Boolean).length;
+    const minutes = Math.max(1, Math.round(words / 220));
+    return { ...v, Content: r.Content, headings, minutes, lang: entry === byVersion[v.key] ? 'en' : 'it' };
   }),
 );
 const bibliography = byVersion['bibliography'] ? await render(byVersion['bibliography']) : null;
@@ -102,7 +106,10 @@ const articleJsonLd = {
             </svg>
             {s.back}
           </a>
-          <LangSwitch lang={lang} />
+          <div class="top-right">
+            <ThemeSwitch lang={lang} />
+            <LangSwitch lang={lang} />
+          </div>
         </div>
 
         <header class="case-head container" id="start">
@@ -138,7 +145,8 @@ const articleJsonLd = {
 
           <div class="reader">
             <h2 class="reader-q" id="reader-q">{s.readHow}</h2>
-            <div class="modes" role="tablist" aria-labelledby="reader-q">
+            <p class="reader-hint" id="reader-hint">{s.readHowHint}</p>
+            <div class="modes" role="tablist" aria-labelledby="reader-q" aria-describedby="reader-hint">
               {
                 rendered.map((v) => (
                   <button
@@ -151,7 +159,8 @@ const articleJsonLd = {
                     tabindex={v.key === defaultMode ? 0 : -1}
                     data-mode={v.key}
                     data-cursor={s.modeCursor[v.key]}>
-                    {v.label}
+                    <span class="mode-name">{v.label}</span>
+                    <span class="mode-time">{s.minRead.replace('{n}', String(v.minutes))}</span>
                   </button>
                 ))
               }
@@ -618,12 +627,15 @@ const articleJsonLd = {
   /* small text on the coloured header: themes where white is too faint set --theme-small-ink
      (e.g. Sunfest, Figma shows a black "Back"; white would be 2.2:1) */
   .back,
-  .topbar :global(.lang) {
+  .top-right {
     color: var(--theme-small-ink, inherit);
   }
-  /* the EN / IT switch takes the same colour as "Back" */
-  .topbar :global(.lang) {
+  /* the theme button and the EN / IT switch take the same colour as "Back" */
+  .top-right {
     --lang-ink: currentColor;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   .case-head {
@@ -771,23 +783,48 @@ const articleJsonLd = {
     font-size: clamp(1.4rem, 1.1rem + 1vw, 2.25rem);
   }
 
+  .reader-hint {
+    margin: 6px 0 0;
+    font-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+  }
+
+  /* the three versions as three big choices, each with its reading time, so they can't be missed */
   .modes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 12px 0 28px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+    gap: 12px;
+    max-width: 720px;
+    margin: 18px 0 32px;
   }
 
   .mode {
-    padding: 4px 14px;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--theme-tag-bg);
+    display: grid;
+    gap: 4px;
+    justify-items: start;
+    padding: 14px 18px;
+    border-radius: 16px;
+    border: 2px solid var(--theme-tag-bg);
     background: transparent;
     color: inherit;
     font-family: 'Manrope', system-ui, sans-serif;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+
+  .mode-name {
+    font-weight: 700;
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+    line-height: 1.2;
+  }
+
+  .mode-time {
     font-weight: 500;
     font-size: var(--fs-small);
-    cursor: pointer;
+  }
+
+  .mode:hover {
+    transform: translateY(-2px);
   }
 
   :global(.theme-cicerone) .mode {

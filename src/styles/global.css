@@ -510,6 +510,15 @@ html.classic-pointer #view-cursor {
   transform: translateY(-50%);
 }
 
+/* near the right edge of the window: label on the left of the pointer (see view-cursor.ts) */
+#view-cursor.is-flipped {
+  flex-direction: row-reverse;
+}
+
+#view-cursor.is-flipped .vc-dot {
+  margin: -5px -5px 0 0;
+}
+
 #view-cursor.is-pressed .vc-dot {
   transform: scale(0.7);
 }

@@ -1,7 +1,8 @@
 ---
 // "Are you a recruiter?" pop-up with the Unbiased mode switch (Figma: Bias Mode Section).
 // States (data-state): hidden → compact pill (a moment after the page loads) → icon only (after a long time).
-// It never opens by itself: hovering, keyboard focus or a tap on the title shows the full card.
+// It opens by itself only once, on the first visit (~7 s); then hovering, keyboard focus or a tap on the title
+// shows the full card.
 // The switch sits at the bottom right in every size, so it stays under the pointer while the card grows.
 // When the mode is on, the title reads "Reviewer mode" and the icon turns blue.
 // Turning the switch on blurs every element marked with the `pii` class (see src/scripts/unbiased.ts).
@@ -99,11 +100,25 @@ const s = t(lang);
     document.fonts?.ready.then(fitPill);
     window.addEventListener('resize', fitPill);
 
-    // Appears a moment after the page loads, already small
+    // Appears a moment after the page loads, already small. On the first visit (per browser) it opens by itself
+    // for ~7 s first, so people find the mode at the start and not at the end of their visit.
+    let introSeen = true;
+    try {
+      introSeen = localStorage.getItem('recruiter-intro-seen') === '1';
+    } catch {
+      /* storage blocked: no intro */
+    }
     window.setTimeout(
       () => {
         fitPill();
-        set('compact');
+        if (introSeen) return set('compact');
+        try {
+          localStorage.setItem('recruiter-intro-seen', '1');
+        } catch {
+          /* storage blocked */
+        }
+        set('open');
+        scheduleSmall(7000);
       },
       reduce ? 0 : 900,
     );
@@ -260,7 +275,7 @@ const s = t(lang);
   /* mode on: the icon turns into a blue badge, so you can see at a glance that it's active */
   :global(:root[data-unbiased='true']) .popup[data-state='icon']:not(:hover):not(:focus-within) .icon-wrap {
     background: var(--color-brand);
-    color: #fff;
+    color: var(--color-text-inverse);
   }
 
   .popup-title {

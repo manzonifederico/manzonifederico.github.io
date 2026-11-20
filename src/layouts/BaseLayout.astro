@@ -93,6 +93,14 @@ const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.sit
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="theme-color" content="#145ee1" />
     <meta name="color-scheme" content="light dark" />
+    <!-- colour theme picked with the theme button (light / dark); none = follow the device. Runs before the page
+         paints, so there is no flash of the wrong colours -->
+    <script is:inline>
+      try {
+        var th = localStorage.getItem('theme');
+        if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th;
+      } catch (e) {}
+    </script>
     <meta name="author" content={site.name} />
 
     <!-- Social previews (LinkedIn, WhatsApp, Slack, X…) -->

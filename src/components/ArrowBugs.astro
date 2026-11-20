@@ -836,11 +836,17 @@ const s = t(lang);
   };
   if (hint && enabled() && !seenHint()) {
     hint.classList.toggle('is-touch', !fine.matches);
+    let firstVisit = false; // the recruiter card opens by itself on a first visit: the snackbar comes after it
+    try {
+      firstVisit = localStorage.getItem('recruiter-intro-seen') !== '1';
+    } catch {
+      /* storage blocked */
+    }
     window.setTimeout(() => {
       if (!enabled()) return;
       hint.hidden = false;
       window.setTimeout(() => hint.classList.add('is-in'), 20);
-    }, 2500);
+    }, firstVisit ? 9000 : 2500);
     hint.querySelector('[data-bugs-hint-ok]')?.addEventListener('click', closeHint);
     hint.querySelector('[data-bugs-hint-off]')?.addEventListener('click', () => {
       try {
@@ -1035,7 +1041,7 @@ const s = t(lang);
   .hint-ok {
     background: var(--color-brand);
     border-color: var(--color-brand);
-    color: #fff;
+    color: var(--color-text-inverse);
   }
 
   .hint-btn:focus-visible {

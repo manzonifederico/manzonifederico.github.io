@@ -10,7 +10,7 @@
   --color-brand-soft: rgba(20, 94, 225, 0.09);
   --color-link: #1257d4;             /* brand blue, a touch darker so links pass 4.5:1 on tinted panels */
   --color-text: #000000;
-  --color-text-inverse: #ffffff;
+  --color-text-inverse: #ffffff;     /* text on the brand blue (top of the page, footer, filled buttons) */
   --color-bg: #ffffff;
   /* brand blue used as text or thin lines on the page background (in dark mode a lighter blue, so it stays
      readable); --color-brand itself stays the fill colour for blue areas with white text */
@@ -66,31 +66,135 @@
   --dur: 200ms;
 }
 
-/* ---------- Dark mode: follows the system setting (prefers-color-scheme) ----------
-   Only the page itself changes: the blue areas (top of the page, footer) and the project colours (cards and
-   article sheets) keep their own colours. */
+/* ---------- Dark mode ----------
+   Used when the visitor picks "Dark" with the theme button (html[data-theme='dark']) or, on "Automatic", when
+   the device is in dark mode. Greys in the Spotify style (a very dark grey page, lighter greys for raised things), white
+   text, and a light blue for the blue areas, which then carry dark text. Project cards get a dark version of
+   their colour; the article sheets keep their light colours. The two blocks below are identical: keep them in
+   sync. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #1a1a1a;
+  --color-surface: #2a2a2a;
+  --color-text: #ffffff;
+  --color-text-muted: #b3b3b3;
+  --color-brand: #4f94ff;
+  --color-text-inverse: #0a1a3a; /* deep navy, not black */
+  --color-brand-ink: #7fb2ff;
+  --color-link: #8fbcff;
+  --color-brand-soft: rgba(111, 168, 255, 0.14);
+  --color-line: #b3b3b3;
+  --popup-bg: rgba(46, 46, 46, 0.96);
+  --color-chip-soft: rgba(111, 168, 255, 0.18);
+  --switch-track: rgba(255, 255, 255, 0.3);
+  --sunfest-bridge: linear-gradient(#262626, #0b5682); /* neck between the two dark Sunfest cards */
+}
+
+:root[data-theme='dark'] #main > .case {
+  color-scheme: light;
+  --color-text: #000000;
+  --color-bg: #ffffff;
+  --color-brand: #145ee1;
+  --color-text-inverse: #ffffff;
+  --color-brand-ink: #145ee1;
+  --color-link: #1257d4;
+  --color-brand-soft: rgba(20, 94, 225, 0.09);
+  --color-surface: #ffffff;
+  --color-line: #000000;
+  --color-text-muted: #3d3d45;
+  --color-chip-soft: #e3ecfc;
+}
+
+:root[data-theme='dark'] .card[class*='theme-'] {
+  --color-line: #b3b3b3;
+  --theme-border: transparent;
+}
+
+:root[data-theme='dark'] .card.theme-cicerone {
+  --theme-bg: linear-gradient(160deg, #4d1f6b 0%, #262626 92%);
+  --theme-ink: #f4dbff;
+  --theme-tag-bg: #d58bff;
+  --theme-tag-ink: #1f0a2e;
+}
+
+:root[data-theme='dark'] .card.theme-sunfest {
+  --theme-bg: linear-gradient(160deg, #0b5682 0%, #262626 92%);
+  --theme-ink: #ffffff;
+  --theme-tag-bg: #ffe100;
+  --theme-tag-ink: #000000;
+  --theme-small-ink: #e6f5ff;
+}
+
+:root[data-theme='dark'] .card.theme-flashquiz {
+  --theme-bg: linear-gradient(160deg, #1b3670 0%, #262626 92%);
+  --theme-ink: #d7e2ff;
+  --theme-tag-bg: #8fb3ff;
+  --theme-tag-ink: #0b1a33;
+}
+
+:root[data-theme='dark'] .card--flash-quiz .media--logo {
+  padding: 10px 16px;
+  border-radius: 20px;
+  background: #d7e2ff; /* the logo has black lettering: it keeps its light tile */
+}
+
+:root[data-theme='dark'] .card.theme-instagram {
+  --theme-bg: linear-gradient(160deg, #2a2a2a 0%, #262626 92%);
+  --theme-ink: #ffffff;
+  --theme-tag-bg: #5aa9ff;
+  --theme-tag-ink: #001a33;
+  --theme-border: #3e3e3e;
+}
+
+:root[data-theme='dark'] .card.theme-bkmc {
+  --theme-bg: linear-gradient(248deg, #6e1a00 0%, #5e4700 100%);
+  --theme-ink: #ffffff;
+  --theme-tag-bg: #ffcc00;
+  --theme-tag-ink: #000000;
+  --theme-small-ink: #ffffff;
+  --theme-border: transparent;
+}
+
+:root[data-theme='dark'] .card.theme-agora {
+  --theme-bg: linear-gradient(160deg, #173d7a 0%, #262626 92%);
+  --theme-ink: #cfe3ff;
+  --theme-tag-bg: #8ab8ff;
+  --theme-tag-ink: #0b1a33;
+}
+
+:root[data-theme='dark'] .card.theme-mirrormood {
+  --theme-bg: linear-gradient(160deg, #7a2c29 0%, #262626 92%);
+  --theme-ink: #ffe1df;
+  --theme-tag-bg: #f29a96;
+  --theme-tag-ink: #2a0a09;
+  --theme-small-ink: #ffe1df;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     color-scheme: dark;
-    --color-text: #e8ebf1;
-    --color-bg: #0f1218;
-    --color-brand-ink: #82acff;
-    --color-link: #8fb5ff;
-    --color-brand-soft: rgba(130, 172, 255, 0.14);
-    --color-surface: #1a1f29;
-    --color-line: #c9cfda;
-    --popup-bg: rgba(26, 31, 41, 0.94);
-    --color-text-muted: #b3bbc8;
-    --color-chip-soft: rgba(130, 172, 255, 0.16);
+    --color-bg: #1a1a1a;
+    --color-surface: #2a2a2a;
+    --color-text: #ffffff;
+    --color-text-muted: #b3b3b3;
+    --color-brand: #4f94ff;
+    --color-text-inverse: #0a1a3a; /* deep navy, not black */
+    --color-brand-ink: #7fb2ff;
+    --color-link: #8fbcff;
+    --color-brand-soft: rgba(111, 168, 255, 0.14);
+    --color-line: #b3b3b3;
+    --popup-bg: rgba(46, 46, 46, 0.96);
+    --color-chip-soft: rgba(111, 168, 255, 0.18);
     --switch-track: rgba(255, 255, 255, 0.3);
+    --sunfest-bridge: linear-gradient(#262626, #0b5682); /* neck between the two dark Sunfest cards */
   }
 
-  /* the project colours keep their light look: inside a card or an article sheet the light values return */
-  .card,
-  #main > .case {
+  :root:not([data-theme='light']) #main > .case {
     color-scheme: light;
     --color-text: #000000;
     --color-bg: #ffffff;
+    --color-brand: #145ee1;
+    --color-text-inverse: #ffffff;
     --color-brand-ink: #145ee1;
     --color-link: #1257d4;
     --color-brand-soft: rgba(20, 94, 225, 0.09);
@@ -98,6 +202,71 @@
     --color-line: #000000;
     --color-text-muted: #3d3d45;
     --color-chip-soft: #e3ecfc;
+  }
+
+  :root:not([data-theme='light']) .card[class*='theme-'] {
+    --color-line: #b3b3b3;
+    --theme-border: transparent;
+  }
+
+  :root:not([data-theme='light']) .card.theme-cicerone {
+    --theme-bg: linear-gradient(160deg, #4d1f6b 0%, #262626 92%);
+    --theme-ink: #f4dbff;
+    --theme-tag-bg: #d58bff;
+    --theme-tag-ink: #1f0a2e;
+  }
+
+  :root:not([data-theme='light']) .card.theme-sunfest {
+    --theme-bg: linear-gradient(160deg, #0b5682 0%, #262626 92%);
+    --theme-ink: #ffffff;
+    --theme-tag-bg: #ffe100;
+    --theme-tag-ink: #000000;
+    --theme-small-ink: #e6f5ff;
+  }
+
+  :root:not([data-theme='light']) .card.theme-flashquiz {
+    --theme-bg: linear-gradient(160deg, #1b3670 0%, #262626 92%);
+    --theme-ink: #d7e2ff;
+    --theme-tag-bg: #8fb3ff;
+    --theme-tag-ink: #0b1a33;
+  }
+
+  :root:not([data-theme='light']) .card--flash-quiz .media--logo {
+    padding: 10px 16px;
+    border-radius: 20px;
+    background: #d7e2ff; /* the logo has black lettering: it keeps its light tile */
+  }
+
+  :root:not([data-theme='light']) .card.theme-instagram {
+    --theme-bg: linear-gradient(160deg, #2a2a2a 0%, #262626 92%);
+    --theme-ink: #ffffff;
+    --theme-tag-bg: #5aa9ff;
+    --theme-tag-ink: #001a33;
+    --theme-border: #3e3e3e;
+  }
+
+  :root:not([data-theme='light']) .card.theme-bkmc {
+    --theme-bg: linear-gradient(248deg, #6e1a00 0%, #5e4700 100%);
+    --theme-ink: #ffffff;
+    --theme-tag-bg: #ffcc00;
+    --theme-tag-ink: #000000;
+    --theme-small-ink: #ffffff;
+    --theme-border: transparent;
+  }
+
+  :root:not([data-theme='light']) .card.theme-agora {
+    --theme-bg: linear-gradient(160deg, #173d7a 0%, #262626 92%);
+    --theme-ink: #cfe3ff;
+    --theme-tag-bg: #8ab8ff;
+    --theme-tag-ink: #0b1a33;
+  }
+
+  :root:not([data-theme='light']) .card.theme-mirrormood {
+    --theme-bg: linear-gradient(160deg, #7a2c29 0%, #262626 92%);
+    --theme-ink: #ffe1df;
+    --theme-tag-bg: #f29a96;
+    --theme-tag-ink: #2a0a09;
+    --theme-small-ink: #ffe1df;
   }
 }
 

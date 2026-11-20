@@ -37,13 +37,21 @@ function setup() {
   let cy = 0;
   let raf = 0;
   let current: HTMLElement | null = null;
+  let width = 0; // label width, measured when it appears
+
+  // near the right edge the label goes on the other side of the pointer, so it is never cut off
+  const place = () => {
+    const flip = cx + width + 12 > innerWidth;
+    el.classList.toggle('is-flipped', flip);
+    el.style.transform = `translate3d(${flip ? cx - width : cx}px, ${cy}px, 0)`;
+  };
 
   const follow = () => {
     // small easing so the label trails the pointer smoothly (instant with reduced motion)
     const k = reduce.matches ? 1 : 0.35;
     cx += (x - cx) * k;
     cy += (y - cy) * k;
-    el.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
+    place();
     if (Math.abs(x - cx) > 0.3 || Math.abs(y - cy) > 0.3) raf = requestAnimationFrame(follow);
     else raf = 0;
   };
@@ -60,11 +68,13 @@ function setup() {
     // (which sets its own colours) give the label their colours; anything else gets the blue label
     const themed = !!target.closest('#main > .case, .card, footer');
     const cs = getComputedStyle(target);
-    el.style.setProperty('--vc', (themed && cs.getPropertyValue('--theme-tag-bg').trim()) || '#145ee1');
-    el.style.setProperty('--vc-ink', (themed && cs.getPropertyValue('--theme-tag-ink').trim()) || '#fff');
+    el.style.setProperty('--vc', (themed && cs.getPropertyValue('--theme-tag-bg').trim()) || 'var(--color-brand)');
+    el.style.setProperty('--vc-ink', (themed && cs.getPropertyValue('--theme-tag-ink').trim()) || 'var(--color-text-inverse)');
     cx = x;
     cy = y;
-    el.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
+    el.classList.remove('is-flipped');
+    width = el.offsetWidth;
+    place();
     el.classList.add('is-visible');
   };
   const leave = () => {
@@ -87,6 +97,8 @@ function setup() {
     { passive: true },
   );
   document.addEventListener('pointerleave', leave);
+  // a control that changes its own label (e.g. the theme button) refreshes the label under the pointer
+  document.addEventListener('theme-change', () => current && enter(current));
   document.addEventListener('pointerdown', () => current && el.classList.add('is-pressed'));
   document.addEventListener('pointerup', () => el.classList.remove('is-pressed'));
 

@@ -1,6 +1,7 @@
 ---
 // "Hey!" intro with the blurred blue blob and the language switch (Figma: Intro).
 import LangSwitch from './LangSwitch.astro';
+import ThemeSwitch from './ThemeSwitch.astro';
 import { t, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -20,6 +21,7 @@ const s = t(lang);
     </p>
   </div>
   <div class="hero-lang">
+    <ThemeSwitch lang={lang} />
     <LangSwitch lang={lang} />
   </div>
 </header>
@@ -72,14 +74,17 @@ const s = t(lang);
   .hero-lang {
     position: absolute;
     z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     top: 44px;
     right: 26px;
   }
 
   /* below ~860px the blob reaches the top-right corner, so the switch turns white */
   @media (max-width: 860px) {
-    .hero-lang :global(.lang) {
-      --lang-ink: #fff;
+    .hero-lang {
+      --lang-ink: var(--color-text-inverse);
     }
   }
 
