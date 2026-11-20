@@ -87,7 +87,7 @@
   --popup-bg: rgba(46, 46, 46, 0.96);
   --color-chip-soft: rgba(111, 168, 255, 0.18);
   --switch-track: rgba(255, 255, 255, 0.3);
-  --sunfest-bridge: linear-gradient(#262626, #0b5682); /* neck between the two dark Sunfest cards */
+  --sunfest-bridge: #12803a; /* neck between the two dark Sunfest cards */
 }
 
 :root[data-theme='dark'] #main > .case {
@@ -118,11 +118,11 @@
 }
 
 :root[data-theme='dark'] .card.theme-sunfest {
-  --theme-bg: linear-gradient(160deg, #0b5682 0%, #262626 92%);
+  --theme-bg: #12803a; /* one flat vivid green, so the neck joining the two cards matches */
   --theme-ink: #ffffff;
   --theme-tag-bg: #ffe100;
   --theme-tag-ink: #000000;
-  --theme-small-ink: #e6f5ff;
+  --theme-small-ink: #ffffff;
 }
 
 :root[data-theme='dark'] .card.theme-flashquiz {
@@ -186,7 +186,7 @@
     --popup-bg: rgba(46, 46, 46, 0.96);
     --color-chip-soft: rgba(111, 168, 255, 0.18);
     --switch-track: rgba(255, 255, 255, 0.3);
-    --sunfest-bridge: linear-gradient(#262626, #0b5682); /* neck between the two dark Sunfest cards */
+    --sunfest-bridge: #12803a; /* neck between the two dark Sunfest cards */
   }
 
   :root:not([data-theme='light']) #main > .case {
@@ -217,11 +217,11 @@
   }
 
   :root:not([data-theme='light']) .card.theme-sunfest {
-    --theme-bg: linear-gradient(160deg, #0b5682 0%, #262626 92%);
+    --theme-bg: #12803a; /* one flat vivid green, so the neck joining the two cards matches */
     --theme-ink: #ffffff;
     --theme-tag-bg: #ffe100;
     --theme-tag-ink: #000000;
-    --theme-small-ink: #e6f5ff;
+    --theme-small-ink: #ffffff;
   }
 
   :root:not([data-theme='light']) .card.theme-flashquiz {
