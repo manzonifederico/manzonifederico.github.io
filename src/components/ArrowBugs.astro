@@ -1045,6 +1045,10 @@ const s = t(lang);
   .bugs :global(.bug-svg),
   .bugs :global(.splat) {
     display: block;
+  }
+
+  /* only the splat is drawn with lines; the pixel arrows are filled squares, and an outline would fatten them */
+  .bugs :global(.splat) {
     stroke: currentColor;
   }
 
@@ -1098,7 +1102,6 @@ const s = t(lang);
 
   :global(.boss svg) {
     display: block;
-    stroke: currentColor;
   }
 
   :global(.stolen-pointer) {
