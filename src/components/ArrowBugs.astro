@@ -96,23 +96,50 @@ const s = t(lang);
   const COUNT = 5;
   const FLEE = 90; // px: how close the pointer can get before an arrow runs
   const HEAD = 0; // degrees: direction the drawn arrow points to (its tip), so it can face where it goes
-  // a white halo under the blue strokes keeps the arrows visible on the blue blur at the top of the page
-  const SMALL = `<svg class="bug-svg" viewBox="0 0 40 30" width="40" height="30" fill="none">
-    <g stroke="#fff" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" opacity=".85">
-      <path class="bug-body" d="M4 15 H34" stroke-dasharray="4 3"/><path d="M28.5 9.5 L35 15 L28.5 20.5"/></g>
-    <path class="bug-body" d="M4 15 H34" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round"/>
-    <path d="M28.5 9.5 L35 15 L28.5 20.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
+  // 8-bit arrows: a dashed shaft and a V-shaped tip drawn in pixels (22 × 11 grid, '#' = a pixel). Two frames whose
+  // dashes are shifted by two pixels alternate, so the shaft "walks" in steps like an old game sprite. Every pixel
+  // gets a 1-pixel edge in the page colour (white / dark grey), so the arrows stay visible on the blue glow.
+  const FRAME_A = [
+    '......................',
+    '..............#.......',
+    '...............#......',
+    '................#.....',
+    '.................#....',
+    '##..##..##..##..###...',
+    '.................#....',
+    '................#.....',
+    '...............#......',
+    '..............#.......',
+    '......................',
+  ];
+  const FRAME_B = FRAME_A.map((row, y) => (y === 5 ? '..##..##..##..#####...' : row));
+  const pixelArrow = (scale: number, cls = '') => {
+    const frame = (rows: string[], frameCls: string) => {
+      const on = new Set<string>();
+      rows.forEach((row, y) => [...row].forEach((c, x) => c !== '.' && on.add(`${x},${y}`)));
+      const edge = new Set<string>();
+      on.forEach((k) => {
+        const [x, y] = k.split(',').map(Number);
+        for (let dx = -1; dx <= 1; dx++)
+          for (let dy = -1; dy <= 1; dy++) if (!on.has(`${x + dx},${y + dy}`)) edge.add(`${x + dx},${y + dy}`);
+      });
+      const rects = (cells: Set<string>) =>
+        [...cells]
+          .map((k) => {
+            const [x, y] = k.split(',');
+            return `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+          })
+          .join('');
+      return `<g class="${frameCls}"><g class="px-edge">${rects(edge)}</g><g class="px-body">${rects(on)}</g></g>`;
+    };
+    return `<svg class="${cls}" viewBox="-1 -1 24 13" width="${24 * scale}" height="${13 * scale}" shape-rendering="crispEdges">${frame(FRAME_A, 'px-a')}${frame(FRAME_B, 'px-b')}</svg>`;
+  };
+  const SMALL = `${pixelArrow(2, 'bug-svg')}
   <svg class="splat" viewBox="-20 -20 40 40" width="40" height="40">
     <path d="M0-6V-14M5 4L11 9M-5 4L-11 9M6-3L13-6M-6-3L-13-6" stroke-width="2" stroke-linecap="round"/>
   </svg>`;
-  // the big one: the same arrow, six times bigger (its tip is at 210, 90)
-  const BIG = `<svg viewBox="0 0 40 30" width="240" height="180" fill="none">
-    <g stroke="#fff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity=".85">
-      <path d="M4 15 H34" stroke-dasharray="1.6 1.1"/><path d="M28.5 9.5 L35 15 L28.5 20.5"/></g>
-    <path d="M4 15 H34" stroke-width=".55" stroke-dasharray="1.6 1.1" stroke-linecap="round"/>
-    <path d="M28.5 9.5 L35 15 L28.5 20.5" stroke-width=".55" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`;
+  // the big one: the same arrow, six times bigger (12 px pixels; its tip is at 240, 78)
+  const BIG = pixelArrow(12);
   const POINTER = `<svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 2 L3 18 L14.5 12.5 Z" fill="#145ee1" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
 
   type Bug = { el: HTMLElement; x: number; y: number; vx: number; vy: number; wander: number; rot: number; alive: boolean };
@@ -225,7 +252,7 @@ const s = t(lang);
         const diff = ((target - b.rot + 540) % 360) - 180;
         b.rot += diff * 0.2;
       }
-      b.el.style.transform = `translate3d(${b.x - 32}px, ${b.y - 27}px, 0) rotate(${b.rot}deg)`;
+      b.el.style.transform = `translate3d(${b.x - 36}px, ${b.y - 25}px, 0) rotate(${b.rot}deg)`;
     }
     raf = requestAnimationFrame(step);
   }
@@ -444,8 +471,8 @@ const s = t(lang);
     const big = document.createElement('div');
     big.className = 'boss';
     big.innerHTML = BIG;
-    big.style.left = `${x - 210}px`;
-    big.style.top = `${y - 90}px`;
+    big.style.left = `${x - 240}px`;
+    big.style.top = `${y - 78}px`;
     document.body.append(ptr, big);
     sfxWhoosh(0.75);
 
@@ -598,8 +625,8 @@ const s = t(lang);
     const big = document.createElement('div');
     big.className = 'boss';
     big.innerHTML = BIG;
-    big.style.left = `${cx - 210}px`; // tip of the big arrow on the centre of the screen
-    big.style.top = `${cy - 90}px`;
+    big.style.left = `${cx - 240}px`; // tip of the big arrow on the centre of the screen
+    big.style.top = `${cy - 78}px`;
     document.body.append(big);
     fx.push(big);
     sfxWhoosh(0.75);
@@ -1015,7 +1042,7 @@ const s = t(lang);
     pointer-events: none;
     color: var(--color-brand);
     opacity: 0.6;
-    transform-origin: 32px 27px;
+    transform-origin: 36px 25px;
     will-change: transform;
   }
 
@@ -1026,21 +1053,41 @@ const s = t(lang);
     stroke: currentColor;
   }
 
-  /* the dashes crawl along the arrow, like little legs */
-  .bugs :global(.bug-body) {
-    animation: crawl 0.5s linear infinite;
+  /* pixel arrows: body in the arrow colour, a 1-pixel edge in the page colour; the two frames alternate so the
+     dashes walk along the shaft, like little legs */
+  :global(.px-body) {
+    fill: currentColor;
   }
 
-  @keyframes crawl {
-    to {
-      stroke-dashoffset: -7;
+  :global(.px-edge) {
+    fill: var(--bug-edge, #ffffff);
+  }
+
+  :global(.px-a) {
+    animation: px-a 0.5s steps(1) infinite;
+  }
+
+  :global(.px-b) {
+    opacity: 0;
+    animation: px-b 0.5s steps(1) infinite;
+  }
+
+  @keyframes px-a {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes px-b {
+    50% {
+      opacity: 1;
     }
   }
 
   .bugs :global(.splat) {
     position: absolute;
-    left: 12px;
-    top: 7px;
+    left: 16px;
+    top: 5px;
     opacity: 0;
     transform: scale(0.3);
   }
@@ -1057,7 +1104,8 @@ const s = t(lang);
     transition: transform 90ms ease-in;
   }
 
-  .bugs :global(.bug.is-squashed .bug-body) {
+  .bugs :global(.bug.is-squashed .px-a),
+  .bugs :global(.bug.is-squashed .px-b) {
     animation: none;
   }
 

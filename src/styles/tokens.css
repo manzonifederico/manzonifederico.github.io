@@ -95,6 +95,7 @@
   --color-fill: #1f2d45; /* filled chips / buttons: a blue-tinted grey with a blue line and light blue text */
   --color-on-fill: #d3e3ff;
   --color-fill-line: #7fb2ff;
+  --bug-edge: #1a1a1a; /* edge around the pixel arrows of the game */
   --color-link: #8fbcff;
   --color-brand-soft: rgba(111, 168, 255, 0.14);
   --color-line: #b3b3b3;
@@ -186,6 +187,7 @@
     --color-fill: #1f2d45; /* filled chips / buttons: a blue-tinted grey with a blue line and light blue text */
     --color-on-fill: #d3e3ff;
     --color-fill-line: #7fb2ff;
+    --bug-edge: #1a1a1a;
     --color-link: #8fbcff;
     --color-brand-soft: rgba(111, 168, 255, 0.14);
     --color-line: #b3b3b3;
