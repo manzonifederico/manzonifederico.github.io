@@ -88,6 +88,7 @@ export const ui = {
     shakeText: 'You shook your phone and the arrows ran for cover. Shake it again whenever you like.',
     shakeOk: 'Got it',
     overscroll: 'Nothing to see here, mate.',
+    effects: 'Effects',
     bugsDeathsCount: 'Deaths',
     bugsDeaths: {
       // the big arrow steals the pointer (mouse only)
@@ -205,6 +206,7 @@ export const ui = {
     shakeText: 'Hai scosso il telefono e le frecce sono scappate. Scuotilo di nuovo quando vuoi.',
     shakeOk: 'Ok',
     overscroll: 'Circolare, non c’è niente da vedere.',
+    effects: 'Effetti',
     bugsDeathsCount: 'Morti',
     bugsDeaths: {
       steal: [

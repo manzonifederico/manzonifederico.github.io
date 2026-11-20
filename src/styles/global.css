@@ -709,3 +709,77 @@ html.gamepad-nav :focus {
 .gamepad-note.is-out {
   opacity: 0;
 }
+
+/* ---------- Smoothness (src/scripts/perf.ts) ---------- */
+/* glows off screen: their animations pause */
+.blob.is-paused,
+.blob.is-paused::before,
+.blob.is-paused::after {
+  animation-play-state: paused !important;
+}
+
+/* lighter mode: the glows stand still */
+html.lite .blob,
+html.lite .blob::before,
+html.lite .blob::after {
+  animation: none !important;
+}
+
+/* the opt-in note for lighter mode */
+.lite-note {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 56;
+  width: min(400px, calc(100vw - 32px));
+  padding: 16px 18px 14px;
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(20, 94, 225, 0.25);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.lite-note-title {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.lite-note-text {
+  margin: 0;
+}
+
+.lite-note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lite-note-actions button {
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-brand-ink);
+  background: transparent;
+  color: var(--color-brand-ink);
+  font: 600 0.875rem var(--font-display);
+  cursor: pointer;
+}
+
+.lite-note-actions [data-on] {
+  background: var(--color-fill);
+  color: var(--color-on-fill);
+  border-color: var(--color-fill-line);
+}
+
+@media (max-width: 720px) {
+  .lite-note {
+    top: 12px;
+    bottom: auto;
+  }
+}

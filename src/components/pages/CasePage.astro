@@ -603,6 +603,16 @@ const articleJsonLd = {
     background-attachment: fixed;
   }
 
+  @media (pointer: coarse) {
+    :global(.theme-bkmc) .case-panel {
+      background-attachment: scroll;
+    }
+  }
+
+  :global(html.lite .theme-bkmc) .case-panel {
+    background-attachment: scroll;
+  }
+
   .topbar {
     display: flex;
     justify-content: space-between;

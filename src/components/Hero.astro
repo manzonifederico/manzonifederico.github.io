@@ -46,16 +46,11 @@ const s = t(lang);
     width: max(83%, 980px);
     max-width: 1195px;
     aspect-ratio: 1195 / 709;
-    border-radius: 50%;
-    background: var(--color-block);
-    filter: blur(80px); /* a little less blur than Figma's 100px, so the wavy edge shows */
     translate: var(--tilt-x, 0) var(--tilt-y, 0); /* a tilted phone moves the glow (ArrowBugs.astro) */
     transition: translate 400ms ease-out;
-    transform: translateZ(0);
+    will-change: transform;
     /* breathes: drifts a little side to side and swells, slow enough not to distract */
-    animation:
-      hero-breathe 9s ease-in-out infinite alternate,
-      blob-wave 6s ease-in-out infinite;
+    animation: hero-breathe 9s ease-in-out infinite alternate;
   }
 
   @keyframes hero-breathe {
@@ -70,27 +65,51 @@ const s = t(lang);
     }
   }
 
-  /* the edge ripples: the ellipse's four corners swell and shrink out of step, like a slow wave */
-  @keyframes blob-wave {
-    0% {
-      border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+
+  /* the wave: two blurred copies of the shape, a little lopsided, turning and stretching out of step. Only their
+     transform moves (the graphics card does it), so the blur is drawn once and the page stays smooth */
+  .blob::before,
+  .blob::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-block);
+    filter: blur(80px);
+    will-change: transform;
+  }
+
+  .blob::before {
+    border-radius: 58% 42% 55% 45% / 46% 54% 42% 58%;
+    animation: wave-a 7s ease-in-out infinite alternate;
+  }
+
+  .blob::after {
+    border-radius: 42% 58% 47% 53% / 56% 44% 60% 40%;
+    animation: wave-b 9s ease-in-out infinite alternate;
+  }
+
+  @keyframes wave-a {
+    from {
+      transform: rotate(-5deg) scale(1.04, 0.96);
     }
-    25% {
-      border-radius: 64% 36% 58% 42% / 40% 60% 42% 58%;
+    to {
+      transform: rotate(5deg) scale(0.97, 1.04);
     }
-    50% {
-      border-radius: 38% 62% 42% 58% / 60% 40% 64% 36%;
+  }
+
+  @keyframes wave-b {
+    from {
+      transform: rotate(6deg) scale(0.96, 1.04);
     }
-    75% {
-      border-radius: 60% 40% 66% 34% / 44% 56% 38% 62%;
-    }
-    100% {
-      border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+    to {
+      transform: rotate(-5deg) scale(1.05, 0.96);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .blob {
+    .blob,
+    .blob::before,
+    .blob::after {
       animation: none;
     }
   }
@@ -149,6 +168,9 @@ const s = t(lang);
       width: 200%;
       aspect-ratio: auto;
       height: max(440px, calc(100svh - 20px)); /* never shorter than the text needs on narrow phones */
+    }
+    .blob::before,
+    .blob::after {
       filter: blur(45px);
     }
   }

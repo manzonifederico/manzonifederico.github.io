@@ -231,6 +231,18 @@ const s = t(lang);
     }
   }
 
+  /* phones and lighter mode: no live blur of the page behind the card (costly while scrolling); the card is almost
+     opaque anyway */
+  @media (pointer: coarse) {
+    .popup {
+      backdrop-filter: none;
+    }
+  }
+
+  :global(html.lite) .popup {
+    backdrop-filter: none;
+  }
+
   .popup[data-state='hidden'] {
     /* rises in from below (never off-screen sideways: that would widen the page on phones) */
     transform: translateY(24px) scale(0.96);

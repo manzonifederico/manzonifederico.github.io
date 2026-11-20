@@ -102,6 +102,20 @@ const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.sit
         if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th;
       } catch (e) {}
     </script>
+    <!-- lighter mode before the first paint (src/scripts/perf.ts): the visitor's own choice wins; otherwise a weak
+         device (4 cores or fewer, 2 GB of memory or less, "data saver", or a slow first visit) starts light -->
+    <script is:inline>
+      try {
+        var ef = localStorage.getItem('effects');
+        var n = navigator;
+        var weak =
+          (n.hardwareConcurrency || 8) <= 4 ||
+          (n.deviceMemory || 8) <= 2 ||
+          (n.connection && n.connection.saveData) ||
+          localStorage.getItem('perf-lite') === '1';
+        if (ef === 'off' || (ef !== 'on' && weak)) document.documentElement.classList.add('lite');
+      } catch (e) {}
+    </script>
     <meta name="author" content={site.name} />
 
     <!-- Social previews (LinkedIn, WhatsApp, Slack, X…) -->
@@ -151,6 +165,7 @@ const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.sit
       import '../scripts/unbiased';
       import '../scripts/view-cursor';
       import '../scripts/gamepad';
+      import '../scripts/perf';
     </script>
   </body>
 </html>

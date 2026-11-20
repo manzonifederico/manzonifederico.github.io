@@ -134,7 +134,8 @@ const s = t(lang);
     }
   };
   // only its own switch and "reduce motion" turn it off (not the pointer switch)
-  const enabled = () => !reduce.matches && !switchedOff() && (fine.matches || coarse.matches);
+  const enabled = () =>
+    !reduce.matches && !switchedOff() && !html.classList.contains('lite') && (fine.matches || coarse.matches); // 'lite': lighter mode (src/scripts/perf.ts)
   let touchMode = !fine.matches; // the last squash came from a finger
   let fx: HTMLElement[] = []; // attack effects on screen (removed when the game restarts)
   let pageAnims: Animation[] = []; // shakes applied to the page (cancelled when the game restarts)
@@ -880,7 +881,7 @@ const s = t(lang);
       if (!enabled()) return;
       hint.hidden = false;
       window.setTimeout(() => hint.classList.add('is-in'), 20);
-    }, firstVisit ? 9000 : 2500);
+    }, !fine.matches ? 1500 : firstVisit ? 9000 : 2500); // phones: right away (it sits at the top, the recruiter card at the bottom)
     hint.querySelector('[data-bugs-hint-ok]')?.addEventListener('click', closeHint);
     hint.querySelector('[data-bugs-hint-off]')?.addEventListener('click', () => {
       try {
@@ -989,7 +990,11 @@ const s = t(lang);
   fine.addEventListener?.('change', sync);
   coarse.addEventListener?.('change', sync);
   reduce.addEventListener?.('change', sync);
-  sync();
+  document.addEventListener('effects-change', sync);
+  // start once the page has finished its own work, so the arrows never slow down the first seconds
+  const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+  if (idle) idle(() => sync(), { timeout: 2000 });
+  else window.setTimeout(sync, 1200);
 </script>
 
 <style>

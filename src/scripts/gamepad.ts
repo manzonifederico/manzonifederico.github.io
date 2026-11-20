@@ -174,3 +174,5 @@ addEventListener('gamepadconnected', () => {
 addEventListener('pointerdown', () => html.classList.remove('gamepad-nav'), { passive: true });
 // a controller already connected when the page opens (some browsers only report it after a button press)
 if (Array.from(navigator.getGamepads?.() ?? []).some((p) => p && p.connected) && !raf) raf = requestAnimationFrame(poll);
+
+export {}; // a module, so its names stay private

@@ -102,6 +102,11 @@ const emailLabel = (email: string) => {
           <label id="classic-pointer-label" for="classic-pointer-switch">{s.classicPointer}</label>
           <button type="button" role="switch" aria-checked="true" aria-labelledby="classic-pointer-label" id="classic-pointer-switch" class="pointer-switch" data-classic-pointer></button>
         </span>
+        <!-- moving backgrounds and other effects: on, or off for a lighter, smoother site (src/scripts/perf.ts) -->
+        <span class="switch-pair">
+          <label id="effects-label" for="effects-switch">{s.effects}</label>
+          <button type="button" role="switch" aria-checked="true" aria-labelledby="effects-label" id="effects-switch" class="pointer-switch" data-effects></button>
+        </span>
         {
           /* home page: turn the arrow game off (remembered on this device) */
           game && (
@@ -148,8 +153,10 @@ const emailLabel = (email: string) => {
       return false;
     }
   };
-  arrowSwitch?.setAttribute('aria-checked', String(!arrowsOff()));
-  document.addEventListener('arrows-mode', () => arrowSwitch?.setAttribute('aria-checked', String(!arrowsOff())));
+  const gameOn = () => !arrowsOff() && !document.documentElement.classList.contains('lite');
+  arrowSwitch?.setAttribute('aria-checked', String(gameOn()));
+  document.addEventListener('arrows-mode', () => arrowSwitch?.setAttribute('aria-checked', String(gameOn())));
+  document.addEventListener('effects-change', () => arrowSwitch?.setAttribute('aria-checked', String(gameOn())));
   arrowSwitch?.addEventListener('click', () => {
     const off = !arrowsOff();
     try {
@@ -158,6 +165,7 @@ const emailLabel = (email: string) => {
       /* storage blocked: nothing to remember */
     }
     arrowSwitch.setAttribute('aria-checked', String(!off));
+    if (!off && document.documentElement.classList.contains('lite')) document.dispatchEvent(new CustomEvent('effects-set', { detail: true }));
     document.dispatchEvent(new Event('arrows-mode'));
   });
 
@@ -214,16 +222,11 @@ const emailLabel = (email: string) => {
     width: 280%;
     margin-left: -140%;
     height: 200%;
-    border-radius: 50%;
-    background: var(--color-block);
-    filter: blur(80px);
     translate: var(--tilt-x, 0) var(--tilt-y, 0); /* a tilted phone moves the glow (ArrowBugs.astro) */
     transition: translate 400ms ease-out;
-    transform: translateZ(0);
+    will-change: transform;
     /* a slow, gentle drift so the glow feels alive */
-    animation:
-      glow-drift 10s ease-in-out infinite alternate,
-      blob-wave 7s ease-in-out infinite;
+    animation: glow-drift 10s ease-in-out infinite alternate;
   }
 
   @keyframes glow-drift {
@@ -238,27 +241,51 @@ const emailLabel = (email: string) => {
     }
   }
 
-  /* the edge ripples: the ellipse's four corners swell and shrink out of step, like a slow wave */
-  @keyframes blob-wave {
-    0% {
-      border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+
+  /* the wave: two blurred copies of the shape, a little lopsided, turning and stretching out of step. Only their
+     transform moves (the graphics card does it), so the blur is drawn once and the page stays smooth */
+  .blob::before,
+  .blob::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-block);
+    filter: blur(80px);
+    will-change: transform;
+  }
+
+  .blob::before {
+    border-radius: 58% 42% 55% 45% / 46% 54% 42% 58%;
+    animation: wave-a 7s ease-in-out infinite alternate;
+  }
+
+  .blob::after {
+    border-radius: 42% 58% 47% 53% / 56% 44% 60% 40%;
+    animation: wave-b 9s ease-in-out infinite alternate;
+  }
+
+  @keyframes wave-a {
+    from {
+      transform: rotate(-5deg) scale(1.04, 0.96);
     }
-    25% {
-      border-radius: 64% 36% 58% 42% / 40% 60% 42% 58%;
+    to {
+      transform: rotate(5deg) scale(0.97, 1.04);
     }
-    50% {
-      border-radius: 38% 62% 42% 58% / 60% 40% 64% 36%;
+  }
+
+  @keyframes wave-b {
+    from {
+      transform: rotate(6deg) scale(0.96, 1.04);
     }
-    75% {
-      border-radius: 60% 40% 66% 34% / 44% 56% 38% 62%;
-    }
-    100% {
-      border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+    to {
+      transform: rotate(-5deg) scale(1.05, 0.96);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .blob {
+    .blob,
+    .blob::before,
+    .blob::after {
       animation: none;
     }
   }
@@ -482,7 +509,14 @@ const emailLabel = (email: string) => {
     .cards {
       grid-template-columns: minmax(0, 1fr);
     }
+    /* phones: a smaller glow (less to draw), still flat across the title */
     .blob {
+      width: 180%;
+      margin-left: -90%;
+      height: 150%;
+    }
+    .blob::before,
+    .blob::after {
       filter: blur(60px);
     }
   }

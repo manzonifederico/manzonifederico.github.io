@@ -320,6 +320,7 @@
 }
 
 :root[data-theme='dark'] body.theme-instagram {
+  --theme-bg-end: #1f1f1f;
   --theme-bg: linear-gradient(160deg, #303030 0%, #1f1f1f 92%);
   --theme-ink: #ffffff;
   --theme-tag-bg: #5aa9ff;
@@ -328,6 +329,7 @@
 }
 
 :root[data-theme='dark'] body.theme-bkmc {
+  --theme-bg-end: #5e4700;
   --theme-bg: linear-gradient(248deg, #6e1a00 0%, #5e4700 100%);
   --theme-ink: #ffffff;
   --theme-tag-bg: #ffcc00;
@@ -359,6 +361,24 @@
 
 :root[data-theme='dark'] body[class*='theme-'] .case-panel {
   background-attachment: fixed; /* the fade sits on the screen, like on the cards, whatever the article's length */
+}
+
+/* phones and lighter mode: a fixed background repaints on every scroll, so the fade covers the first screen
+   and the colour it ends on carries on below */
+@media (pointer: coarse) {
+  :root[data-theme='dark'] body[class*='theme-'] .case-panel {
+    background-attachment: scroll;
+    background-size: 100% 100lvh;
+    background-repeat: no-repeat;
+    background-color: var(--theme-bg-end, #262626);
+  }
+}
+
+:root[data-theme='dark'].lite body[class*='theme-'] .case-panel {
+  background-attachment: scroll;
+  background-size: 100% 100lvh;
+  background-repeat: no-repeat;
+  background-color: var(--theme-bg-end, #262626);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -411,6 +431,7 @@
   }
 
   :root:not([data-theme='light']) body.theme-instagram {
+    --theme-bg-end: #1f1f1f;
     --theme-bg: linear-gradient(160deg, #303030 0%, #1f1f1f 92%);
     --theme-ink: #ffffff;
     --theme-tag-bg: #5aa9ff;
@@ -419,6 +440,7 @@
   }
 
   :root:not([data-theme='light']) body.theme-bkmc {
+    --theme-bg-end: #5e4700;
     --theme-bg: linear-gradient(248deg, #6e1a00 0%, #5e4700 100%);
     --theme-ink: #ffffff;
     --theme-tag-bg: #ffcc00;
@@ -450,5 +472,23 @@
 
   :root:not([data-theme='light']) body[class*='theme-'] .case-panel {
     background-attachment: fixed; /* the fade sits on the screen, like on the cards, whatever the article's length */
+  }
+
+  /* phones and lighter mode: a fixed background repaints on every scroll, so the fade covers the first screen
+     and the colour it ends on carries on below */
+  @media (pointer: coarse) {
+    :root:not([data-theme='light']) body[class*='theme-'] .case-panel {
+      background-attachment: scroll;
+      background-size: 100% 100lvh;
+      background-repeat: no-repeat;
+      background-color: var(--theme-bg-end, #262626);
+    }
+  }
+
+  :root:not([data-theme='light']).lite body[class*='theme-'] .case-panel {
+    background-attachment: scroll;
+    background-size: 100% 100lvh;
+    background-repeat: no-repeat;
+    background-color: var(--theme-bg-end, #262626);
   }
 }
