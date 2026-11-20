@@ -96,20 +96,21 @@ const s = t(lang);
   const COUNT = 5;
   const FLEE = 90; // px: how close the pointer can get before an arrow runs
   const HEAD = 0; // degrees: direction the drawn arrow points to (its tip), so it can face where it goes
-  // 8-bit arrows, lance-shaped: a thin shaft, a long sharp tip and a small light knob at the back, drawn in pixels
+  // 8-bit arrows, lance-shaped (design "P3b"): a thin shaft, a broad head that ends in a sharp single-pixel tip
+  // and a small knob at the back, drawn in pixels
   // (22 × 11 grid: '#' = arrow colour, 'o' = light blue). Every pixel gets a 1-pixel edge in the page colour
   // (white / dark grey), so the arrows stay visible on the blue glow.
   const ARROW = [
     '......................',
+    '......................',
     '..............#.......',
-    '..............##......',
-    '..............####....',
-    'o.............######..',
-    '.o####################',
-    'o.............######..',
-    '..............####....',
-    '..............##......',
+    '..............###.....',
+    'o.............#####...',
+    '#o###################.',
+    'o.............#####...',
+    '..............###.....',
     '..............#.......',
+    '......................',
     '......................',
   ];
   const pixelArrow = (scale: number, cls = '') => {
@@ -132,7 +133,7 @@ const s = t(lang);
   <svg class="splat" viewBox="-20 -20 40 40" width="40" height="40">
     <path d="M0-6V-14M5 4L11 9M-5 4L-11 9M6-3L13-6M-6-3L-13-6" stroke-width="2" stroke-linecap="round"/>
   </svg>`;
-  // the big one: the same arrow, six times bigger (12 px pixels; its tip is at 276, 78)
+  // the big one: the same arrow, six times bigger (12 px pixels; its tip is at 264, 78)
   const BIG = pixelArrow(12);
   const POINTER = `<svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 2 L3 18 L14.5 12.5 Z" fill="#145ee1" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
 
@@ -465,7 +466,7 @@ const s = t(lang);
     const big = document.createElement('div');
     big.className = 'boss';
     big.innerHTML = BIG;
-    big.style.left = `${x - 276}px`;
+    big.style.left = `${x - 264}px`;
     big.style.top = `${y - 78}px`;
     document.body.append(ptr, big);
     sfxWhoosh(0.75);
@@ -619,7 +620,7 @@ const s = t(lang);
     const big = document.createElement('div');
     big.className = 'boss';
     big.innerHTML = BIG;
-    big.style.left = `${cx - 276}px`; // tip of the big arrow on the centre of the screen
+    big.style.left = `${cx - 264}px`; // tip of the big arrow on the centre of the screen
     big.style.top = `${cy - 78}px`;
     document.body.append(big);
     fx.push(big);
