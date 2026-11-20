@@ -1,5 +1,6 @@
 ---
-// EN / IT switch. Links to the same page in the other language.
+// EN / IT switch. Links to the same page in the other language. With a mouse, each one shows a label with its
+// flag next to the pointer (src/scripts/view-cursor.ts): "Read in English 🇬🇧" / "Reading in English 🇬🇧".
 import { t, localePath, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -16,12 +17,12 @@ const other: Lang = lang === 'en' ? 'it' : 'en';
       <>
         {i > 0 && <span aria-hidden="true">/</span>}
         {l === lang ? (
-          <span class="current" aria-current="page" lang={l}>
+          <span class="current" aria-current="page" lang={l} data-cursor={t(lang).readingIn} data-cursor-flag={l === 'en' ? 'gb' : 'it'}>
             {l.toUpperCase()}
             <span class="visually-hidden" lang={lang}> – {t(lang).langNames[l]}</span>
           </span>
         ) : (
-          <a href={localePath(other, path)} hreflang={l} lang={l} title={t(lang).switchTo}>
+          <a href={localePath(other, path)} hreflang={l} lang={l} data-cursor={t(lang).switchTo} data-cursor-flag={l === 'en' ? 'gb' : 'it'}>
             {l.toUpperCase()}
             <span class="visually-hidden"> – {t(lang).switchTo}</span>
           </a>
