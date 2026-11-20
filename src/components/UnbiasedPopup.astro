@@ -55,9 +55,7 @@ const s = t(lang);
   if (popup) {
     const toggle = popup.querySelector<HTMLButtonElement>('[data-popup-toggle]')!;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // on phones the pill sits over the text, so it becomes just an icon much sooner (and as soon as you scroll)
-    const narrow = matchMedia('(max-width: 700px)');
-    const ICON_AFTER = narrow.matches ? 5000 : 25000; // time in the small pill before it becomes just an icon
+    const ICON_AFTER = 25000; // "a long time" in the small pill before it becomes just an icon
     type State = 'open' | 'compact' | 'icon';
     let small: 'compact' | 'icon' = 'compact';
     let timer: number | undefined;
@@ -123,17 +121,6 @@ const s = t(lang);
     popup.addEventListener('focusout', (e) => {
       if (!popup.contains(e.relatedTarget as Node)) scheduleSmall(1200);
     });
-
-    window.addEventListener(
-      'scroll',
-      () => {
-        if (narrow.matches && popup.dataset.state === 'compact' && !popup.matches(':focus-within')) {
-          small = 'icon';
-          set('icon');
-        }
-      },
-      { passive: true },
-    );
 
     // Click/tap on the title toggles (needed on touch screens, where there is no hover)
     toggle.addEventListener('click', () => {
