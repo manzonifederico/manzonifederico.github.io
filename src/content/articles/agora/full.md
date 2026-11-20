@@ -114,4 +114,11 @@ The kiosk is only one part of Agorà. The same boards, posts and notifications l
 
 ## What I’ve noticed in the project
 
-Looking back, I noticed a “happy path bias” in my own design: I focused on things going right, and error prevention and recovery need more work. The same goes for what happens when the connection drops, since an offline mode should let the system degrade gracefully instead of just failing. Multi-user interaction turned out to be a design space I only started to explore, and choosing one main user was just a first answer to it. Finally, designing at such a big scale is messy: getting sizes right on a two-metre kiosk is a challenge of its own. These are the points I would tackle first if I took Agorà further.
+Looking back, four things stand out, and each one points to a part of the design above.
+
+- **A “happy path bias” in every flow.** Every flow I designed assumes that each step goes right: adding a post, checking what the AI extracted, logging in, sharing a post to your own devices. Error prevention and recovery are missing from all of them, and that is the first thing I would work on.
+- **No offline mode.** The kiosk, the app and the website share the same boards, posts and notifications, and sharing goes through QR codes, e-mail and NFC. When the connection drops, the system should degrade gracefully instead of just failing.
+- **Multi-user interaction has only just started.** Choosing *one main user, with others watching* (see Interaction and navigation) was a first answer to a two-metre screen, not a full exploration of several people using it at once. Exploring shared interaction, with two people using the same screen at the same time, is still something I intend to do.
+- **Designing at this scale is messy.** Getting sizes right on a kiosk of about 2 m × 1 m, where the proximity sensor also resizes the interface, is a challenge of its own.
+
+Going back to the question I started from, how do you build a community in a university, Agorà answers it through the three lenses. The kiosk brings the board back into the **physical spaces** people share; posts, sharing, the app and the website take care of **communication**, so information follows people wherever they are; and reactions, doodling and games give people a reason to stop in front of the board, which is where a **sense of community** starts. These four points are where I would start to make that answer hold up beyond the happy path.

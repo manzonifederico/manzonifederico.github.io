@@ -48,7 +48,7 @@
 
 ## Cosa ho notato
 
-- “Happy path bias”: prevenzione degli errori e recupero dagli errori richiedono più lavoro.
+- “Happy path bias” in tutti i flussi: prevenzione degli errori e recupero dagli errori richiedono più lavoro.
 - Una modalità offline, perché il sistema continui a funzionare in forma ridotta.
-- L’interazione multiutente è uno spazio di design che ho solo iniziato a esplorare.
+- L’interazione multiutente è uno spazio di design che ho solo iniziato a esplorare; resta mia intenzione esplorare due persone che usano lo stesso schermo insieme.
 - Gli schermi molto grandi sono difficili da progettare: le dimensioni sono una sfida a sé.

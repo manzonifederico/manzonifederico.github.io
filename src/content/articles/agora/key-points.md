@@ -48,7 +48,7 @@
 
 ## What I’ve noticed
 
-- “Happy path bias”: error prevention and recovery need more work.
+- “Happy path bias” in every flow: error prevention and recovery need more work.
 - An offline mode for graceful degradation.
-- Multi-user interaction is a design space I only started to explore.
+- Multi-user interaction is a design space I only started to explore; I still intend to explore two people sharing one screen at the same time.
 - Very large screens are hard to design for: sizes are a challenge of their own.
