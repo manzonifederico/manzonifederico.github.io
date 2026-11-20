@@ -4,7 +4,7 @@ import { Image, getImage } from 'astro:assets';
 import SunfestLayout from '../../layouts/SunfestLayout.astro';
 import CheckProgram from '../../components/sunfest/CheckProgram.astro';
 import { acts, days, homeLineup, type Act } from '../../data/sunfest25';
-import sunBig from '../../assets/sunfest25/sun-big.svg?raw';
+import sunSmall from '../../assets/sunfest25/star-small.svg?raw'; // the little sun between the names on the home page
 
 // Lineup order = poster order (headliner, big names, small names); one tile per artist
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -58,7 +58,7 @@ const data = await Promise.all(
                   {a.photo ? (
                     <Image class="tile__img" src={a.photo} alt="" widths={[240, 360]} sizes="(max-width: 600px) 46vw, 25vw" />
                   ) : (
-                    <span class="tile__img tile__img--none" set:html={inlineSvg(sunBig)} aria-hidden="true" />
+                    <span class="tile__img tile__img--none" set:html={inlineSvg(sunSmall)} aria-hidden="true" />
                   )}
                   <span class="tile__name">{a.name}</span>
                 </button>
@@ -66,7 +66,7 @@ const data = await Promise.all(
             );
           })}
         </ul>
-        {d.n === 2 && <p class="note sf-wrap">Day 2 artist photos weren’t part of the design, so these tiles show the Sunfest sun.</p>}
+        {d.n === 2 && <p class="note sf-wrap">A few Day 2 photos weren’t in the design, so those tiles show the Sunfest sun.</p>}
       </section>
     ))
   }
@@ -78,7 +78,7 @@ const data = await Promise.all(
       <button type="button" class="artist__close" data-close aria-label="Close">×</button>
       <div class="artist__media">
         <img class="artist__img" alt="" width="700" height="700" hidden />
-        <span class="artist__none" set:html={inlineSvg(sunBig)} aria-hidden="true"></span>
+        <span class="artist__none" set:html={inlineSvg(sunSmall)} aria-hidden="true"></span>
       </div>
       <div class="artist__info">
         <p class="artist__day"></p>
@@ -227,10 +227,10 @@ const data = await Promise.all(
   .tile__img--none {
     display: grid;
     place-items: center;
-    background: radial-gradient(circle at 50% 40%, #ffe100 0 18%, #43baff 19% 100%);
+    background: #43baff;
   }
   .tile__img--none :global(svg) {
-    width: 45%;
+    width: 30%;
     height: auto;
   }
   .tile__name {
@@ -296,7 +296,7 @@ const data = await Promise.all(
     object-fit: cover;
   }
   .artist__none {
-    width: 45%;
+    width: 30%;
   }
   .artist__none :global(svg) {
     width: 100%;
