@@ -87,7 +87,7 @@
   --popup-bg: rgba(46, 46, 46, 0.96);
   --color-chip-soft: rgba(111, 168, 255, 0.18);
   --switch-track: rgba(255, 255, 255, 0.3);
-  --sunfest-bridge: #12803a; /* neck between the two dark Sunfest cards */
+  --sunfest-bridge: linear-gradient(#12385a, #0b78c2); /* bottom of the first Sunfest card → top of the second */ /* neck between the two dark Sunfest cards */
 }
 
 :root[data-theme='dark'] #main > .case {
@@ -118,7 +118,7 @@
 }
 
 :root[data-theme='dark'] .card.theme-sunfest {
-  --theme-bg: #12803a; /* one flat vivid green, so the neck joining the two cards matches */
+  --theme-bg: linear-gradient(180deg, #0b78c2 0%, #12385a 100%); /* top to bottom, so the neck between the two cards can match */
   --theme-ink: #ffffff;
   --theme-tag-bg: #ffe100;
   --theme-tag-ink: #000000;
@@ -186,7 +186,7 @@
     --popup-bg: rgba(46, 46, 46, 0.96);
     --color-chip-soft: rgba(111, 168, 255, 0.18);
     --switch-track: rgba(255, 255, 255, 0.3);
-    --sunfest-bridge: #12803a; /* neck between the two dark Sunfest cards */
+    --sunfest-bridge: linear-gradient(#12385a, #0b78c2); /* bottom of the first Sunfest card → top of the second */ /* neck between the two dark Sunfest cards */
   }
 
   :root:not([data-theme='light']) #main > .case {
@@ -217,7 +217,7 @@
   }
 
   :root:not([data-theme='light']) .card.theme-sunfest {
-    --theme-bg: #12803a; /* one flat vivid green, so the neck joining the two cards matches */
+    --theme-bg: linear-gradient(180deg, #0b78c2 0%, #12385a 100%); /* top to bottom, so the neck between the two cards can match */
     --theme-ink: #ffffff;
     --theme-tag-bg: #ffe100;
     --theme-tag-ink: #000000;
