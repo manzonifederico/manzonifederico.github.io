@@ -264,6 +264,7 @@ const tagsAttr = (p: Project) => p.tags.join('|');
   /* ---------- Sunfest pair: the whole group lifts together on hover ---------- */
   .pair {
     display: grid;
+    container-type: inline-size; /* the neck below shows the middle slice of the cards' gradient (100cqw wide) */
     transition: transform var(--dur) var(--ease), filter var(--dur) var(--ease);
   }
 
@@ -290,7 +291,7 @@ const tagsAttr = (p: Project) => p.tags.join('|');
     content: '';
     width: 90px;
     height: 100%;
-    background: var(--sunfest-bridge, var(--sunfest-bg));
+    background: var(--sunfest-bridge, var(--sunfest-bg)) center / 100cqw 100% no-repeat;
     -webkit-mask:
       radial-gradient(circle 15px at 0 50%, transparent 14.5px, #000 15px) left / 50% 100% no-repeat,
       radial-gradient(circle 15px at 100% 50%, transparent 14.5px, #000 15px) right / 50% 100% no-repeat;

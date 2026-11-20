@@ -76,7 +76,7 @@
   color-scheme: dark;
   --color-bg: #1a1a1a;
   --color-surface: #2a2a2a;
-  --color-text: #ffffff;
+  --color-text: #e8e8e8; /* off-white: softer than pure white on the dark grey */
   --color-text-muted: #b3b3b3;
   --color-brand: #4f94ff;
   --color-text-inverse: #0a1a3a; /* deep navy, not black */
@@ -87,7 +87,7 @@
   --popup-bg: rgba(46, 46, 46, 0.96);
   --color-chip-soft: rgba(111, 168, 255, 0.18);
   --switch-track: rgba(255, 255, 255, 0.3);
-  --sunfest-bridge: linear-gradient(#262626, var(--sunfest-bg)); /* bottom of the first Sunfest card → top of the second */ /* neck between the two dark Sunfest cards */
+  --sunfest-bridge: linear-gradient(90deg, var(--sunfest-bg) 0, var(--sunfest-bg) max(45%, 360px), #262626 100%); /* the two Sunfest cards and the neck between them share this left-to-right fade (MyWork.astro) */ /* neck between the two dark Sunfest cards */
 }
 
 :root[data-theme='dark'] #main > .case {
@@ -118,7 +118,7 @@
 }
 
 :root[data-theme='dark'] .card.theme-sunfest {
-  --theme-bg: linear-gradient(180deg, var(--sunfest-bg) 0, var(--sunfest-bg) 150px, #1e5878 60%, #262626 100%); /* the original sky blue, fading top to bottom so the neck between the two cards matches */
+  --theme-bg: var(--sunfest-bridge);
   --theme-ink: #ffffff;
   --theme-tag-bg: #ffe100;
   --theme-tag-ink: #000000;
@@ -175,7 +175,7 @@
     color-scheme: dark;
     --color-bg: #1a1a1a;
     --color-surface: #2a2a2a;
-    --color-text: #ffffff;
+    --color-text: #e8e8e8; /* off-white: softer than pure white on the dark grey */
     --color-text-muted: #b3b3b3;
     --color-brand: #4f94ff;
     --color-text-inverse: #0a1a3a; /* deep navy, not black */
@@ -186,7 +186,7 @@
     --popup-bg: rgba(46, 46, 46, 0.96);
     --color-chip-soft: rgba(111, 168, 255, 0.18);
     --switch-track: rgba(255, 255, 255, 0.3);
-    --sunfest-bridge: linear-gradient(#262626, var(--sunfest-bg)); /* bottom of the first Sunfest card → top of the second */ /* neck between the two dark Sunfest cards */
+    --sunfest-bridge: linear-gradient(90deg, var(--sunfest-bg) 0, var(--sunfest-bg) max(45%, 360px), #262626 100%); /* the two Sunfest cards and the neck between them share this left-to-right fade (MyWork.astro) */ /* neck between the two dark Sunfest cards */
   }
 
   :root:not([data-theme='light']) #main > .case {
@@ -217,7 +217,7 @@
   }
 
   :root:not([data-theme='light']) .card.theme-sunfest {
-    --theme-bg: linear-gradient(180deg, var(--sunfest-bg) 0, var(--sunfest-bg) 150px, #1e5878 60%, #262626 100%); /* the original sky blue, fading top to bottom so the neck between the two cards matches */
+    --theme-bg: var(--sunfest-bridge);
     --theme-ink: #ffffff;
     --theme-tag-bg: #ffe100;
     --theme-tag-ink: #000000;
