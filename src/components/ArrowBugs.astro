@@ -875,7 +875,7 @@ const s = t(lang);
       if (!enabled()) return;
       hint.hidden = false;
       window.setTimeout(() => hint.classList.add('is-in'), 20);
-    }, 1500); // right away on every device: bottom left (top on phones), clear of the recruiter card at the bottom right
+    }, 300); // straight away on every device: bottom left (top up to 900px), clear of the recruiter card at the bottom right
     hint.querySelector('[data-bugs-hint-ok]')?.addEventListener('click', closeHint);
     hint.querySelector('[data-bugs-hint-off]')?.addEventListener('click', () => {
       try {
