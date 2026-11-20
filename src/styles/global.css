@@ -714,14 +714,16 @@ html.gamepad-nav :focus {
 /* glows off screen: their animations pause */
 .blob.is-paused,
 .blob.is-paused::before,
-.blob.is-paused::after {
+.blob.is-paused::after,
+.blob.is-paused .lobe {
   animation-play-state: paused !important;
 }
 
 /* lighter mode: the glows stand still */
 html.lite .blob,
 html.lite .blob::before,
-html.lite .blob::after {
+html.lite .blob::after,
+html.lite .blob .lobe {
   animation: none !important;
 }
 

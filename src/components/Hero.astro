@@ -12,7 +12,7 @@ const s = t(lang);
 ---
 
 <header class="hero" id="top">
-  <div class="blob" aria-hidden="true"></div>
+  <div class="blob" aria-hidden="true"><span class="lobe"></span></div>
   <div class="hero-inner container">
     <h1 class="hero-title">{s.heroTitle}</h1>
     <p class="hero-sub">
@@ -52,72 +52,96 @@ const s = t(lang);
     width: max(83%, 980px);
     max-width: 1195px;
     aspect-ratio: 1195 / 709;
-    /* on tall windows the glow stretches down with the intro and fades out just above the name */
-    min-height: calc(100% + 104px);
     translate: var(--tilt-x, 0) var(--tilt-y, 0); /* a tilted phone moves the glow (ArrowBugs.astro) */
     transition: translate 400ms ease-out;
     will-change: transform;
-    /* breathes: drifts a little side to side and swells, slow enough not to distract */
+    /* breathes: swells and settles in place, slow enough not to distract */
     animation: hero-breathe 9s ease-in-out infinite alternate;
   }
 
   @keyframes hero-breathe {
     0% {
-      transform: translate3d(-3%, 12px, 0) rotate(-2deg) scale(1);
+      transform: translate3d(-2%, 8px, 0) rotate(-2deg) scale(1);
     }
     45% {
-      transform: translate3d(2.5%, -22px, 0) rotate(1.5deg) scale(1.07);
+      transform: translate3d(1.5%, -14px, 0) rotate(1.5deg) scale(1.08);
     }
     100% {
-      transform: translate3d(4%, 6px, 0) rotate(3deg) scale(1.03);
+      transform: translate3d(3%, 4px, 0) rotate(2.5deg) scale(1.03);
     }
   }
 
 
-  /* the wave: two blurred copies of the shape, a little lopsided, turning and stretching out of step. Only their
-     transform moves (the graphics card does it), so the blur is drawn once and the page stays smooth */
+  /* the waves: a blurred core in the blob's own shape, which never shrinks (so the white text always stays on solid
+     blue), and two blurred lobes on its right and bottom edges that swell out into the white space and pull back,
+     out of step. Together they make the edge bulge and ripple deeply. Only transforms move (the graphics card does
+     it), so each blur is drawn once and the page stays smooth */
   .blob::before,
-  .blob::after {
+  .blob::after,
+  .lobe {
     content: '';
     position: absolute;
-    inset: 0;
+    border-radius: 50%;
     background: var(--color-block);
     filter: blur(80px);
     will-change: transform;
   }
 
   .blob::before {
-    border-radius: 58% 42% 55% 45% / 46% 54% 42% 58%;
-    animation: wave-a 7s ease-in-out infinite alternate;
+    inset: 0;
+    animation: core 8s ease-in-out infinite alternate;
   }
 
+  /* right-hand lobe */
   .blob::after {
-    border-radius: 42% 58% 47% 53% / 56% 44% 60% 40%;
-    animation: wave-b 9s ease-in-out infinite alternate;
+    left: 52%;
+    top: 22%;
+    width: 52%;
+    height: 62%;
+    animation: lobe-a 6s ease-in-out infinite alternate;
   }
 
-  @keyframes wave-a {
+  /* bottom lobe */
+  .lobe {
+    left: 14%;
+    top: 44%;
+    width: 58%;
+    height: 56%;
+    animation: lobe-b 7.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes core {
     from {
-      transform: rotate(-5deg) scale(1.04, 0.96);
+      transform: rotate(-2deg) scale(1.02);
     }
     to {
-      transform: rotate(5deg) scale(0.97, 1.04);
+      transform: rotate(2deg) scale(1.05, 1.02);
     }
   }
 
-  @keyframes wave-b {
+  @keyframes lobe-a {
     from {
-      transform: rotate(6deg) scale(0.96, 1.04);
+      transform: translate(-10%, -6%) scale(0.8);
     }
     to {
-      transform: rotate(-5deg) scale(1.05, 0.96);
+      transform: translate(16%, 12%) scale(1.15);
+    }
+  }
+
+  @keyframes lobe-b {
+    from {
+      transform: translate(8%, -12%) scale(0.85, 0.75);
+    }
+    to {
+      transform: translate(-6%, 10%) scale(1.12, 1.05);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .blob,
     .blob::before,
-    .blob::after {
+    .blob::after,
+    .lobe {
       animation: none;
     }
   }
@@ -170,10 +194,10 @@ const s = t(lang);
       width: 200%;
       aspect-ratio: auto;
       height: max(440px, calc(100svh - 20px)); /* never shorter than the text needs on narrow phones */
-      min-height: 0;
     }
     .blob::before,
-    .blob::after {
+    .blob::after,
+    .lobe {
       filter: blur(45px);
     }
   }
