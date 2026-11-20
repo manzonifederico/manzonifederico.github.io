@@ -102,6 +102,16 @@ const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.sit
         if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th;
       } catch (e) {}
     </script>
+    <!-- for testing: add ?replay to any address and the one-time things (game snackbar, recruiter intro, shake and
+         lighter-mode notes) show again as on a first visit -->
+    <script is:inline>
+      try {
+        if (/[?&]replay(=|&|$)/.test(location.search))
+          ['arrows-hint-seen', 'arrows-hint-seen-2', 'recruiter-intro-seen', 'shake-hint-seen', 'lite-note'].forEach(function (k) {
+            localStorage.removeItem(k);
+          });
+      } catch (e) {}
+    </script>
     <!-- lighter mode before the first paint (src/scripts/perf.ts): the visitor's own choice wins; otherwise a weak
          device (4 cores or fewer, 2 GB of memory or less, "data saver", or a slow first visit) starts light -->
     <script is:inline>

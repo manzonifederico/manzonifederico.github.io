@@ -851,7 +851,7 @@ const s = t(lang);
 
   // ---------- snackbar: how to play / turn it off (once per device, a few seconds after the page opens) ----------
   const hint = document.querySelector<HTMLElement>('[data-bugs-hint]');
-  const HINT_KEY = 'arrows-hint-seen';
+  const HINT_KEY = 'arrows-hint-seen-2'; // new name when the snackbar changes, so everyone sees the new one once
   const seenHint = () => {
     try {
       return localStorage.getItem(HINT_KEY) === '1';
