@@ -121,8 +121,9 @@ button {
   top: -100px;
   z-index: 100;
   padding: var(--space-2xs) var(--space-xs);
-  background: var(--color-brand);
-  color: var(--color-text-inverse);
+  background: var(--color-fill);
+  color: var(--color-on-fill);
+  box-shadow: inset 0 0 0 1px var(--color-fill-line);
   border-radius: var(--radius-pill);
   font-size: var(--fs-small);
 }
@@ -322,6 +323,146 @@ button {
   html.has-view-cursor [data-cursor] * {
     cursor: none !important;
   }
+
+  /* recruiter mode hides the labels on personal details (e.g. Rovigo): there the normal pointer stays */
+  html.has-view-cursor[data-unbiased='true'] [data-cursor-pii],
+  html.has-view-cursor[data-unbiased='true'] [data-cursor-pii] * {
+    cursor: inherit !important;
+  }
+}
+
+/* ---------- Pointers in dark mode: light blue on the page; on a project's card and article, that project's
+   dark-mode tag colour (same shapes as above, colours swapped) ---------- */
+@media (hover: hover) and (pointer: fine) {
+  :root[data-theme='dark'] {
+    --cur-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%237fb2ff' stroke='%231a1a1a' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+    --cur-square-base: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%237fb2ff' stroke='%231a1a1a' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-base: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%231a1a1a' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23e8e8e8' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-zoom-out: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Ccircle cx='13' cy='13' r='8.5' stroke='%231a1a1a' stroke-width='5'/%3E%3Cpath d='M19.5 19.5 L27 27' stroke='%231a1a1a' stroke-width='6.5'/%3E%3Ccircle cx='13' cy='13' r='8.5' stroke='%23e8e8e8' stroke-width='2.2'/%3E%3Cpath d='M19.5 19.5 L27 27' stroke='%23e8e8e8' stroke-width='3.2'/%3E%3Cpath d='M9 13 H17' stroke='%23e8e8e8' stroke-width='2.2'/%3E%3C/g%3E%3C/svg%3E") 13 13, zoom-out;
+    --cur-zoom-in: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Ccircle cx='13' cy='13' r='8.5' stroke='%231a1a1a' stroke-width='5'/%3E%3Cpath d='M19.5 19.5 L27 27' stroke='%231a1a1a' stroke-width='6.5'/%3E%3Ccircle cx='13' cy='13' r='8.5' stroke='%23e8e8e8' stroke-width='2.2'/%3E%3Cpath d='M19.5 19.5 L27 27' stroke='%23e8e8e8' stroke-width='3.2'/%3E%3Cpath d='M9 13 H17 M13 9 V17' stroke='%23e8e8e8' stroke-width='2.2'/%3E%3C/g%3E%3C/svg%3E") 13 13, zoom-in;
+  }
+
+  :root[data-theme='dark'] .theme-cicerone {
+    --cur-fill: #d58bff;
+    --cur-edge: #1f0a2e;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%23d58bff' stroke='%231f0a2e' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%231f0a2e' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23d58bff' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%23d58bff' stroke='%231f0a2e' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root[data-theme='dark'] .theme-sunfest {
+    --cur-fill: #ffe100;
+    --cur-edge: #000000;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%23ffe100' stroke='%23000000' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23000000' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23ffe100' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%23ffe100' stroke='%23000000' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root[data-theme='dark'] .theme-flashquiz {
+    --cur-fill: #8fb3ff;
+    --cur-edge: #0b1a33;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%238fb3ff' stroke='%230b1a33' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%230b1a33' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%238fb3ff' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%238fb3ff' stroke='%230b1a33' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root[data-theme='dark'] .theme-instagram {
+    --cur-fill: #5aa9ff;
+    --cur-edge: #001a33;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%235aa9ff' stroke='%23001a33' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23001a33' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%235aa9ff' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%235aa9ff' stroke='%23001a33' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root[data-theme='dark'] .theme-bkmc {
+    --cur-fill: #ffcc00;
+    --cur-edge: #000000;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%23ffcc00' stroke='%23000000' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23000000' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23ffcc00' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%23ffcc00' stroke='%23000000' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root[data-theme='dark'] .theme-agora {
+    --cur-fill: #8ab8ff;
+    --cur-edge: #0b1a33;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%238ab8ff' stroke='%230b1a33' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%230b1a33' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%238ab8ff' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%238ab8ff' stroke='%230b1a33' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root[data-theme='dark'] .theme-mirrormood {
+    --cur-fill: #f29a96;
+    --cur-edge: #2a0a09;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%23f29a96' stroke='%232a0a09' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%232a0a09' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23f29a96' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%23f29a96' stroke='%232a0a09' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --cur-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%237fb2ff' stroke='%231a1a1a' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+    --cur-square-base: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%237fb2ff' stroke='%231a1a1a' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-base: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%231a1a1a' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23e8e8e8' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-zoom-out: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Ccircle cx='13' cy='13' r='8.5' stroke='%231a1a1a' stroke-width='5'/%3E%3Cpath d='M19.5 19.5 L27 27' stroke='%231a1a1a' stroke-width='6.5'/%3E%3Ccircle cx='13' cy='13' r='8.5' stroke='%23e8e8e8' stroke-width='2.2'/%3E%3Cpath d='M19.5 19.5 L27 27' stroke='%23e8e8e8' stroke-width='3.2'/%3E%3Cpath d='M9 13 H17' stroke='%23e8e8e8' stroke-width='2.2'/%3E%3C/g%3E%3C/svg%3E") 13 13, zoom-out;
+    --cur-zoom-in: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Ccircle cx='13' cy='13' r='8.5' stroke='%231a1a1a' stroke-width='5'/%3E%3Cpath d='M19.5 19.5 L27 27' stroke='%231a1a1a' stroke-width='6.5'/%3E%3Ccircle cx='13' cy='13' r='8.5' stroke='%23e8e8e8' stroke-width='2.2'/%3E%3Cpath d='M19.5 19.5 L27 27' stroke='%23e8e8e8' stroke-width='3.2'/%3E%3Cpath d='M9 13 H17 M13 9 V17' stroke='%23e8e8e8' stroke-width='2.2'/%3E%3C/g%3E%3C/svg%3E") 13 13, zoom-in;
+  }
+
+  :root:not([data-theme='light']) .theme-cicerone {
+    --cur-fill: #d58bff;
+    --cur-edge: #1f0a2e;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%23d58bff' stroke='%231f0a2e' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%231f0a2e' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23d58bff' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%23d58bff' stroke='%231f0a2e' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root:not([data-theme='light']) .theme-sunfest {
+    --cur-fill: #ffe100;
+    --cur-edge: #000000;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%23ffe100' stroke='%23000000' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23000000' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23ffe100' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%23ffe100' stroke='%23000000' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root:not([data-theme='light']) .theme-flashquiz {
+    --cur-fill: #8fb3ff;
+    --cur-edge: #0b1a33;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%238fb3ff' stroke='%230b1a33' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%230b1a33' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%238fb3ff' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%238fb3ff' stroke='%230b1a33' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root:not([data-theme='light']) .theme-instagram {
+    --cur-fill: #5aa9ff;
+    --cur-edge: #001a33;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%235aa9ff' stroke='%23001a33' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23001a33' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%235aa9ff' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%235aa9ff' stroke='%23001a33' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root:not([data-theme='light']) .theme-bkmc {
+    --cur-fill: #ffcc00;
+    --cur-edge: #000000;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%23ffcc00' stroke='%23000000' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23000000' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23ffcc00' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%23ffcc00' stroke='%23000000' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root:not([data-theme='light']) .theme-agora {
+    --cur-fill: #8ab8ff;
+    --cur-edge: #0b1a33;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%238ab8ff' stroke='%230b1a33' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%230b1a33' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%238ab8ff' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%238ab8ff' stroke='%230b1a33' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
+
+  :root:not([data-theme='light']) .theme-mirrormood {
+    --cur-fill: #f29a96;
+    --cur-edge: #2a0a09;
+    --cur-square-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%23f29a96' stroke='%232a0a09' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
+    --cur-text-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='24' viewBox='0 0 16 24'%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%232a0a09' stroke-width='3.6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M5 3 H11 M8 3 V21 M5 21 H11' stroke='%23f29a96' stroke-width='1.65' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") 8 12, text;
+    --cur-arrow-case: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%23f29a96' stroke='%232a0a09' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
+  }
 }
 
 /* ---------- Idle easter egg: the triangle pointer turns into the star (see src/scripts/view-cursor.ts) ---------- */
@@ -458,7 +599,7 @@ html.classic-pointer #view-cursor {
 
 /* ---------- "View project" cursor (see src/scripts/view-cursor.ts) ---------- */
 #view-cursor {
-  --vc: var(--color-brand);
+  --vc: var(--color-fill);
   position: fixed;
   left: 0;
   top: 0;

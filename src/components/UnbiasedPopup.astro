@@ -161,6 +161,18 @@ const s = t(lang);
       );
     }
 
+    // over the footer's blue glow the card takes the footer's colours (dark mode only, see the style below)
+    const foot = document.querySelector<HTMLElement>('footer.footer');
+    const checkFooter = () => {
+      if (!foot) return;
+      const r = popup.getBoundingClientRect();
+      const top = foot.getBoundingClientRect().top + Math.min(160, foot.offsetHeight * 0.25);
+      popup.classList.toggle('on-footer', r.top + r.height / 2 > top);
+    };
+    addEventListener('scroll', checkFooter, { passive: true });
+    addEventListener('resize', checkFooter);
+    checkFooter();
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && popup.dataset.state === 'open') {
         const inside = popup.contains(document.activeElement);
@@ -200,6 +212,23 @@ const s = t(lang);
       padding 400ms var(--ease),
       border-radius 400ms var(--ease),
       background-color 300ms var(--ease);
+  }
+
+  /* dark mode, over the footer's blue glow: a lighter blue with a thin line, like the footer's contact cards */
+  :global(:root[data-theme='dark']) .popup.on-footer {
+    background: #2c4f8f;
+    box-shadow: inset 0 0 0 1px rgba(232, 232, 232, 0.35), 0 10px 30px rgba(0, 0, 0, 0.3);
+    color: #e8e8e8;
+    --color-brand-ink: #e8e8e8;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .popup.on-footer {
+      background: #2c4f8f;
+      box-shadow: inset 0 0 0 1px rgba(232, 232, 232, 0.35), 0 10px 30px rgba(0, 0, 0, 0.3);
+      color: #e8e8e8;
+      --color-brand-ink: #e8e8e8;
+    }
   }
 
   .popup[data-state='hidden'] {
@@ -263,8 +292,9 @@ const s = t(lang);
 
   /* mode on: the icon turns into a blue badge, so you can see at a glance that it's active */
   :global(:root[data-unbiased='true']) .popup[data-state='icon']:not(:hover):not(:focus-within) .icon-wrap {
-    background: var(--color-brand);
-    color: var(--color-text-inverse);
+    background: var(--color-fill);
+    color: var(--color-on-fill);
+    box-shadow: inset 0 0 0 1px var(--color-fill-line);
   }
 
   .popup-title {

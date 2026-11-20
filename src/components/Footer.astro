@@ -194,7 +194,7 @@ const emailLabel = (email: string) => {
   .footer {
     /* colours of the pointer labels on the blue (see src/scripts/view-cursor.ts) */
     --theme-tag-bg: var(--color-text-inverse);
-    --theme-tag-ink: var(--color-brand);
+    --theme-tag-ink: var(--color-block);
     position: relative;
     color: var(--color-text-inverse);
     padding-top: clamp(200px, 24vw, 340px);
@@ -215,22 +215,22 @@ const emailLabel = (email: string) => {
     margin-left: -140%;
     height: 200%;
     border-radius: 50%;
-    background: var(--color-brand);
+    background: var(--color-block);
     filter: blur(80px);
     transform: translateZ(0);
     /* a slow, gentle drift so the glow feels alive */
-    animation: glow-drift 14s ease-in-out infinite alternate;
+    animation: glow-drift 12s ease-in-out infinite alternate;
   }
 
   @keyframes glow-drift {
     0% {
-      transform: translate3d(-2.5%, 0, 0) scale(1);
+      transform: translate3d(-3%, 0, 0) scale(1);
     }
     50% {
-      transform: translate3d(1.5%, -18px, 0) scale(1.03);
+      transform: translate3d(2%, -24px, 0) scale(1.04);
     }
     100% {
-      transform: translate3d(3%, 6px, 0) scale(0.99);
+      transform: translate3d(3.5%, 8px, 0) scale(0.99);
     }
   }
 
@@ -249,6 +249,7 @@ const emailLabel = (email: string) => {
   }
 
   .footer-title {
+    color: var(--color-block-title);
     font-size: var(--fs-display);
     letter-spacing: 0.05em;
   }
@@ -423,7 +424,7 @@ const emailLabel = (email: string) => {
   }
 
   .pointer-switch[aria-checked='true']::before {
-    background: color-mix(in srgb, var(--color-text-inverse) 70%, transparent);
+    background: var(--color-block-switch-on);
   }
 
   .pointer-switch[aria-checked='true']::after {

@@ -68,8 +68,8 @@ function setup() {
     // (which sets its own colours) give the label their colours; anything else gets the blue label
     const themed = !!target.closest('#main > .case, .card, footer');
     const cs = getComputedStyle(target);
-    el.style.setProperty('--vc', (themed && cs.getPropertyValue('--theme-tag-bg').trim()) || 'var(--color-brand)');
-    el.style.setProperty('--vc-ink', (themed && cs.getPropertyValue('--theme-tag-ink').trim()) || 'var(--color-text-inverse)');
+    el.style.setProperty('--vc', (themed && cs.getPropertyValue('--theme-tag-bg').trim()) || 'var(--color-fill)');
+    el.style.setProperty('--vc-ink', (themed && cs.getPropertyValue('--theme-tag-ink').trim()) || 'var(--color-on-fill)');
     cx = x;
     cy = y;
     el.classList.remove('is-flipped');

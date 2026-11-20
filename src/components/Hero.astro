@@ -47,9 +47,29 @@ const s = t(lang);
     max-width: 1195px;
     aspect-ratio: 1195 / 709;
     border-radius: 50%;
-    background: var(--color-brand);
+    background: var(--color-block);
     filter: blur(100px);
     transform: translateZ(0);
+    /* breathes: drifts a little side to side and swells, slow enough not to distract */
+    animation: hero-breathe 11s ease-in-out infinite alternate;
+  }
+
+  @keyframes hero-breathe {
+    0% {
+      transform: translate3d(-2%, 8px, 0) scale(1);
+    }
+    45% {
+      transform: translate3d(1.5%, -14px, 0) scale(1.05);
+    }
+    100% {
+      transform: translate3d(3%, 4px, 0) scale(1.02);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blob {
+      animation: none;
+    }
   }
 
   .hero-inner {

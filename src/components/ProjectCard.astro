@@ -101,6 +101,7 @@ const media = await Promise.all(
     border-radius: var(--radius-card);
     border: 1px solid var(--theme-border);
     background: var(--theme-bg);
+    background-origin: border-box; /* gradients fill the 1px border too: no repeated edge of the fade showing on the right */
     color: var(--theme-ink);
     text-shadow: var(--theme-text-shadow, none);
     overflow: hidden;

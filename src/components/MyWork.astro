@@ -196,15 +196,15 @@ const tagsAttr = (p: Project) => p.tags.join('|');
     color: var(--color-brand-ink);
     font-family: 'Manrope', system-ui, sans-serif;
     font-weight: 500;
-    font-size: clamp(1rem, 0.94rem + 0.25vw, 1.125rem);
+    font-size: 1rem;
     line-height: 1.2;
-    min-height: 44px;
+    min-height: 40px;
     cursor: pointer;
     transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
   }
 
   .view-btn {
-    padding: 8px 20px;
+    padding: 6px 18px;
     font-family: var(--font-display);
   }
 
@@ -226,18 +226,26 @@ const tagsAttr = (p: Project) => p.tags.join('|');
   .chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
   }
 
   .chip {
-    padding: 8px 18px;
-    gap: 8px;
+    padding: 6px 15px;
+    gap: 6px;
+  }
+
+  /* touch screens: keep a comfortable tap height */
+  @media (pointer: coarse) {
+    .view-btn,
+    .chip {
+      min-height: 44px;
+    }
   }
 
   .chip[aria-pressed='true'] {
-    background: var(--color-brand);
-    color: var(--color-text-inverse);
+    background: var(--color-fill);
+    color: var(--color-on-fill);
   }
 
 

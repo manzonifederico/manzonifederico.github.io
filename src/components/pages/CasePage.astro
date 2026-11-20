@@ -494,8 +494,8 @@ const articleJsonLd = {
     padding: 6px 14px;
     border: 1px solid currentColor;
     border-radius: var(--radius-pill);
-    background: rgba(255, 255, 255, 0.85);
-    color: #000;
+    background: var(--sheet-pop-bg, rgba(255, 255, 255, 0.85));
+    color: var(--sheet-ink, #000);
     font-size: var(--fs-small);
     font-weight: 500;
     cursor: pointer;
@@ -710,8 +710,8 @@ const articleJsonLd = {
     display: inline-flex;
     padding: 6px 14px;
     border-radius: var(--radius-pill);
-    background: rgba(255, 255, 255, 0.85);
-    color: #000;
+    background: var(--sheet-pop-bg, rgba(255, 255, 255, 0.85));
+    color: var(--sheet-ink, #000);
     font-size: var(--fs-small);
     font-weight: 500;
   }
@@ -726,10 +726,10 @@ const articleJsonLd = {
 
   @media (max-width: 1179px) {
     .legend-list {
-      background: rgba(255, 255, 255, 0.92);
+      background: var(--sheet-pop-bg, rgba(255, 255, 255, 0.92));
       border-radius: var(--radius-md);
       padding: 10px 14px;
-      color: #000;
+      color: var(--sheet-ink, #000);
     }
   }
 
@@ -770,7 +770,7 @@ const articleJsonLd = {
 
   .reader {
     background: var(--theme-panel);
-    color: #000;
+    color: var(--sheet-ink, #000);
     border-radius: var(--radius-md);
     padding: clamp(16px, 2.4vw, 32px);
     max-width: 1100px;
@@ -828,18 +828,18 @@ const articleJsonLd = {
   }
 
   :global(.theme-cicerone) .mode {
-    color: #7a00b0;
+    color: var(--mode-ink, #7a00b0);
   }
 
   /* MirrorMood tags are white, which would vanish on the white reading panel */
   :global(.theme-mirrormood) .mode {
-    border-color: #a23b38;
-    color: #8f2f2c;
+    border-color: var(--mode-line, #a23b38);
+    color: var(--mode-ink, #8f2f2c);
   }
 
   :global(.theme-mirrormood) .mode[aria-selected='true'] {
-    background: #a23b38;
-    color: #fff;
+    background: var(--mode-line, #a23b38);
+    color: var(--mode-on-ink, #fff);
   }
 
   .mode[aria-selected='true'] {
@@ -854,7 +854,7 @@ const articleJsonLd = {
   .en-only {
     margin: -14px 0 24px;
     font-size: var(--fs-small);
-    color: #444;
+    color: var(--sheet-muted, #444);
   }
 
   /* ---------- Article text with the timeline down the left ---------- */
@@ -889,7 +889,7 @@ const articleJsonLd = {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: #1e1e1e;
+    background: var(--sheet-dot, #1e1e1e);
   }
 
   .prose :global(h2) {
@@ -914,7 +914,7 @@ const articleJsonLd = {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: #1e1e1e;
+    background: var(--sheet-dot, #1e1e1e);
   }
 
   /* small pill next to a heading, e.g. "Live website ↗" (Markdown: <a class="heading-chip" href="…">) */
@@ -1035,7 +1035,7 @@ const articleJsonLd = {
 
   /* Instagram: white UIs on a white page need an outline */
   :global(.theme-instagram) .prose :global(img) {
-    border: 1.5px solid #1a1a1a;
+    border: 1.5px solid var(--sheet-img-line, #1a1a1a);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
   }
 
@@ -1053,9 +1053,9 @@ const articleJsonLd = {
     margin: 1em 0 1.4em;
     padding: 16px;
     border-radius: 22px;
-    background: #fff;
+    background: var(--sheet-card, #fff);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--sheet-card-line, rgba(0, 0, 0, 0.06));
   }
 
   .prose :global(.persona > p:first-child) {
@@ -1154,7 +1154,7 @@ const articleJsonLd = {
 
   .prose :global(th),
   .prose :global(td) {
-    border: 1px solid rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--sheet-rule, rgba(0, 0, 0, 0.25));
     padding: 6px 10px;
     text-align: left;
   }
