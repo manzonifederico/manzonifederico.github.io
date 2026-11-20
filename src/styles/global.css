@@ -210,7 +210,7 @@ button {
    square → anything clickable (same square as the nav and the CV timeline)
    text   → the usual text cursor, a little thicker
    Elements with data-cursor="…" show a label that follows the pointer (src/scripts/view-cursor.ts). */
-@media (hover: hover) and (pointer: fine) {
+@media (any-hover: hover) and (any-pointer: fine) {
   :root {
     --cur-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%23145ee1' stroke='white' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
     --cur-square-base: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%23145ee1' stroke='white' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
@@ -333,7 +333,7 @@ button {
 
 /* ---------- Pointers in dark mode: light blue on the page; on a project's card and article, that project's
    dark-mode tag colour (same shapes as above, colours swapped) ---------- */
-@media (hover: hover) and (pointer: fine) {
+@media (any-hover: hover) and (any-pointer: fine) {
   :root[data-theme='dark'] {
     --cur-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%237fb2ff' stroke='%231a1a1a' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
     --cur-square-base: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%237fb2ff' stroke='%231a1a1a' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;
@@ -399,7 +399,7 @@ button {
   }
 }
 
-@media (hover: hover) and (pointer: fine) and (prefers-color-scheme: dark) {
+@media (any-hover: hover) and (any-pointer: fine) and (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --cur-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2 L3 18 L14.5 12.5 Z' fill='%237fb2ff' stroke='%231a1a1a' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, default;
     --cur-square-base: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Crect x='5' y='5' width='10' height='10' rx='1.5' fill='%237fb2ff' stroke='%231a1a1a' stroke-width='1.6'/%3E%3C/svg%3E") 10 10, pointer;

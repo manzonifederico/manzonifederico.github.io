@@ -64,12 +64,13 @@ const media = await Promise.all(
             playsinline
             preload="metadata"
             data-card-video
+            aria-label={lang === 'it' ? (img.altIt ?? img.alt) : img.alt}
           />
         ) : (
         <Image
           class:list={['media', `media--${img.kind}`, `media-${i}`]}
           src={img.src}
-          alt=""
+          alt={lang === 'it' ? (img.altIt ?? img.alt) : img.alt}
           widths={[320, 480, 640, 960, 1280]}
           sizes={img.kind === 'desktop' || img.kind === 'screen' ? '(max-width: 720px) 85vw, 600px' : '(max-width: 720px) 45vw, 320px'}
           loading="lazy"
@@ -297,7 +298,7 @@ const media = await Promise.all(
   }
 
   /* custom cursor: hide the system pointer only where the "View project" label is shown */
-  @media (hover: hover) and (pointer: fine) {
+  @media (any-hover: hover) and (any-pointer: fine) {
     :global(html.has-view-cursor) .card,
     :global(html.has-view-cursor) .card :global(*) {
       cursor: none;

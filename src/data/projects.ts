@@ -33,6 +33,8 @@ export type Slug = 'agora' | 'mirrormood' | 'cicerone' | 'sunfest' | 'sunfest-us
 export interface CardImage {
   src: ImageMetadata;
   alt: string;
+  /** Italian alt text (Italian pages) */
+  altIt?: string;
   /** visual treatment on the card */
   kind: 'phone' | 'phone-framed' | 'screen' | 'logo' | 'desktop';
   /** optional video in public/ (e.g. '/video/x.mp4'): used instead of the image as soon as the file exists */
@@ -82,8 +84,8 @@ export const projects: Project[] = [
     cursor: '#1458c8',
     theme: 'theme-agora',
     cardImages: [
-      { src: agoraRender, alt: 'Rendering of the Agorà kiosk with main and secondary screen', kind: 'desktop' },
-      { src: agoraScreen, alt: 'The Agorà kiosk screen: general board, experiments board and more boards', kind: 'desktop' },
+      { src: agoraRender, alt: 'Rendering of the Agorà kiosk with main and secondary screen', altIt: 'Rendering del chiosco Agorà con schermo principale e secondario', kind: 'desktop' },
+      { src: agoraScreen, alt: 'The Agorà kiosk screen: general board, experiments board and more boards', altIt: 'Lo schermo del chiosco Agorà: bacheca generale, bacheca degli esperimenti e altre bacheche', kind: 'desktop' },
     ],
   },
   {
@@ -103,8 +105,8 @@ export const projects: Project[] = [
     cursor: '#a23b38',
     theme: 'theme-mirrormood',
     cardImages: [
-      { src: mmMirror, alt: 'A person in front of a full-height smart mirror', kind: 'phone' },
-      { src: mmSystem, alt: 'MirrorMood system diagram: sensing, processing and feedback', kind: 'desktop' },
+      { src: mmMirror, alt: 'A person in front of a full-height smart mirror', altIt: 'Una persona davanti a uno specchio smart a figura intera', kind: 'phone' },
+      { src: mmSystem, alt: 'MirrorMood system diagram: sensing, processing and feedback', altIt: 'Schema del sistema MirrorMood: rilevamento, elaborazione e feedback', kind: 'desktop' },
     ],
   },
   {
@@ -129,9 +131,9 @@ export const projects: Project[] = [
     cursor: '#7a00b0',
     theme: 'theme-cicerone',
     cardImages: [
-      { src: ciceroneAr, alt: 'AR navigation view warning about a signalled obstacle', kind: 'phone', video: '/video/cicerone-ar.mp4' },
-      { src: ciceroneNav, alt: 'Indoor map with a highlighted route to the cafeteria', kind: 'phone' },
-      { src: ciceroneStop, alt: 'Add a stop screen listing the most viewed rooms', kind: 'phone' },
+      { src: ciceroneAr, alt: 'AR navigation view warning about a signalled obstacle', altIt: 'Vista di navigazione in realtà aumentata che avvisa di un ostacolo segnalato', kind: 'phone', video: '/video/cicerone-ar.mp4' },
+      { src: ciceroneNav, alt: 'Indoor map with a highlighted route to the cafeteria', altIt: 'Mappa interna con il percorso evidenziato verso la mensa', kind: 'phone' },
+      { src: ciceroneStop, alt: 'Add a stop screen listing the most viewed rooms', altIt: 'Schermata per aggiungere una tappa con le stanze più visitate', kind: 'phone' },
     ],
   },
   {
@@ -159,12 +161,12 @@ export const projects: Project[] = [
     cursor: '#003f7d',
     theme: 'theme-sunfest',
     cardImages: [
-      { src: sunAbout, alt: 'Sunfest About us page', kind: 'screen' },
-      { src: sunLineup, alt: 'Sunfest Lineup page', kind: 'screen' },
-      { src: sunFaqs, alt: 'Sunfest FAQs page', kind: 'screen' },
-      { src: sunHome, alt: 'Sunfest home page', kind: 'screen' },
-      { src: sunProgram, alt: 'Sunfest Program page', kind: 'screen' },
-      { src: sunOvernight, alt: 'Sunfest Overnight camping page', kind: 'screen' },
+      { src: sunAbout, alt: 'Sunfest About us page', altIt: 'Pagina Chi siamo di Sunfest', kind: 'screen' },
+      { src: sunLineup, alt: 'Sunfest Lineup page', altIt: 'Pagina Lineup di Sunfest', kind: 'screen' },
+      { src: sunFaqs, alt: 'Sunfest FAQs page', altIt: 'Pagina FAQ di Sunfest', kind: 'screen' },
+      { src: sunHome, alt: 'Sunfest home page', altIt: 'Home page di Sunfest', kind: 'screen' },
+      { src: sunProgram, alt: 'Sunfest Program page', altIt: 'Pagina Programma di Sunfest', kind: 'screen' },
+      { src: sunOvernight, alt: 'Sunfest Overnight camping page', altIt: 'Pagina del campeggio notturno di Sunfest', kind: 'screen' },
     ],
   },
   {
@@ -185,8 +187,8 @@ export const projects: Project[] = [
     cursor: '#003f7d',
     theme: 'theme-sunfest',
     cardImages: [
-      { src: sunHome, alt: 'Sunfest25 home page', kind: 'screen' },
-      { src: poplarHome, alt: 'Poplar Utopia festival home page', kind: 'screen' },
+      { src: sunHome, alt: 'Sunfest25 home page', altIt: 'Home page di Sunfest25', kind: 'screen' },
+      { src: poplarHome, alt: 'Poplar Utopia festival home page', altIt: 'Home page del festival Poplar Utopia', kind: 'screen' },
     ],
   },
   {
@@ -217,9 +219,9 @@ export const projects: Project[] = [
     cursor: '#00458f',
     theme: 'theme-flashquiz',
     cardImages: [
-      { src: fqLogo, alt: 'Flash Quiz logo', kind: 'logo' },
-      { src: fqPhone, alt: 'Flash Quiz mobile course list', kind: 'phone-framed' },
-      { src: fqDesktop, alt: 'Flash Quiz desktop analytics dashboard', kind: 'desktop' },
+      { src: fqLogo, alt: 'Flash Quiz logo', altIt: 'Logo di Flash Quiz', kind: 'logo' },
+      { src: fqPhone, alt: 'Flash Quiz mobile course list', altIt: 'Elenco dei corsi di Flash Quiz su smartphone', kind: 'phone-framed' },
+      { src: fqDesktop, alt: 'Flash Quiz desktop analytics dashboard', altIt: 'Dashboard delle statistiche di Flash Quiz su desktop', kind: 'desktop' },
     ],
   },
   {
@@ -244,10 +246,10 @@ export const projects: Project[] = [
     cursor: '#0b5cb0',
     theme: 'theme-instagram',
     cardImages: [
-      { src: igPrefs, alt: 'Content preferences settings with feed type options', kind: 'phone-framed' },
-      { src: igTime, alt: 'Time management screen with daily usage chart', kind: 'phone-framed' },
-      { src: igFunc, alt: 'Functionalities screen with toggles for reels features', kind: 'phone-framed' },
-      { src: igBlocked, alt: 'Instagram blocked screen with tasks to unlock', kind: 'phone-framed' },
+      { src: igPrefs, alt: 'Content preferences settings with feed type options', altIt: 'Impostazioni delle preferenze dei contenuti con le opzioni del feed', kind: 'phone-framed' },
+      { src: igTime, alt: 'Time management screen with daily usage chart', altIt: 'Schermata di gestione del tempo con il grafico dell’uso giornaliero', kind: 'phone-framed' },
+      { src: igFunc, alt: 'Functionalities screen with toggles for reels features', altIt: 'Schermata delle funzionalità con gli interruttori per i reel', kind: 'phone-framed' },
+      { src: igBlocked, alt: 'Instagram blocked screen with tasks to unlock', altIt: 'Schermata di Instagram bloccato con le attività per sbloccarlo', kind: 'phone-framed' },
     ],
   },
   {
@@ -272,8 +274,8 @@ export const projects: Project[] = [
     cursor: '#1a1a1a',
     theme: 'theme-bkmc',
     cardImages: [
-      { src: bkLogo, alt: 'Burger King logo', kind: 'logo' },
-      { src: mcLogo, alt: 'McDonald’s logo', kind: 'logo' },
+      { src: bkLogo, alt: 'Burger King logo', altIt: 'Logo di Burger King', kind: 'logo' },
+      { src: mcLogo, alt: 'McDonald’s logo', altIt: 'Logo di McDonald’s', kind: 'logo' },
     ],
   },
 ];

@@ -80,7 +80,7 @@ const s = t(lang);
 <script>
   const layer = document.querySelector<HTMLElement>('[data-bugs]');
   const death = document.querySelector<HTMLDialogElement>('[data-bugs-death]');
-  const fine = matchMedia('(hover: hover) and (pointer: fine)');
+  const fine = matchMedia('(any-hover: hover) and (any-pointer: fine)');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const html = document.documentElement;
 

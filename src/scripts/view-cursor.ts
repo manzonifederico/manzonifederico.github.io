@@ -7,10 +7,11 @@
 // Any element with data-cursor="<label>" gets one. Colours come from the element's --theme-tag-bg /
 // --theme-tag-ink (the project chips on cards and articles; set on the footer too).
 // Works by event delegation, so elements that get data-cursor later work as well.
-// Touch screens and keyboard users keep the normal behaviour.
+// Touch screens and keyboard users keep the normal behaviour. A phone or tablet with a mouse connected gets the
+// mouse behaviour too: it switches on with the first mouse move, and only mouse moves drive it (not fingers).
 // The "Classic pointer" switch in the footer (html.classic-pointer, saved in localStorage) turns all of this off.
 
-const fine = matchMedia('(hover: hover) and (pointer: fine)');
+const fine = matchMedia('(any-hover: hover) and (any-pointer: fine)');
 // small flags for labels with data-cursor-flag (e.g. the languages in the CV): Italy, United Kingdom, Spain
 const FLAGS: Record<string, string> = {
   it: '<svg class="vc-flag" viewBox="0 0 3 2" aria-hidden="true"><path fill="#009246" d="M0 0h1v2H0z"/><path fill="#fff" d="M1 0h1v2H1z"/><path fill="#ce2b37" d="M2 0h1v2H2z"/></svg>',
@@ -20,8 +21,8 @@ const FLAGS: Record<string, string> = {
 const isClassic = () => document.documentElement.classList.contains('classic-pointer');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
-function setup() {
-  if (!fine.matches || document.getElementById('view-cursor')) return;
+function setup(mouseSeen = false) {
+  if ((!fine.matches && !mouseSeen) || document.getElementById('view-cursor')) return;
   document.documentElement.classList.add('has-view-cursor');
 
   const el = document.createElement('div');
@@ -85,6 +86,7 @@ function setup() {
   document.addEventListener(
     'pointermove',
     (e) => {
+      if (e.pointerType !== 'mouse') return; // fingers and pens on a touch screen: no label
       x = e.clientX;
       y = e.clientY;
       const target = (e.target as Element | null)?.closest?.<HTMLElement>('[data-cursor]') ?? null;
@@ -238,6 +240,7 @@ function setup() {
   document.addEventListener(
     'pointermove',
     (e) => {
+      if (e.pointerType !== 'mouse') return;
       px = e.clientX;
       py = e.clientY;
       moves.push({ x: px, y: py, t: performance.now() });
@@ -292,4 +295,6 @@ function setup() {
 }
 
 setup();
-fine.addEventListener?.('change', setup);
+fine.addEventListener?.('change', () => setup());
+// touch device with a mouse plugged in later (or a browser that doesn't report it): start on the first mouse move
+document.addEventListener('pointermove', (e) => e.pointerType === 'mouse' && setup(true), { passive: true });

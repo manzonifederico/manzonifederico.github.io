@@ -614,7 +614,9 @@ const articleJsonLd = {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 4px;
+    padding: var(--theme-back-pad, 6px 4px);
+    border-radius: var(--radius-pill);
+    background: var(--theme-top-bg, transparent);
     font-size: var(--fs-small);
     text-decoration: none;
     color: inherit;
@@ -630,12 +632,23 @@ const articleJsonLd = {
   .top-right {
     color: var(--theme-small-ink, inherit);
   }
+
+  /* a page index on a dark pill (dark Sunfest): some room inside it */
+  @media (min-width: 1180px) {
+    .legend-list {
+      padding: var(--theme-legend-pad, 0);
+    }
+  }
   /* the theme button and the EN / IT switch take the same colour as "Back" */
   .top-right {
     --lang-ink: currentColor;
     display: flex;
     align-items: center;
     gap: 10px;
+    color: var(--theme-top-ink, var(--theme-small-ink, inherit));
+    background: var(--theme-top-bg, transparent);
+    padding: var(--theme-top-pad, 0);
+    border-radius: var(--radius-pill);
   }
 
   .case-head {
@@ -720,6 +733,8 @@ const articleJsonLd = {
     list-style: none;
     margin: 10px 0 0;
     padding: 0;
+    border-radius: var(--radius-md);
+    background: var(--theme-legend-bg, none);
     display: grid;
     gap: 2px;
   }
@@ -919,7 +934,9 @@ const articleJsonLd = {
 
   /* small pill next to a heading, e.g. "Live website ↗" (Markdown: <a class="heading-chip" href="…">) */
   .prose :global(.heading-chip) {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px; /* WCAG 2.5.8: at least 24px tall to tap, even on small phones */
     margin-left: 0.6em;
     padding: 0.3em 0.8em;
     vertical-align: middle;

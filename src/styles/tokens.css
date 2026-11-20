@@ -294,11 +294,19 @@
 }
 
 :root[data-theme='dark'] body.theme-sunfest {
-  --theme-bg: linear-gradient(160deg, #0b5a88 0%, #262626 92%);
+  /* same fade as the other article pages (160deg, colour → grey), starting from the Sunfest sky blue. The small
+     texts on it (Back, theme + EN/IT, page index) sit on dark pills; the big subtitle is white */
+  --theme-bg: linear-gradient(160deg, var(--sunfest-bg) 0%, #262626 90%);
   --theme-ink: #ffffff;
   --theme-tag-bg: #ffe100;
   --theme-tag-ink: #000000;
   --theme-small-ink: #ffffff;
+  --theme-top-bg: rgba(0, 0, 0, 0.55);
+  --theme-top-ink: #ffffff;
+  --theme-top-pad: 2px 6px 2px 4px;
+  --theme-back-pad: 6px 12px;
+  --theme-legend-bg: rgba(0, 0, 0, 0.55);
+  --theme-legend-pad: 10px 14px;
   --theme-panel: #1a1a1a;
 }
 
@@ -377,11 +385,19 @@
   }
 
   :root:not([data-theme='light']) body.theme-sunfest {
-    --theme-bg: linear-gradient(160deg, #0b5a88 0%, #262626 92%);
+    /* same fade as the other article pages (160deg, colour → grey), starting from the Sunfest sky blue. The small
+       texts on it (Back, theme + EN/IT, page index) sit on dark pills; the big subtitle is white */
+    --theme-bg: linear-gradient(160deg, var(--sunfest-bg) 0%, #262626 90%);
     --theme-ink: #ffffff;
     --theme-tag-bg: #ffe100;
     --theme-tag-ink: #000000;
     --theme-small-ink: #ffffff;
+    --theme-top-bg: rgba(0, 0, 0, 0.55);
+    --theme-top-ink: #ffffff;
+    --theme-top-pad: 2px 6px 2px 4px;
+    --theme-back-pad: 6px 12px;
+    --theme-legend-bg: rgba(0, 0, 0, 0.55);
+    --theme-legend-pad: 10px 14px;
     --theme-panel: #1a1a1a;
   }
 
