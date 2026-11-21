@@ -49,7 +49,7 @@ export const achievements: Achievement[] = [
   { id: 'brainrot', icon: '🧠', secret: true, en: { title: 'Brainrotted', desc: 'Get killed by a brainrot', hint: 'Some words don’t like being poked' }, it: { title: 'Brainrottato', desc: 'Fatti uccidere da un brainrot', hint: 'Certe parole non amano essere punzecchiate' } },
   { id: 'tung', icon: '🪵', secret: true, en: { title: 'Tung tung tung', desc: 'Meet Tung Tung Tung Sahur', hint: '🏏🏏🏏' }, it: { title: 'Tung tung tung', desc: 'Incontra Tung Tung Tung Sahur', hint: '🏏🏏🏏' } },
   { id: 'lirili', icon: '🐘', secret: true, en: { title: 'Elephant in the desert', desc: 'Meet Lirilì Larilà', hint: 'Someone is taking a walk in the desert' }, it: { title: 'Elefante nel deserto', desc: 'Incontra Lirilì Larilà', hint: 'Qualcuno sta passeggiando nel deserto' } },
-  { id: 'platinum', icon: '🏆', en: { title: 'Platinum', desc: 'Unlock every achievement possible on this device (the extras aside)' }, it: { title: 'Platino', desc: 'Sblocca tutti gli achievement possibili su questo dispositivo (extra esclusi)' } },
+  { id: 'platinum', icon: '🏆', en: { title: 'Platinum', desc: 'Unlock every achievement possible on this device (the extras aside)' }, it: { title: 'Platino', desc: 'Sblocca tutti i trofei possibili su questo dispositivo (extra esclusi)' } },
 ];
 
 export const achievementText = (lang: Lang) =>
