@@ -1,8 +1,10 @@
 ---
-// Easter egg: pull the page down past its top and a line appears above it ("Nothing to see here, mate.").
-// - iPhone / Mac (Safari, trackpads): the page's elastic bounce uncovers the line, which sits just above the page.
-// - Android: no bounce, so a pull at the very top (finger dragging down) slides the same line in at the top.
-// Decorative only: hidden from screen readers. Nothing changes with "reduce motion" except it appears without sliding.
+// Easter egg: pull the page up past its end and a faint line shows under the signature ("Nothing to see here,
+// mate."). It is plain text in the empty space at the bottom of the footer, invisible until you keep pulling at the
+// very end of the page: a finger dragging up on a phone (iPhone or Android), or a trackpad / wheel that keeps going
+// down on a computer. It fades away a moment after you let go.
+// The words live in a data attribute and are drawn by CSS (::after), so they can't be selected, copied or found with
+// the browser's search, and screen readers skip them (decorative).
 import { t, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -11,28 +13,43 @@ interface Props {
 const { lang } = Astro.props;
 ---
 
-<p class="overscroll-note" aria-hidden="true" data-overscroll>{t(lang).overscroll}</p>
+<div class="overscroll-note" aria-hidden="true" data-overscroll data-note={t(lang).overscroll}></div>
 
 <script>
   const note = document.querySelector<HTMLElement>('[data-overscroll]');
   if (note) {
-    let startY: number | null = null;
+    const atBottom = () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
     let hideTimer: number | undefined;
+    // just under the signature and the footer's switches (above the recruiter card that sits at the bottom of phones)
+    const place = () => {
+      const lows = Array.from(document.querySelectorAll('footer .sign, footer .switch-pair'), (el) => el.getBoundingClientRect().bottom);
+      const below = lows.length ? Math.max(...lows) + 14 : window.innerHeight - 48;
+      note.style.top = `${Math.round(Math.min(below, window.innerHeight - 40))}px`;
+    };
+    const show = () => {
+      window.clearTimeout(hideTimer);
+      if (!note.classList.contains('is-pulled')) place();
+      note.classList.add('is-pulled');
+    };
+    const hideSoon = (ms = 1200) => {
+      window.clearTimeout(hideTimer);
+      hideTimer = window.setTimeout(() => note.classList.remove('is-pulled'), ms);
+    };
+
+    // phones: a finger that keeps dragging up once the page is already at its end
+    let startY: number | null = null;
     document.addEventListener(
       'touchstart',
       (e) => {
-        startY = window.scrollY <= 0 && e.touches.length === 1 ? e.touches[0].clientY : null;
+        startY = e.touches.length === 1 ? e.touches[0].clientY : null;
       },
       { passive: true },
     );
     document.addEventListener(
       'touchmove',
       (e) => {
-        if (startY === null || window.scrollY > 0) return;
-        if (e.touches[0].clientY - startY > 70) {
-          window.clearTimeout(hideTimer);
-          note.classList.add('is-pulled');
-        }
+        if (startY === null || !atBottom()) return;
+        if (startY - e.touches[0].clientY > 70) show();
       },
       { passive: true },
     );
@@ -40,9 +57,28 @@ const { lang } = Astro.props;
       'touchend',
       () => {
         startY = null;
-        if (!note.classList.contains('is-pulled')) return;
-        window.clearTimeout(hideTimer);
-        hideTimer = window.setTimeout(() => note.classList.remove('is-pulled'), 1400);
+        if (note.classList.contains('is-pulled')) hideSoon();
+      },
+      { passive: true },
+    );
+
+    // computers: wheel or trackpad that keeps scrolling down at the end (a good push, not a single notch)
+    let pushed = 0;
+    let pushReset: number | undefined;
+    window.addEventListener(
+      'wheel',
+      (e) => {
+        if (e.deltaY <= 0 || !atBottom()) {
+          pushed = 0;
+          return;
+        }
+        pushed += e.deltaY;
+        window.clearTimeout(pushReset);
+        pushReset = window.setTimeout(() => (pushed = 0), 500);
+        if (pushed > 300) {
+          show();
+          hideSoon();
+        }
       },
       { passive: true },
     );
@@ -50,42 +86,42 @@ const { lang } = Astro.props;
 </script>
 
 <style>
-  /* sits just above the top of the page: only an elastic bounce at the top shows it */
+  /* in the empty space under the footer's signature, only while pulling past the end of the page */
   .overscroll-note {
-    position: absolute;
-    top: -56px;
+    position: fixed;
     left: 0;
     right: 0;
+    top: calc(100% - 56px); /* replaced when it appears: right under the signature */
+    z-index: 5;
     margin: 0;
     text-align: center;
     font-family: var(--font-display);
-    font-size: 0.9375rem;
-    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    color: var(--color-text-inverse); /* the footer's light text, on its blue glow */
     pointer-events: none;
+    -webkit-user-select: none;
     user-select: none;
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 300ms ease,
+      transform 300ms ease;
   }
 
-  /* Android pull: slides in at the top of the screen for a moment */
+  /* the words come from the attribute: drawn, not written in the page (no copying, no finding, no reading aloud) */
+  .overscroll-note::after {
+    content: attr(data-note);
+    content: attr(data-note) / '';
+  }
+
   .overscroll-note.is-pulled {
-    position: fixed;
-    top: 12px;
-    left: 50%;
-    right: auto;
-    z-index: 60;
-    padding: 6px 14px;
-    border-radius: var(--radius-pill);
-    background: var(--popup-bg, rgba(255, 255, 255, 0.95));
-    color: var(--color-text);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-    white-space: nowrap;
-    transform: translateX(-50%);
-    animation: pull-in 220ms ease-out;
+    opacity: 0.7;
+    transform: none;
   }
 
-  @keyframes pull-in {
-    from {
-      transform: translate(-50%, -24px);
-      opacity: 0;
+  @media (prefers-reduced-motion: reduce) {
+    .overscroll-note {
+      transform: none;
     }
   }
 </style>
