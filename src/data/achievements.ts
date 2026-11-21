@@ -11,7 +11,7 @@ export interface Achievement {
   secret?: boolean;
   /** a bonus: not needed for Platinum (e.g. it needs hardware not everyone has) */
   bonus?: boolean;
-  /** an SVG drawn instead of the emoji (e.g. a flag that has no emoji) */
+  /** an image (SVG or <img>) shown instead of the emoji (e.g. a flag that has no emoji) */
   svg?: string;
   /** only possible on one kind of device: 'pc' needs a mouse or trackpad, 'phone' a touch screen. Platinum asks only
    *  for the ones possible on the device in use */
@@ -20,9 +20,9 @@ export interface Achievement {
   it: { title: string; desc: string };
 }
 
-// the flag of the Republic of Venice (the same one as the "Bacaro tour?" label in src/scripts/view-cursor.ts)
-const VENICE_FLAG =
-  '<svg viewBox="0 0 34 20" aria-hidden="true"><path fill="#a5122a" d="M0 0h22l4 1.67-4 1.66 4 1.67-4 1.67 4 1.66-4 1.67 4 1.67-4 1.66 4 1.67-4 1.67 4 1.66-4 1.67H0z"/><circle cx="6.4" cy="6.2" r="3" fill="#f7dc7a" opacity=".6"/><g fill="#f2c230"><path d="M10 8.6 12.6 3.2l1.2.5-.4 1.6 1.3-.9.9.7-1.1 1.3 1.4-.4.5.9-3.6 2.1z"/><path d="M6.8 9.2c3.2-1.3 7-1.4 10.2-.4.9.3 1.2 1.3.7 2.1-3.4 1-7.3 1-10.4.2-.8-.4-1-1.4-.5-1.9z"/><circle cx="6.4" cy="7" r="2.2"/></g><path d="M8 10.8v4.6M9.8 11.2v4.2M14.6 11.2v4.2M16.4 10.9v4.5M17.4 9.4c1.6-.2 2.2-1.6 1.4-3" stroke="#f2c230" stroke-width="1.1" stroke-linecap="round" fill="none"/></svg>';
+// the flag of the Republic of Venice (public/icons/venice-flag.webp, from the public-domain SVG on Wikimedia Commons;
+// the same one as the "Bacaro tour?" label in src/scripts/view-cursor.ts)
+const VENICE_FLAG = '<img src="/icons/venice-flag.webp" alt="" width="240" height="120">';
 
 export const achievements: Achievement[] = [
   { id: 'first-squash', icon: '🦟', en: { title: 'First blood', desc: 'Squash one of the little arrows' }, it: { title: 'Primo sangue', desc: 'Schiaccia una delle frecce' } },
