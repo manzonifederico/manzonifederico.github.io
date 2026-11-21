@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import rehypeVersionIds from './src/plugins/rehype-version-ids.mjs';
 import rehypePiiNames from './src/plugins/rehype-pii-names.mjs';
+import cspHashes from './src/plugins/csp-hashes.mjs';
 
 // `site` is the public URL of the deployed website (canonical links, sitemap, robots.txt, social previews).
 // On GitHub Pages the deploy workflow (.github/workflows/deploy.yml) passes it in SITE_URL (that also covers a
@@ -27,6 +28,8 @@ export default defineConfig({
       filter: (page) => !page.includes('/404') && !page.includes('/sunfest25') && !page.includes('/cv-print'),
       lastmod: new Date(),
     }),
+    // security policy: the hash of each inline script, added after the build (src/plugins/csp-hashes.mjs)
+    cspHashes(),
   ],
   // article images (markdown) get several sizes (srcset), so phones and normal screens don't download the
   // full-resolution file; the click-to-enlarge view still opens the largest one. No extra inline styles:

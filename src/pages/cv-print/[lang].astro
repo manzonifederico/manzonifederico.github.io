@@ -12,7 +12,9 @@ import { cvByLang, cvProfile } from '../../data/cv';
 import { contact, site } from '../../data/site';
 import type { Lang } from '../../i18n/ui';
 
+// dev server only: the published site doesn't include these pages (the Italian CV isn't public yet)
 export function getStaticPaths() {
+  if (import.meta.env.PROD) return [];
   return [{ params: { lang: 'en' } }, { params: { lang: 'it' } }];
 }
 
