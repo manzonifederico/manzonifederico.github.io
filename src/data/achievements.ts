@@ -42,6 +42,7 @@ export const achievements: Achievement[] = [
   { id: 'read-all', icon: '📚', en: { title: 'Well-read', desc: 'Read every project to the end' }, it: { title: 'Lettore accanito', desc: 'Leggi tutti i progetti fino in fondo' } },
   { id: 'dark', icon: '🌙', en: { title: 'Dark side', desc: 'Switch to the dark theme' }, it: { title: 'Lato oscuro', desc: 'Passa al tema scuro' } },
   { id: 'language', icon: '🌍', en: { title: 'Bilingual', desc: 'Read the site in the other language' }, it: { title: 'Bilingue', desc: 'Leggi il sito nell’altra lingua' } },
+  { id: 'cv', icon: '📄', en: { title: 'Hire me!', desc: 'Download my CV' }, it: { title: 'Hire me!', desc: 'Scarica il mio CV' } },
   { id: 'contact', icon: '📬', en: { title: 'Let’s talk', desc: 'Get in touch through one of my contacts' }, it: { title: 'Parliamone', desc: 'Usa uno dei miei contatti' } },
   { id: 'recruiter', icon: '🕵️', en: { title: 'Unbiased', desc: 'Turn on recruiter mode' }, it: { title: 'Senza pregiudizi', desc: 'Attiva la modalità recruiter' } },
   { id: 'gamepad', icon: '🎮', bonus: true, en: { title: 'Player 2 has joined', desc: 'Connect a game controller' }, it: { title: 'Player 2 è entrato', desc: 'Collega un controller' } },

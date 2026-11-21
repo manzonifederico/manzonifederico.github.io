@@ -259,8 +259,10 @@ document.addEventListener('click', (e) => {
 
 // "Let's talk": any contact used (an e-mail, copying an address, LinkedIn, GitHub, ORCID, ResearchGate)
 document.addEventListener('click', (e) => {
-  const t = (e.target as Element | null)?.closest?.('a[href^="mailto:"], [data-copy], a[rel~="me"]');
-  if (t) unlock('contact');
+  const el = e.target as Element | null;
+  if (el?.closest?.('a[href^="mailto:"], [data-copy], a[rel~="me"]')) unlock('contact');
+  // "Hire me!": the CV downloaded (the PDF links in the CV section)
+  if (el?.closest?.('a[download], a[href$=".pdf"]')) unlock('cv');
 });
 
 // the board window
