@@ -40,9 +40,7 @@ export const contact = {
   } as Record<Lang, string[]>,
 };
 
-// Downloadable CVs, served from /public/cv/
-// The Italian CV is hidden until an up-to-date version exists (set `show: true`).
+// Downloadable CVs, served from /public/cv/: only the English one (there is no Italian CV on purpose)
 export const cvFiles = [
   { label: { en: 'CV English PDF', it: 'CV in inglese (PDF)' }, href: '/cv/Federico-Manzoni-CV-EN.pdf', lang: 'en', show: true },
-  { label: { en: 'CV Italian PDF', it: 'CV in italiano (PDF)' }, href: '/cv/Federico-Manzoni-CV-IT.pdf', lang: 'it', show: false },
 ];
