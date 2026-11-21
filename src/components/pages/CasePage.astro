@@ -686,6 +686,20 @@ const articleJsonLd = {
     display: none;
   }
 
+  /* the word to tap 10 times: on phones, quick taps mustn't select the text, zoom the page or flash a grey box */
+  .case-sub :global([data-brainrot]) {
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (pointer: coarse) {
+    .case-sub :global([data-brainrot]) {
+      cursor: pointer; /* older iPhones only send taps on elements that look clickable */
+    }
+  }
+
   :global(.death.is-tung) .death-sub {
     display: none;
   }
