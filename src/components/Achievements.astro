@@ -21,7 +21,9 @@ const T =
   lang === 'it'
     ? {
         title: 'Trofei',
-        intro: 'Gli easter egg del sito, raccolti qui. Restano salvati solo in questo browser.',
+        // "easter egg" carries a hover label, a nod to Jak and Daxter's egg-shaped Precursor orbs
+        intro: ['Gli ', 'easter egg', ' del sito, raccolti qui. Restano salvati solo in questo browser.'],
+        egg: 'Uovo precursor',
         progress: 'sbloccati',
         tip: 'Suggerimento: fai doppio clic (o tocca due volte) su un ??? per un indizio.',
         hintLabel: 'Trofeo segreto. Premi due volte per un indizio.',
@@ -38,7 +40,8 @@ const T =
       }
     : {
         title: 'Achievements',
-        intro: 'The easter eggs of this site, collected here. Saved in this browser only.',
+        intro: ['The ', 'easter eggs', ' of this site, collected here. Saved in this browser only.'],
+        egg: 'Precursor egg',
         progress: 'unlocked',
         tip: 'Tip: double-click (or tap twice) a ??? for a clue.',
         hintLabel: 'Secret achievement. Press twice for a clue.',
@@ -121,7 +124,9 @@ const headingId = `ach-title-${mode}`;
       <h1 class="title ach-page-title" id={headingId}>
         🏆 {T.title}
       </h1>
-      <p class="ach-intro">{T.intro}</p>
+      <p class="ach-intro">
+        {T.intro[0]}<span data-cursor={T.egg} data-cursor-flag="egg">{T.intro[1]}</span>{T.intro[2]}
+      </p>
       <p class="ach-progress">
         <span data-ach-count>0</span>/<span data-ach-total>{list.length}</span> {T.progress}
       </p>
