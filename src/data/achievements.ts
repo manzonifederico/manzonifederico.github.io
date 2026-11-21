@@ -21,9 +21,9 @@ export interface Achievement {
   it: { title: string; desc: string; hint?: string };
 }
 
-// the flag of the Republic of Venice (public/icons/venice-flag.webp, from the public-domain SVG on Wikimedia Commons;
-// the same one as the "Bacaro tour?" label in src/scripts/view-cursor.ts)
-const VENICE_FLAG = '<img src="/icons/venice-flag.webp" alt="" width="240" height="120">';
+// the traditional flag of Venice / Veneto, the winged lion with the six tails (public/icons/venice-flag.webp, the
+// transparent gaps between the tails kept; the same one as the "Bacaro tour?" label in src/scripts/view-cursor.ts)
+const VENICE_FLAG = '<img src="/icons/venice-flag.webp" alt="" width="120" height="62">';
 
 export const achievements: Achievement[] = [
   { id: 'first-squash', icon: '🦟', en: { title: 'First blood', desc: 'Squash one of the little arrows' }, it: { title: 'Primo sangue', desc: 'Schiaccia una delle frecce' } },

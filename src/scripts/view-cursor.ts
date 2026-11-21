@@ -13,10 +13,9 @@
 
 const fine = matchMedia('(any-hover: hover) and (any-pointer: fine)');
 // small flags for labels with data-cursor-flag (e.g. the languages in the CV): Italy, United Kingdom, Spain, and
-// the Republic of Venice (on "Venice" in the About text: public/icons/venice-flag.webp, from the public-domain
-// "Flag of Most Serene Republic of Venice" SVG on Wikimedia Commons)
+// Venice (on "Venice" in the About text: public/icons/venice-flag.webp, the traditional flag with the winged lion)
 const FLAGS: Record<string, string> = {
-  ven: '<img class="vc-flag" src="/icons/venice-flag.webp" alt="" width="240" height="120">',
+  ven: '<img class="vc-flag" src="/icons/venice-flag.webp" alt="" width="120" height="62">',
   it: '<svg class="vc-flag" viewBox="0 0 3 2" aria-hidden="true"><path fill="#009246" d="M0 0h1v2H0z"/><path fill="#fff" d="M1 0h1v2H1z"/><path fill="#ce2b37" d="M2 0h1v2H2z"/></svg>',
   es: '<svg class="vc-flag" viewBox="0 0 3 2" aria-hidden="true"><path fill="#aa151b" d="M0 0h3v2H0z"/><path fill="#f1bf00" d="M0 .5h3v1H0z"/></svg>',
   gb: '<svg class="vc-flag" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="vc-gb-a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="vc-gb-b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#vc-gb-a)"><path fill="#012169" d="M0 0v30h60V0z"/><path stroke="#fff" stroke-width="6" d="M0 0l60 30m0-30L0 30"/><path stroke="#c8102e" stroke-width="4" d="M0 0l60 30m0-30L0 30" clip-path="url(#vc-gb-b)"/><path stroke="#fff" stroke-width="10" d="M30 0v30M0 15h60"/><path stroke="#c8102e" stroke-width="6" d="M30 0v30M0 15h60"/></g></svg>',

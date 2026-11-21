@@ -646,6 +646,12 @@ html.classic-pointer #view-cursor {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
 }
 
+/* the Venice flag has see-through gaps between its tails: no outline or rounding around the whole box */
+#view-cursor img.vc-flag {
+  box-shadow: none;
+  border-radius: 0;
+}
+
 #view-cursor .vc-label {
   padding: 4px 10px;
   border-radius: 14px; /* a pill on one line, a rounded box when a long label wraps */
