@@ -12,7 +12,12 @@ import { localePath } from '../i18n/ui';
 <BaseLayout lang="en" title="Achievements | Federico Manzoni" noindex>
   <main id="main" class="container">
     <div class="ach-top">
-      <a class="ach-back" href={localePath('en', '/')}>← Home</a>
+      <a class="ach-back" href={localePath('en', '/')} data-cursor="Go to home page">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path fill="currentColor" d="M4 21V9l8-6l8 6v12h-6v-7h-4v7z" />
+        </svg>
+        <span class="visually-hidden">Home</span>
+      </a>
       <div class="ach-controls">
         <ThemeSwitch lang="en" />
         <LangSwitch lang="en" />
@@ -35,8 +40,21 @@ import { localePath } from '../i18n/ui';
     padding-inline: inherit;
   }
 
+  /* round button with a house, like the other round controls */
   .ach-back {
-    color: var(--color-link);
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--color-fill);
+    color: var(--color-on-fill);
+    box-shadow: inset 0 0 0 1px var(--color-fill-line);
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .ach-back:hover {
+    transform: scale(1.06);
   }
 
   /* the theme button and the EN / IT switch, in the link colour */
