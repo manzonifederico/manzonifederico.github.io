@@ -31,9 +31,6 @@ const { lang } = Astro.props;
       if (!base) base = parseFloat(getComputedStyle(footer).paddingBottom) || 0;
       footer.style.transition = animate && !reduce.matches ? 'padding-bottom 320ms cubic-bezier(0.2, 1.4, 0.4, 1)' : '';
       footer.style.paddingBottom = stretch ? `${base + stretch}px` : '';
-      // while stretched, the footer comes above the recruiter card that sits at the bottom of phones (z-index 50),
-      // so the line isn't hidden under it; back to normal when it springs back
-      footer.style.zIndex = stretch ? '60' : '';
       // under the signature and switches, whatever their height on this screen
       // (measured against the footer itself: the row sits inside a container, so offsetTop would be off)
       const rows = footer.querySelector<HTMLElement>('.footer-bottom');
