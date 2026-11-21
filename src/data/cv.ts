@@ -27,8 +27,12 @@ const ECIU =
 const UXC = 'https://www.trentinoinnovation.eu/innovate/innovation-tools/ux-challenge/?lang=en';
 // ACM Reference Format (details from the DOI record on Crossref); Federico's name in bold.
 // Authors are wrapped in .pii-name so reviewer mode blurs them.
-const ACM_REF =
-  '<span class="pii pii-name">Lorenzo Zambotto</span>, <span class="pii pii-name">Simone Bassanelli</span>, <strong><span class="pii pii-name">Federico Manzoni</span></strong>, <span class="pii pii-name">Antonio Bucchiarone</span>, and <span class="pii pii-name">Annapaola Marconi</span>. 2026. How Game Elements Structure Educational Learning Paths: A Literature Review. In <em>Proceedings of the 10th Annual International GamiFIN Conference 2026 (GamiFIN 2026)</em>, Saariselkä, Finland. ACM, New York, NY, USA, 13 pages. <a href="https://doi.org/10.1145/3789624.3789648">https://doi.org/10.1145/3789624.3789648</a>';
+// the DOI link carries a pointer label (src/scripts/view-cursor.ts) inviting to read the paper, in each language
+const DOI_LABEL = { en: 'Open and read the first paper I contributed to 📄', it: 'Apri e leggi il primo paper a cui ho contribuito 📄' };
+const ACM_REF = (lang: 'en' | 'it') =>
+  '<span class="pii pii-name">Lorenzo Zambotto</span>, <span class="pii pii-name">Simone Bassanelli</span>, <strong><span class="pii pii-name">Federico Manzoni</span></strong>, <span class="pii pii-name">Antonio Bucchiarone</span>, and <span class="pii pii-name">Annapaola Marconi</span>. 2026. How Game Elements Structure Educational Learning Paths: A Literature Review. In <em>Proceedings of the 10th Annual International GamiFIN Conference 2026 (GamiFIN 2026)</em>, Saariselkä, Finland. ACM, New York, NY, USA, 13 pages. <a href="https://doi.org/10.1145/3789624.3789648" data-cursor="' +
+  DOI_LABEL[lang] +
+  '">https://doi.org/10.1145/3789624.3789648</a>';
 
 /** Short profile shown under the name in "My CV" */
 export const cvProfile: Record<Lang, string> = {
@@ -185,7 +189,7 @@ export const cvByLang: Record<Lang, CvSection[]> = {
       items: [
         {
           title: 'How Game Elements Structure Educational Learning Paths: A Literature Review',
-          org: ACM_REF,
+          org: ACM_REF('en'),
           dates: ['2026'],
         },
       ],
@@ -395,7 +399,7 @@ export const cvByLang: Record<Lang, CvSection[]> = {
       items: [
         {
           title: 'How Game Elements Structure Educational Learning Paths: A Literature Review',
-          org: ACM_REF,
+          org: ACM_REF('it'),
           dates: ['2026'],
         },
       ],
