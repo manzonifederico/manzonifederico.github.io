@@ -158,5 +158,177 @@
   "projects/instagram-blocked.png": {
     "en": "App blocked",
     "it": "App bloccata"
+  },
+  "agora/slide-02.png": {
+    "en": "Problem definition",
+    "it": "Definizione del problema"
+  },
+  "agora/slide-03.png": {
+    "en": "Three lenses",
+    "it": "Tre prospettive"
+  },
+  "agora/slide-05.png": {
+    "en": "Board issues",
+    "it": "Problemi delle bacheche"
+  },
+  "agora/slide-07.png": {
+    "en": "Kiosk sketches",
+    "it": "Schizzi del chiosco"
+  },
+  "agora/slide-08.png": {
+    "en": "Final kiosk sketch",
+    "it": "Schizzo del chiosco finale"
+  },
+  "agora/slide-09.png": {
+    "en": "Kiosk render",
+    "it": "Rendering del chiosco"
+  },
+  "agora/slide-11.png": {
+    "en": "Multi-interaction",
+    "it": "Interazione multipla"
+  },
+  "agora/slide-12.png": {
+    "en": "Always moving",
+    "it": "Sempre in movimento"
+  },
+  "agora/slide-13.png": {
+    "en": "Posts system",
+    "it": "Sistema dei post"
+  },
+  "agora/slide-14.png": {
+    "en": "Adding options",
+    "it": "Modalità di inserimento"
+  },
+  "agora/slide-16.png": {
+    "en": "Sharing options",
+    "it": "Opzioni di condivisione"
+  },
+  "bk-vs-mc/participants.png": {
+    "en": "Recruitment message",
+    "it": "Messaggio di reclutamento"
+  },
+  "bk-vs-mc/table-1-responses.png": {
+    "en": "Responses table",
+    "it": "Tabella delle risposte"
+  },
+  "bk-vs-mc/questionnaire-structure.png": {
+    "en": "Survey flowchart",
+    "it": "Flusso del questionario"
+  },
+  "bk-vs-mc/results-export.png": {
+    "en": "Question labels",
+    "it": "Etichette delle domande"
+  },
+  "bk-vs-mc/r-results.png": {
+    "en": "Score summary",
+    "it": "Riepilogo dei punteggi"
+  },
+  "cicerone/persona-jane.png": {
+    "en": "Student persona",
+    "it": "Persona studentessa"
+  },
+  "cicerone/persona-mario.png": {
+    "en": "PhD student persona",
+    "it": "Persona dottorando"
+  },
+  "cicerone/persona-steven.png": {
+    "en": "Technician persona",
+    "it": "Persona tecnico"
+  },
+  "mirrormood/02-situation.png": {
+    "en": "Smart mirror",
+    "it": "Specchio intelligente"
+  },
+  "mirrormood/04-goals.png": {
+    "en": "Research goals",
+    "it": "Obiettivi di ricerca"
+  },
+  "mirrormood/05-questions.png": {
+    "en": "Research questions",
+    "it": "Domande di ricerca"
+  },
+  "mirrormood/09-mirror-d.png": {
+    "en": "System diagram",
+    "it": "Diagramma del sistema"
+  },
+  "mirrormood/23-data-pipeline.png": {
+    "en": "Data pipeline",
+    "it": "Pipeline dei dati"
+  },
+  "mirrormood/24-circumplex.png": {
+    "en": "Circumplex model",
+    "it": "Modello circomplesso"
+  },
+  "mirrormood/12-lab-design.png": {
+    "en": "Lab conditions",
+    "it": "Condizioni in laboratorio"
+  },
+  "mirrormood/17-wild-timeline.png": {
+    "en": "Field timeline",
+    "it": "Timeline sul campo"
+  },
+  "mirrormood/25-metrics.png": {
+    "en": "Metrics",
+    "it": "Metriche"
+  },
+  "mirrormood/30-costs.png": {
+    "en": "Costs table",
+    "it": "Tabella dei costi"
+  },
+  "sunfest-usability/table-2.png": {
+    "en": "Experiment design",
+    "it": "Disegno sperimentale"
+  },
+  "sunfest-usability/table-3.png": {
+    "en": "Task structure",
+    "it": "Struttura dei task"
+  },
+  "sunfest-usability/table-1-sus.png": {
+    "en": "SUS scores",
+    "it": "Punteggi SUS"
+  },
+  "sunfest-usability/sus-boxplot-1.png": {
+    "en": "SUS boxplot",
+    "it": "Boxplot SUS"
+  },
+  "sunfest-usability/sus-boxplot-2.png": {
+    "en": "SUS violin plot",
+    "it": "Violin plot SUS"
+  },
+  "sunfest-usability/ueq-s-sunfest.png": {
+    "en": "Sunfest UEQ-S",
+    "it": "UEQ-S di Sunfest"
+  },
+  "sunfest-usability/ueq-s-poplar.png": {
+    "en": "Poplar UEQ-S",
+    "it": "UEQ-S di Poplar"
+  },
+  "sunfest-usability/table-4.png": {
+    "en": "Task results",
+    "it": "Risultati dei task"
+  },
+  "sunfest/persona-social-explorer.png": {
+    "en": "Social explorer",
+    "it": "Esploratrice social"
+  },
+  "sunfest/persona-pragmatic-planner.png": {
+    "en": "Pragmatic planner",
+    "it": "Organizzatore pragmatico"
+  },
+  "sunfest/persona-mindful-creative.png": {
+    "en": "Mindful creative",
+    "it": "Creativa consapevole"
+  },
+  "sunfest/site-map.png": {
+    "en": "Site map",
+    "it": "Mappa del sito"
+  },
+  "sunfest/typography-titles.png": {
+    "en": "Title font",
+    "it": "Font dei titoli"
+  },
+  "sunfest/palette-typography.png": {
+    "en": "Palette and type",
+    "it": "Palette e tipografia"
   }
 }
