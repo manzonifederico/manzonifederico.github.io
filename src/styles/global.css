@@ -646,28 +646,6 @@ html.classic-pointer #view-cursor {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
 }
 
-/* the University of Trento seal (public/icons/unitn-seal.png, from unitn.it): a white disc with the seal drawn in
-   the label's colour, so its fine lines stand out on any project's palette */
-#view-cursor .vc-seal {
-  display: inline-grid;
-  place-items: center;
-  width: 1.6em;
-  height: 1.6em;
-  margin-left: 8px;
-  vertical-align: -0.5em;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
-}
-
-#view-cursor .vc-seal > span {
-  width: 92%;
-  height: 92%;
-  background: var(--vc);
-  -webkit-mask: url('/icons/unitn-seal.png') center / contain no-repeat;
-  mask: url('/icons/unitn-seal.png') center / contain no-repeat;
-}
-
 #view-cursor .vc-label {
   padding: 4px 10px;
   border-radius: 14px; /* a pill on one line, a rounded box when a long label wraps */

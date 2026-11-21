@@ -12,11 +12,9 @@
 // The "Classic pointer" switch in the footer (html.classic-pointer, saved in localStorage) turns all of this off.
 
 const fine = matchMedia('(any-hover: hover) and (any-pointer: fine)');
-// small flags for labels with data-cursor-flag (e.g. the languages in the CV): Italy, United Kingdom, Spain, the
-// Republic of Venice (on "Venice" in the About text), and the University of Trento's round seal with the phoenix
-// (on the "Uni Project" chips; a mask image in the label's text colour, see global.css)
+// small flags for labels with data-cursor-flag (e.g. the languages in the CV): Italy, United Kingdom, Spain, and
+// the Republic of Venice (on "Venice" in the About text)
 const FLAGS: Record<string, string> = {
-  unitn: '<span class="vc-flag vc-seal" aria-hidden="true"><span></span></span>',
   ven: '<svg class="vc-flag" viewBox="0 0 34 20" aria-hidden="true"><path fill="#a5122a" d="M0 0h22l4 1.67-4 1.66 4 1.67-4 1.67 4 1.66-4 1.67 4 1.67-4 1.66 4 1.67-4 1.67 4 1.66-4 1.67H0z"/><circle cx="6.4" cy="6.2" r="3" fill="#f7dc7a" opacity=".6"/><g fill="#f2c230"><path d="M10 8.6 12.6 3.2l1.2.5-.4 1.6 1.3-.9.9.7-1.1 1.3 1.4-.4.5.9-3.6 2.1z"/><path d="M6.8 9.2c3.2-1.3 7-1.4 10.2-.4.9.3 1.2 1.3.7 2.1-3.4 1-7.3 1-10.4.2-.8-.4-1-1.4-.5-1.9z"/><circle cx="6.4" cy="7" r="2.2"/></g><path d="M8 10.8v4.6M9.8 11.2v4.2M14.6 11.2v4.2M16.4 10.9v4.5M17.4 9.4c1.6-.2 2.2-1.6 1.4-3" stroke="#f2c230" stroke-width="1.1" stroke-linecap="round" fill="none"/></svg>',
   it: '<svg class="vc-flag" viewBox="0 0 3 2" aria-hidden="true"><path fill="#009246" d="M0 0h1v2H0z"/><path fill="#fff" d="M1 0h1v2H1z"/><path fill="#ce2b37" d="M2 0h1v2H2z"/></svg>',
   es: '<svg class="vc-flag" viewBox="0 0 3 2" aria-hidden="true"><path fill="#aa151b" d="M0 0h3v2H0z"/><path fill="#f1bf00" d="M0 .5h3v1H0z"/></svg>',
@@ -238,7 +236,9 @@ function setup(mouseSeen = false) {
     }, reduce.matches ? 0 : 260);
   };
   const sleep = () => {
-    if (isClassic() || !inside) return;
+    // not while a context label (with its square) is showing, e.g. resting on a project card: the star would sit on
+    // top of the label as a second pointer
+    if (isClassic() || !inside || current) return;
     window.clearTimeout(outTimer);
     sleepY = window.scrollY;
     star.style.transform = `translate3d(${px}px, ${py}px, 0)`;
