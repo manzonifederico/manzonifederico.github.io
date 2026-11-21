@@ -447,9 +447,28 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
     }
   }
 
+  // "Praise the Sun" achievement not won yet (src/scripts/achievements.ts): it needs the fireball, so after 3 deaths
+  // without it the next finale is the fireball, and its first game-over is the line with the soldiers
+  const praiseMissing = () => {
+    try {
+      return !JSON.parse(localStorage.getItem('achievements') ?? '{}').praise;
+    } catch {
+      return false;
+    }
+  };
+  const deathsSoFar = () => {
+    try {
+      return Number(localStorage.getItem('game-deaths') ?? '0');
+    } catch {
+      return 0;
+    }
+  };
+  const FIREBALL = 2; // index in touchBoss's attacks
+
   // the big arrow comes for the pointer
   function boss() {
     if (!enabled()) return restart();
+    if (praiseMissing() && deathsSoFar() >= 3) return touchBoss(FIREBALL, touchMode ? undefined : mx, touchMode ? undefined : my);
     if (touchMode) return touchBoss();
     const pick = Math.floor(Math.random() * 4); // 0 = steal the pointer, 1–3 = the attacks
     if (pick > 0) return touchBoss(pick - 1, mx, my);
@@ -698,7 +717,8 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
     // a line that fits how you died
     const all = JSON.parse(death.dataset.deaths ?? '{}') as Record<Finale, [string, string, string?][]>;
     const lines = all[kind] ?? [];
-    const [title, sub, extra] = lines[Math.floor(Math.random() * lines.length)] ?? ['', ''];
+    const praiseLine = kind === 'fireball' && praiseMissing() ? lines.find((l) => l[2] === 'praise') : undefined;
+    const [title, sub, extra] = praiseLine ?? lines[Math.floor(Math.random() * lines.length)] ?? ['', ''];
     if (extra === 'praise') {
       praiseTheSun();
       document.dispatchEvent(new CustomEvent('achieve', { detail: 'praise' })); // src/scripts/achievements.ts
