@@ -182,7 +182,11 @@ const articleJsonLd = {
           <!-- Linked legend: Start → sections of the current version → End -->
           <nav class="legend" aria-label={s.contents}>
             <details class="legend-box" data-legend>
-              <summary>{s.contents}</summary>
+              <summary
+                data-cursor={lang === 'it' ? 'Mostra indice' : 'Show index'}
+                data-cursor-open={lang === 'it' ? 'Nascondi indice' : 'Hide index'}
+                data-cursor-closed={lang === 'it' ? 'Mostra indice' : 'Show index'}>{s.contents}</summary
+              >
               <ol class="legend-list" role="list">
                 <li><a href="#start" data-legend-link>{s.start}</a></li>
                 {
@@ -508,6 +512,15 @@ const articleJsonLd = {
   const syncLegend = () => legend && (legend.open = wide.matches);
   wide.addEventListener?.('change', syncLegend);
   syncLegend();
+  // the pointer label on "On this page" says what a click will do: show or hide the index
+  const legendSummary = legend?.querySelector<HTMLElement>('summary');
+  const syncLegendLabel = () => {
+    if (!legend || !legendSummary) return;
+    legendSummary.dataset.cursor = (legend.open ? legendSummary.dataset.cursorOpen : legendSummary.dataset.cursorClosed) ?? '';
+    document.dispatchEvent(new Event('cursor-refresh'));
+  };
+  legend?.addEventListener('toggle', syncLegendLabel);
+  syncLegendLabel();
 
   const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-legend-link]'));
   let ticking = false;

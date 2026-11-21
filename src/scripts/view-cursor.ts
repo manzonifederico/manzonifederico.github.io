@@ -151,6 +151,7 @@ function setup(mouseSeen = false) {
   document.addEventListener('pointerleave', leave);
   // a control that changes its own label (e.g. the theme button) refreshes the label under the pointer
   document.addEventListener('theme-change', () => current && enter(current));
+  document.addEventListener('cursor-refresh', () => current && enter(current)); // any element that changed its label
   document.addEventListener('pointerdown', () => current && el.classList.add('is-pressed'));
   document.addEventListener('pointerup', () => el.classList.remove('is-pressed'));
 
