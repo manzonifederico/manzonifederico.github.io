@@ -103,12 +103,16 @@ const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.sit
         if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th;
       } catch (e) {}
     </script>
-    <!-- for testing: add ?replay to any address and the one-time things (game snackbar, recruiter intro, shake and
-         lighter-mode notes, the brainrot order on phones) show again as on a first visit, and the achievements start
-         from zero -->
+    <!-- start from zero: ?replay in the address, or a hard reload (Ctrl+Shift+R, Cmd+Shift+R, Ctrl+F5) brings back the
+         one-time things (game snackbar, recruiter intro, shake and lighter-mode notes, the brainrot order on phones) as on
+         a first visit, and the achievements, the game's deaths and the notes already opened start from zero. A normal
+         reload (F5) keeps everything. Browsers don't say which reload it was, so the key press leaves a note for the
+         next page load (sessionStorage "hard-reset"). Preferences (theme, language, effects, pointer, sound) stay -->
     <script is:inline>
       try {
-        if (/[?&]replay(=|&|$)/.test(location.search))
+        var hard = sessionStorage.getItem('hard-reset') === '1';
+        sessionStorage.removeItem('hard-reset');
+        if (hard || /[?&]replay(=|&|$)/.test(location.search)) {
           ['arrows-hint-seen', 'arrows-hint-seen-2', 'recruiter-intro-seen', 'shake-hint-seen', 'lite-note', 'brainrot-seen',
             // the achievements and what counts towards them
             'achievements', 'ach-hint-teased', 'articles-read', 'game-deaths',
@@ -116,7 +120,14 @@ const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.sit
             'notes-seen'].forEach(function (k) {
             localStorage.removeItem(k);
           });
-        if (/[?&]replay(=|&|$)/.test(location.search)) sessionStorage.removeItem('ach-lang');
+          sessionStorage.removeItem('ach-lang');
+        }
+        addEventListener('keydown', function (e) {
+          var k = (e.key || '').toLowerCase();
+          var r = k === 'r' || e.code === 'KeyR'; // any keyboard layout
+          if (((e.ctrlKey || e.metaKey) && e.shiftKey && r) || (e.ctrlKey && k === 'f5'))
+            sessionStorage.setItem('hard-reset', '1');
+        });
       } catch (e) {}
     </script>
     <!-- lighter mode before the first paint (src/scripts/perf.ts): the visitor's own choice wins; otherwise a weak
