@@ -432,6 +432,7 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
 
   function squash(b: Bug) {
     if (!b.alive || busy) return;
+    document.dispatchEvent(new CustomEvent('achieve', { detail: 'first-squash' })); // src/scripts/achievements.ts
     document.querySelector<HTMLButtonElement>('[data-bugs-hint-ok]')?.click(); // they've found out how to play
     b.alive = false;
     b.el.classList.add('is-squashed');
@@ -449,6 +450,7 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
   // the big arrow comes for the pointer
   function boss() {
     if (!enabled()) return restart();
+    document.dispatchEvent(new CustomEvent('achieve', { detail: 'boss' }));
     if (touchMode) return touchBoss();
     const pick = Math.floor(Math.random() * 4); // 0 = steal the pointer, 1–3 = the attacks
     if (pick > 0) return touchBoss(pick - 1, mx, my);
@@ -711,6 +713,8 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
     }
     const counter = death.querySelector<HTMLElement>('[data-bugs-count]');
     if (counter) counter.textContent = `${counter.dataset.label ?? 'Deaths'}: ${count}`;
+    document.dispatchEvent(new CustomEvent('achieve', { detail: 'died' }));
+    if (count >= 10) document.dispatchEvent(new CustomEvent('achieve', { detail: 'died-10' }));
     html.classList.remove('cursor-stolen'); // the pointer comes back, to press the button
     // the button and the sound switch fade in after ~1.6 s: until then they can't be clicked, so the clicks or
     // taps people are still making while chasing arrows don't close the screen straight away
@@ -961,6 +965,7 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
   });
   const onShake = () => {
     if (!enabled() || busy || death?.open) return;
+    document.dispatchEvent(new CustomEvent('achieve', { detail: 'phone-shake' }));
     touchMode = true;
     panicUntil = performance.now() + 900;
     for (const b of bugs) {

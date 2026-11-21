@@ -62,6 +62,7 @@ document.querySelectorAll<HTMLElement>('[data-unbiased-toggle]').forEach((btn) =
   btn.addEventListener('click', () => {
     const next = root.dataset.unbiased !== 'true';
     root.dataset.unbiased = String(next);
+    if (next) document.dispatchEvent(new CustomEvent('achieve', { detail: 'recruiter' })); // src/scripts/achievements.ts
     delete root.dataset.photo; // reset the per-photo choice
     save(next);
     applyAria();

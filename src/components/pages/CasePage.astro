@@ -491,6 +491,7 @@ const articleJsonLd = {
   function select(key: string, focus = false) {
     const tab = tabs.find((t) => t.dataset.mode === key);
     if (!tab) return;
+    if (key === 'full') document.dispatchEvent(new CustomEvent('achieve', { detail: 'full-story' })); // src/scripts/achievements.ts
     tabs.forEach((t) => {
       const on = t === tab;
       t.setAttribute('aria-selected', String(on));
@@ -648,6 +649,11 @@ const articleJsonLd = {
         name = FIRST[seen] ?? names[Math.floor(Math.random() * names.length)];
       }
       const special = SPECIAL[name];
+      document.dispatchEvent(
+        new CustomEvent('achieve', {
+          detail: name === 'Tung Tung Tung Sahur' ? 'tung' : name === 'Lirilì Larilà' ? 'lirili' : 'brainrot',
+        }),
+      );
       rotDeath.classList.toggle('is-tung', !!special);
       rotDeath.querySelector('.death-title')!.textContent = special
         ? name

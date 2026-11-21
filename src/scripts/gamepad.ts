@@ -149,6 +149,7 @@ function poll() {
 }
 
 function note() {
+  document.dispatchEvent(new CustomEvent('achieve', { detail: 'gamepad' })); // src/scripts/achievements.ts
   try {
     if (sessionStorage.getItem('gamepad-note') === '1') return;
     sessionStorage.setItem('gamepad-note', '1');

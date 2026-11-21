@@ -1,0 +1,25 @@
+---
+// The full achievements board (the same list as the 🏆 window in the footer). Not in search engines.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Achievements from '../../components/Achievements.astro';
+import Footer from '../../components/Footer.astro';
+import { localePath } from '../../i18n/ui';
+---
+
+<BaseLayout lang="it" title="Achievement | Federico Manzoni" noindex>
+  <main id="main" class="container">
+    <p class="ach-back"><a href={localePath('it', '/')}>← Home</a></p>
+    <Achievements lang="it" mode="page" />
+  </main>
+  <Footer lang="it" />
+</BaseLayout>
+
+<style>
+  .ach-back {
+    position: absolute;
+    top: 40px;
+  }
+  .ach-back a {
+    color: var(--color-link);
+  }
+</style>

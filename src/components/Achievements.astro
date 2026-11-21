@@ -1,0 +1,241 @@
+---
+// Achievements board (src/data/achievements.ts, kept by src/scripts/achievements.ts).
+// mode="dialog": the window that the 🏆 button in the footer opens, on every page.
+// mode="page": the full board on /achievements and /it/achievements.
+// Secret achievements are written as ??? until unlocked: the script fills in their real name from the data block.
+import { achievementText } from '../data/achievements';
+import { localePath, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  mode: 'dialog' | 'page';
+}
+const { lang, mode } = Astro.props;
+const list = achievementText(lang);
+const T =
+  lang === 'it'
+    ? {
+        title: 'Achievement',
+        intro: 'Gli easter egg del sito, raccolti qui. Restano salvati solo in questo browser.',
+        progress: 'sbloccati',
+        locked: 'bloccato',
+        unlocked: 'Achievement sbloccato',
+        open: 'Apri la bacheca completa',
+        close: 'Chiudi',
+      }
+    : {
+        title: 'Achievements',
+        intro: 'The easter eggs of this site, collected here. Saved in this browser only.',
+        progress: 'unlocked',
+        locked: 'locked',
+        unlocked: 'Achievement unlocked',
+        open: 'Open the full board',
+        close: 'Close',
+      };
+// what the script needs: the toast heading and every achievement's text in this language (also the secret ones)
+const data = JSON.stringify({ unlocked: T.unlocked, locked: T.locked, list }).replace(/</g, '\\u003c');
+const headingId = `ach-title-${mode}`;
+---
+
+{
+  mode === 'dialog' ? (
+    <dialog class="ach-dialog" aria-labelledby={headingId} data-ach-dialog>
+      <div class="ach-head">
+        <h2 class="ach-heading" id={headingId}>
+          🏆 {T.title}
+        </h2>
+        <p class="ach-progress">
+          <span data-ach-count>0</span>/{list.length} {T.progress}
+        </p>
+        <form method="dialog">
+          <button type="submit" class="ach-close" aria-label={T.close}>
+            ×
+          </button>
+        </form>
+      </div>
+      <ul class="ach-list" role="list">
+        {list.map((a) => (
+          <li class="ach" data-ach={a.id}>
+            <span class="ach-icon" aria-hidden="true">
+              {a.secret ? '❔' : a.icon}
+            </span>
+            <span class="ach-text">
+              <span class="ach-title">{a.secret ? '???' : a.title}</span>
+              <span class="ach-desc">{a.secret ? '???' : a.desc}</span>
+            </span>
+            <span class="visually-hidden" data-ach-state>
+              {T.locked}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p class="ach-more">
+        <a href={localePath(lang, '/achievements/')}>{T.open} →</a>
+      </p>
+    </dialog>
+  ) : (
+    <section class="ach-page" aria-labelledby={headingId}>
+      <h1 class="title ach-page-title" id={headingId}>
+        🏆 {T.title}
+      </h1>
+      <p class="ach-intro">{T.intro}</p>
+      <p class="ach-progress">
+        <span data-ach-count>0</span>/{list.length} {T.progress}
+      </p>
+      <ul class="ach-list ach-list--page" role="list">
+        {list.map((a) => (
+          <li class="ach" data-ach={a.id}>
+            <span class="ach-icon" aria-hidden="true">
+              {a.secret ? '❔' : a.icon}
+            </span>
+            <span class="ach-text">
+              <span class="ach-title">{a.secret ? '???' : a.title}</span>
+              <span class="ach-desc">{a.secret ? '???' : a.desc}</span>
+            </span>
+            <span class="visually-hidden" data-ach-state>
+              {T.locked}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+<script type="application/json" data-ach-data set:html={data} />
+
+<style>
+  .ach-dialog {
+    text-align: left; /* it sits inside the footer, whose text is centred */
+    font-size: 1rem;
+    letter-spacing: normal;
+    width: min(720px, calc(100vw - 32px));
+    max-height: min(80vh, 760px);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-card, 24px);
+    background: var(--color-bg);
+    color: var(--color-text);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .ach-dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ach-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .ach-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 4px 16px;
+    padding: 22px 24px 14px;
+  }
+
+  .ach-heading {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 500;
+  }
+
+  .ach-head .ach-progress {
+    grid-column: 1;
+    margin: 0;
+  }
+
+  .ach-head form {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .ach-close {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--color-fill);
+    color: var(--color-on-fill);
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+
+  .ach-progress {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .ach-list {
+    margin: 0;
+    padding: 4px 24px 8px;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+    overflow-y: auto;
+  }
+
+  .ach {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+    opacity: 0.55;
+    filter: grayscale(1);
+  }
+
+  .ach.is-unlocked {
+    opacity: 1;
+    filter: none;
+    border-color: var(--color-fill-line, var(--color-brand));
+    background: color-mix(in srgb, var(--color-brand) 8%, transparent);
+  }
+
+  .ach-icon {
+    flex: none;
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+
+  .ach-text {
+    display: grid;
+    gap: 2px;
+  }
+
+  .ach-title {
+    font-weight: 600;
+  }
+
+  .ach-desc {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .ach-more {
+    margin: 0;
+    padding: 12px 24px 20px;
+  }
+
+  .ach-more a,
+  .ach-page a {
+    color: var(--color-link);
+  }
+
+  .ach-page {
+    padding-block: clamp(96px, 10vw, 140px) 64px;
+  }
+
+  .ach-intro {
+    margin: 16px 0 4px;
+  }
+
+  .ach-list--page {
+    padding: 20px 0 0;
+    overflow: visible;
+  }
+</style>

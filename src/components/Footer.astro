@@ -3,6 +3,8 @@
 // Contacts are cards: each e-mail card opens the mail app, the small button next to it copies the address.
 import { site, contact } from '../data/site';
 import { t, type Lang } from '../i18n/ui';
+import Achievements from './Achievements.astro';
+import { achievements } from '../data/achievements';
 
 interface Props {
   lang: Lang;
@@ -118,10 +120,22 @@ const emailLabel = (email: string) => {
         }
       </div>
       <!-- hover: a little thank-you to the AI that helped build the site -->
-      <p class="sign" data-cursor="& Claude :)">
+      <p class="sign" data-cursor="& Claude :)" data-achieve="credits">
         {s.signature.split('{name}')[0]}<span class="pii pii-name">{site.name}</span>{s.signature.split('{name}')[1]}
       </p>
+      <!-- achievements: how many easter eggs this visitor has found; opens the board (src/components/Achievements.astro) -->
+      <button
+        type="button"
+        class="ach-btn"
+        data-ach-open
+        aria-haspopup="dialog"
+        data-cursor={lang === 'it' ? 'Achievement' : 'Achievements'}>
+        <span aria-hidden="true">🏆</span>
+        <span class="visually-hidden">{lang === 'it' ? 'Achievement:' : 'Achievements:'}</span>
+        <span data-ach-count>0</span>/{achievements.length}
+      </button>
     </div>
+    <Achievements lang={lang} mode="dialog" />
     <p class="visually-hidden" aria-live="polite" data-copy-status></p>
   </div>
 </footer>
@@ -412,6 +426,25 @@ const emailLabel = (email: string) => {
     grid-column: 2;
   }
 
+  .ach-btn {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid color-mix(in srgb, var(--color-text-inverse) 45%, transparent);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--color-text-inverse) 12%, transparent);
+    color: var(--color-text-inverse);
+    font: 500 13px / 1.2 var(--font-display);
+  }
+
+  .ach-btn:hover {
+    background: color-mix(in srgb, var(--color-text-inverse) 22%, transparent);
+  }
+
   .pointer-row {
     grid-column: 1;
     grid-row: 1;
@@ -505,6 +538,11 @@ const emailLabel = (email: string) => {
     }
     .pointer-row {
       grid-row: 2;
+      justify-self: center;
+    }
+    .ach-btn {
+      grid-column: 1;
+      grid-row: 3;
       justify-self: center;
     }
     .cards {

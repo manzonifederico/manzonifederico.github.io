@@ -758,6 +758,75 @@ html.gamepad-nav :focus {
   opacity: 0;
 }
 
+/* ---------- Achievement notice (src/scripts/achievements.ts) ---------- */
+.ach-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 18px 10px 12px;
+  border-radius: var(--radius-pill);
+  background: #1a1a1a;
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transform: translateX(-50%);
+  animation: ach-in 350ms var(--ease) both;
+}
+
+.ach-toast.is-out {
+  animation: ach-out 400ms var(--ease) both;
+}
+
+.ach-toast-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #2c2c2c;
+  font-size: 1.35rem;
+}
+
+.ach-toast-text {
+  display: grid;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.ach-toast-text strong {
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9fc2ff;
+}
+
+@keyframes ach-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 24px);
+  }
+}
+
+@keyframes ach-out {
+  to {
+    opacity: 0;
+    transform: translate(-50%, 24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ach-toast,
+  .ach-toast.is-out {
+    animation-duration: 1ms;
+  }
+}
+
 /* ---------- Smoothness (src/scripts/perf.ts) ---------- */
 /* glows off screen: their animations pause */
 .blob.is-paused,

@@ -27,7 +27,7 @@ export default defineConfig({
     sitemap({
       // tells search engines that /x/ and /it/x/ are the same page in two languages
       i18n: { defaultLocale: 'en', locales: { en: 'en', it: 'it' } },
-      filter: (page) => !page.includes('/404') && !page.includes('/sunfest25') && !page.includes('/cv-print'),
+      filter: (page) => !page.includes('/404') && !page.includes('/sunfest25') && !page.includes('/cv-print') && !page.includes('/achievements'),
       lastmod: new Date(),
     }),
     // security policy: the hash of each inline script, added after the build (src/plugins/csp-hashes.mjs)

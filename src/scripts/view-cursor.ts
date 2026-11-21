@@ -87,6 +87,7 @@ function setup(mouseSeen = false) {
     let i = 0;
     nudgeTimer = window.setTimeout(function next() {
       if (current !== target) return;
+      if (i === 0) document.dispatchEvent(new CustomEvent('achieve', { detail: 'nudge' }));
       label.textContent = lines[i++ % lines.length];
       width = el.offsetWidth;
       place();
@@ -128,6 +129,8 @@ function setup(mouseSeen = false) {
     width = el.offsetWidth;
     place();
     el.classList.add('is-visible');
+    // a hover that is an achievement (data-achieve="<id>", e.g. Rovigo, Venice, the signature)
+    if (target.dataset.achieve) document.dispatchEvent(new CustomEvent('achieve', { detail: target.dataset.achieve }));
     if (target.dataset.cursorNudges) startNudges(target);
     else stopNudges();
   };
@@ -246,6 +249,7 @@ function setup(mouseSeen = false) {
     html.classList.add('cursor-idle'); // hide the real pointer: the drawn triangle takes its place
     star.classList.add('is-on');
     window.setTimeout(() => star.classList.add('is-star'), 30);
+    document.dispatchEvent(new CustomEvent('achieve', { detail: 'star' })); // src/scripts/achievements.ts
   };
   const restart = () => {
     window.clearTimeout(idleTimer);
@@ -282,6 +286,7 @@ function setup(mouseSeen = false) {
     paint();
     star.classList.add('is-on', 'is-shake');
     html.classList.add('cursor-idle');
+    document.dispatchEvent(new CustomEvent('achieve', { detail: 'shake-square' }));
     star.style.setProperty('--shake', String(Math.min(4.2, 2.4 + speed * 0.6))); // square side: 24–42px
     window.clearTimeout(shakeEnd);
     shakeEnd = window.setTimeout(() => {

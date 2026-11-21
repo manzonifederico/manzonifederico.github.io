@@ -70,6 +70,7 @@ const names = { auto: s.themeAuto, light: s.themeLight, dark: s.themeDark };
       const text = label();
       if (status) status.textContent = text;
       document.dispatchEvent(new Event('theme-change')); // e.g. the pointer label refreshes its text
+      if (next === 'dark') document.dispatchEvent(new CustomEvent('achieve', { detail: 'dark' })); // src/scripts/achievements.ts
     });
   });
 </script>
