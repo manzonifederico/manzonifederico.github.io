@@ -1,25 +1,53 @@
 ---
 // The full achievements board (the same list as the 🏆 window in the footer). Not in search engines.
+// Top bar like the project pages: back to the home page on the left, theme and language switches on the right.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Achievements from '../components/Achievements.astro';
 import Footer from '../components/Footer.astro';
+import ThemeSwitch from '../components/ThemeSwitch.astro';
+import LangSwitch from '../components/LangSwitch.astro';
 import { localePath } from '../i18n/ui';
 ---
 
 <BaseLayout lang="en" title="Achievements | Federico Manzoni" noindex>
   <main id="main" class="container">
-    <p class="ach-back"><a href={localePath('en', '/')}>← Home</a></p>
+    <div class="ach-top">
+      <a class="ach-back" href={localePath('en', '/')}>← Home</a>
+      <div class="ach-controls">
+        <ThemeSwitch lang="en" />
+        <LangSwitch lang="en" />
+      </div>
+    </div>
     <Achievements lang="en" mode="page" />
   </main>
   <Footer lang="en" />
 </BaseLayout>
 
 <style>
-  .ach-back {
+  .ach-top {
     position: absolute;
-    top: 40px;
+    top: 32px;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: inherit;
   }
-  .ach-back a {
+
+  .ach-back {
     color: var(--color-link);
+  }
+
+  /* the theme button and the EN / IT switch, in the link colour */
+  .ach-controls {
+    --lang-ink: var(--color-link);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  main {
+    position: relative;
   }
 </style>
