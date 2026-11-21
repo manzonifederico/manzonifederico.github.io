@@ -65,20 +65,21 @@ function chime() {
   try {
     const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const ctx = new Ctx();
-    [660, 990].forEach((f, i) => {
+    // two low, soft notes (G4 then C5), pure sine, quiet, with a gentle swell and a long fade
+    [392, 523.25].forEach((f, i) => {
       const o = ctx.createOscillator();
       const g = ctx.createGain();
-      o.type = 'triangle';
+      o.type = 'sine';
       o.frequency.value = f;
-      const t = ctx.currentTime + i * 0.12;
+      const t = ctx.currentTime + i * 0.16;
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      g.gain.exponentialRampToValueAtTime(0.045, t + 0.06);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
       o.connect(g).connect(ctx.destination);
       o.start(t);
-      o.stop(t + 0.4);
+      o.stop(t + 1);
     });
-    window.setTimeout(() => ctx.close(), 800);
+    window.setTimeout(() => ctx.close(), 1400);
   } catch {
     /* no audio: the notice is enough */
   }
