@@ -622,6 +622,7 @@ const emailLabel = (email: string) => {
 
   .qr-actions {
     display: flex;
+    flex-wrap: wrap; /* on a very narrow screen the buttons go one under the other instead of breaking their words */
     justify-content: center;
     gap: 10px;
   }
@@ -635,10 +636,11 @@ const emailLabel = (email: string) => {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
-    padding: 0 20px;
+    padding: 0 18px;
     border-radius: var(--radius-pill);
     font: inherit;
     font-weight: 500;
+    white-space: nowrap; /* "Salva immagine" on one line */
     text-decoration: none;
     cursor: pointer;
   }
