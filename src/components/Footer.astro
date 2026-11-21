@@ -117,7 +117,8 @@ const emailLabel = (email: string) => {
           )
         }
       </div>
-      <p class="sign">
+      <!-- hover: a little thank-you to the AI that helped build the site -->
+      <p class="sign" data-cursor="& Claude :)">
         {s.signature.split('{name}')[0]}<span class="pii pii-name">{site.name}</span>{s.signature.split('{name}')[1]}
       </p>
     </div>
