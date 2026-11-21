@@ -1143,8 +1143,9 @@ const s = t(lang);
     pointer-events: none;
   }
 
-  :global(html.cursor-stolen),
-  :global(html.cursor-stolen *) {
+  /* #cursor-stolen in :is() (no element has that id) makes this stronger than the link/button pointers */
+  :global(:is(html.cursor-stolen, #cursor-stolen)),
+  :global(:is(html.cursor-stolen, #cursor-stolen) *) {
     cursor: none !important;
   }
 

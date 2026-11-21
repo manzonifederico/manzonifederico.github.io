@@ -303,9 +303,11 @@ button {
     cursor: var(--cur-square) !important;
   }
 
-  /* idle easter egg: while the drawn triangle/star is on screen, the real pointer is hidden */
-  html.cursor-idle,
-  html.cursor-idle * {
+  /* idle easter egg: while the drawn triangle/star is on screen, the real pointer is hidden. The #cursor-idle in
+     :is() (no element has that id) makes this rule stronger than the link/button/zoom pointers above and below,
+     so the real pointer also hides when it rests on a link */
+  :is(html.cursor-idle, #cursor-idle),
+  :is(html.cursor-idle, #cursor-idle) * {
     cursor: none !important;
   }
 
