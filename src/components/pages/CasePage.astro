@@ -197,7 +197,7 @@ const articleJsonLd = {
           </ul>
         </header>
 
-        <div class="case-layout container">
+        <div class:list={['case-layout', 'container', { 'case-layout--no-legend': !sections }]}>
           <!-- Linked legend: Start → sections of the current version → End -->
           <nav class="legend" aria-label={s.contents} hidden={!sections}>
             <details class="legend-box" data-legend>
@@ -321,6 +321,23 @@ const articleJsonLd = {
                     );
                   })}
                 </ul>
+                {
+                  project.acknowledgements && project.acknowledgements.length > 0 && (
+                    <>
+                      <h3 class="credits-sub">{lang === 'it' ? 'Ringraziamenti' : 'Acknowledgements'}</h3>
+                      <p class="credits-thanks">
+                        {lang === 'it' ? 'Grazie a ' : 'Thanks to '}
+                        {project.acknowledgements.map((n, i, all) => (
+                          <>
+                            <span class="pii pii-name">{n}</span>
+                            {i < all.length - 2 ? ', ' : i === all.length - 2 ? (lang === 'it' ? ' e ' : ' and ') : ''}
+                          </>
+                        ))}
+                        {lang === 'it' ? ' per il supporto.' : ' for their support.'}
+                      </p>
+                    </>
+                  )
+                }
               </div>
               {
                 project.resources.length > 0 && (
@@ -1025,6 +1042,13 @@ const articleJsonLd = {
     }
   }
 
+  /* no quick links (a short page without sections): the text keeps its place, as on the other project pages */
+  @media (min-width: 1180px) {
+    .case-layout--no-legend > .reader {
+      grid-column: 2;
+    }
+  }
+
   .legend {
     align-self: start;
     font-family: var(--font-display);
@@ -1561,6 +1585,18 @@ const articleJsonLd = {
     display: inline-block;
     min-height: 24px;
     color: var(--color-link);
+  }
+
+  /* acknowledgements: a smaller heading under the team */
+  .credits-sub {
+    margin: 22px 0 6px;
+    font-family: var(--theme-heading-font);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .credits-thanks {
+    margin: 0;
   }
 
   .credits-title {

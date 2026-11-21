@@ -62,6 +62,8 @@ export interface Project {
   cursor: string;
   /** work in progress: the card says "Coming soon" and the article is only its outline (not counted for "Well-read") */
   comingSoon?: boolean;
+  /** people thanked for their support, under the team on the project page */
+  acknowledgements?: string[];
 }
 
 /** Card subtitle/description in the requested language */
@@ -76,7 +78,8 @@ export const projects: Project[] = [
     subtitle: 'Returning to a video game after a break',
     description: 'Re-onboarding: a study on how players navigate, remember and adapt when they return to a game after a break. Coming soon.',
     tags: ['Experimental Design', 'User Research', 'Games', 'Uni Project', 'Thesis Project'],
-    team: ['Federico Manzoni (me)'],
+    team: ['Federico Manzoni (me)', 'Hilda Hadan', 'Geneva Smith', 'Martina Cvajner', 'Lennart Nacke'],
+    acknowledgements: ['Joseph Tu', 'Derrick Wang', 'Simone Bassanelli', 'Francesca Foffano'],
     resources: [],
     it: {
       subtitle: 'Tornare a un videogioco dopo una pausa',
