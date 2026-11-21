@@ -26,6 +26,114 @@ const s = t(lang);
   </div>
 </header>
 
+<script>
+  // EN / IT and the theme button sit in the top-right corner, where the moving blob sometimes reaches. A few times a
+  // second this works out how much of the blob's colour is behind them (from the blob's real position: its layers are
+  // blurred ellipses) and picks the ink that reads better there: the brand blue on the page, the light ink on the blob.
+  // It only runs while the top of the page is on screen.
+  const hero = document.querySelector<HTMLElement>('.hero');
+  const blob = hero?.querySelector<HTMLElement>('.blob');
+  const lobe = blob?.querySelector<HTMLElement>('.lobe');
+  const corner = hero?.querySelector<HTMLElement>('.hero-lang');
+
+  if (hero && blob && lobe && corner) {
+    const root = document.documentElement;
+    const phi = (x: number) => 1 / (1 + Math.exp(-1.702 * x)); // close to the normal curve of a Gaussian blur
+    const rgb = (v: string) => {
+      const c = document.createElement('canvas').getContext('2d')!;
+      c.fillStyle = v.trim() || '#000';
+      const h = c.fillStyle as string; // always "#rrggbb" for opaque colours
+      return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    };
+    const lum = (c: number[]) => {
+      const l = c.map((v) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2];
+    };
+    const contrast = (a: number[], b: number[]) => {
+      const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+      return (x + 0.05) / (y + 0.05);
+    };
+    const matrix = (cs: CSSStyleDeclaration) => new DOMMatrix(cs.transform === 'none' ? undefined : cs.transform);
+
+    // one layer: its box inside the blob, its own transform (about its centre) and its blur
+    const layer = (cs: CSSStyleDeclaration, x: number, y: number, w: number, h: number) => ({
+      box: [x, y, w, h],
+      m: new DOMMatrix().translate(x + w / 2, y + h / 2).multiply(matrix(cs)).translate(-w / 2, -h / 2),
+      blur: parseFloat(cs.filter.replace(/[^\d.]/g, '')) || 1,
+    });
+
+    const coverage = (points: DOMPoint[]) => {
+      const bs = getComputedStyle(blob);
+      const W = blob.offsetWidth;
+      const H = blob.offsetHeight;
+      const hr = hero.getBoundingClientRect();
+      // "none", "0px" or "12px 4px": a missing value is 0
+      const [tx = 0, ty = 0] = (bs.translate === 'none' ? '' : bs.translate).split(' ').map((v) => parseFloat(v) || 0);
+      // the blob: tilt ("translate"), then its breathing transform, both about its centre
+      const mb = new DOMMatrix()
+        .translate(hr.left + blob.offsetLeft + W / 2 + tx, hr.top + blob.offsetTop + H / 2 + ty)
+        .multiply(matrix(bs))
+        .translate(-W / 2, -H / 2);
+      const before = getComputedStyle(blob, '::before');
+      const after = getComputedStyle(blob, '::after');
+      const layers = [
+        layer(before, 0, 0, W, H),
+        layer(after, parseFloat(after.left), parseFloat(after.top), parseFloat(after.width), parseFloat(after.height)),
+        layer(getComputedStyle(lobe), lobe.offsetLeft, lobe.offsetTop, lobe.offsetWidth, lobe.offsetHeight),
+      ];
+      let sum = 0;
+      for (const p of points) {
+        let clear = 1;
+        for (const l of layers) {
+          const q = mb.multiply(l.m).inverse().transformPoint(p);
+          const [, , w, h] = l.box;
+          const dx = q.x - w / 2;
+          const dy = q.y - h / 2;
+          const r = Math.hypot(dx / (w / 2), dy / (h / 2));
+          const inside = r === 0 ? Math.min(w, h) / 2 : Math.hypot(dx, dy) * (1 / r - 1); // px inside the edge
+          clear *= 1 - phi(inside / l.blur);
+        }
+        sum += 1 - clear;
+      }
+      return sum / points.length;
+    };
+
+    let timer = 0;
+    const check = () => {
+      const r = corner.getBoundingClientRect();
+      if (!r.width) return;
+      const points = [0.15, 0.5, 0.85].flatMap((fx) =>
+        [0.3, 0.7].map((fy) => new DOMPoint(r.left + r.width * fx, r.top + r.height * fy)),
+      );
+      const a = coverage(points);
+      const css = getComputedStyle(root);
+      const page = rgb(css.getPropertyValue('--color-bg'));
+      const block = rgb(css.getPropertyValue('--color-block'));
+      const behind = page.map((v, i) => v + (block[i] - v) * a);
+      const onPage = contrast(rgb(css.getPropertyValue('--color-brand-ink')), behind);
+      const onBlob = contrast(rgb(css.getPropertyValue('--color-text-inverse')), behind);
+      const now = corner.dataset.ink;
+      // a small margin keeps it from flickering while the blob's edge hovers right on the switch
+      if (onBlob > onPage * (now === 'dark' ? 1.15 : 1)) corner.dataset.ink = 'light';
+      else if (onPage > onBlob * (now === 'light' ? 1.15 : 1)) corner.dataset.ink = 'dark';
+    };
+    const start = () => {
+      if (!timer) timer = window.setInterval(check, 200);
+      check();
+    };
+    const stop = () => {
+      window.clearInterval(timer);
+      timer = 0;
+    };
+    new IntersectionObserver(([e]) => (e.isIntersecting && !document.hidden ? start() : stop())).observe(corner);
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    addEventListener('resize', check, { passive: true });
+    new MutationObserver(check).observe(root, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+  }
+
+  export {}; // a module, so its names stay private
+</script>
+
 <style>
   .hero {
     position: relative;
@@ -175,11 +283,27 @@ const s = t(lang);
     right: 26px;
   }
 
-  /* below ~860px the blob reaches the top-right corner, so the switch turns white */
+  /* below ~860px the blob reaches the top-right corner, so the switch starts white. Once the page runs, the script
+     below follows the moving blob and sets data-ink: light ink while blue is behind the switch, brand blue on white */
   @media (max-width: 860px) {
     .hero-lang {
       --lang-ink: var(--color-text-inverse);
     }
+  }
+
+  .hero-lang[data-ink='light'] {
+    --lang-ink: var(--color-text-inverse);
+  }
+
+  .hero-lang[data-ink='dark'] {
+    --lang-ink: var(--color-brand-ink);
+  }
+
+  .hero-lang :global(.lang),
+  .hero-lang :global(.theme-btn) {
+    transition:
+      color 400ms var(--ease),
+      background var(--dur) var(--ease);
   }
 
   @media (max-width: 720px) {
