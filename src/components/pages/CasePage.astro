@@ -98,6 +98,10 @@ const Bibliography = bibliography?.Content;
 
 // opens on the first mode (Key points)
 const defaultMode: VersionKey = rendered[0].key;
+// one version only (e.g. a work in progress that is just a few paragraphs): no "How do you wish to read" choice and,
+// when it has no sections, no quick links either
+const single = rendered.length === 1;
+const sections = rendered.some((v) => v.headings.length > 0);
 const related = project.related ? getProject(project.related) : undefined;
 
 // ---------- SEO ----------
@@ -177,7 +181,17 @@ const articleJsonLd = {
             {project.tags.map((tag) => (
               <Tag
                 label={tagLabel(lang, tag)}
-                note={tag === 'Uni Project' ? (lang === 'it' ? 'Università di Trento' : 'University of Trento') : undefined}
+                note={
+                  tag !== 'Uni Project'
+                    ? undefined
+                    : project.slug === 're-onboarding' // run at Waterloo, for the Master's thesis at Trento
+                      ? lang === 'it'
+                        ? 'Università di Waterloo e Università di Trento'
+                        : 'University of Waterloo & University of Trento'
+                      : lang === 'it'
+                        ? 'Università di Trento'
+                        : 'University of Trento'
+                }
               />
             ))}
           </ul>
@@ -185,7 +199,7 @@ const articleJsonLd = {
 
         <div class="case-layout container">
           <!-- Linked legend: Start → sections of the current version → End -->
-          <nav class="legend" aria-label={s.contents}>
+          <nav class="legend" aria-label={s.contents} hidden={!sections}>
             <details class="legend-box" data-legend>
               <summary
                 data-cursor={lang === 'it' ? 'Mostra indice' : 'Show index'}
@@ -211,9 +225,9 @@ const articleJsonLd = {
           </nav>
 
           <div class="reader">
-            <h2 class="reader-q" id="reader-q">{s.readHow}</h2>
-            <p class="reader-hint" id="reader-hint">{s.readHowHint}</p>
-            <div class="modes" role="tablist" aria-labelledby="reader-q" aria-describedby="reader-hint">
+            <h2 class="reader-q" id="reader-q" hidden={single}>{s.readHow}</h2>
+            <p class="reader-hint" id="reader-hint" hidden={single}>{s.readHowHint}</p>
+            <div class="modes" role="tablist" aria-labelledby="reader-q" aria-describedby="reader-hint" hidden={single}>
               {
                 rendered.map((v) => (
                   <button
@@ -255,9 +269,9 @@ const articleJsonLd = {
               rendered.map((v) => (
                 <section
                   class="prose"
-                  role="tabpanel"
+                  role={single ? undefined : 'tabpanel'}
                   id={`panel-${v.key}`}
-                  aria-labelledby={`tab-${v.key}`}
+                  aria-labelledby={single ? undefined : `tab-${v.key}`}
                   data-panel={v.key}
                   tabindex="0"
                   lang={v.lang}
@@ -1112,6 +1126,11 @@ const articleJsonLd = {
   .reader-hint {
     margin: 6px 0 0;
     font-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+  }
+
+  /* a page with one version only has no choice to make (CasePage: "single") */
+  .modes[hidden] {
+    display: none;
   }
 
   /* the three versions as three big choices, each with its reading time, so they can't be missed */
