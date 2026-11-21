@@ -127,7 +127,7 @@ const emailLabel = (email: string) => {
           data-cursor={lang === 'it' ? 'Achievement' : 'Achievements'}>
           <span aria-hidden="true">🏆</span>
           <span class="visually-hidden">{lang === 'it' ? 'Achievement:' : 'Achievements:'}</span>
-          <span data-ach-count>0</span>/{achievements.length}
+          <span data-ach-count>0</span>/<span data-ach-total>{achievements.length}</span>
         </button>
       </div>
       <!-- hover: a little thank-you to the AI that helped build the site -->

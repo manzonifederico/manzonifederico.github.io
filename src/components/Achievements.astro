@@ -18,6 +18,9 @@ const T =
         title: 'Achievement',
         intro: 'Gli easter egg del sito, raccolti qui. Restano salvati solo in questo browser.',
         progress: 'sbloccati',
+        pcOnly: 'solo computer',
+        phoneOnly: 'solo telefono',
+        bonus: 'bonus',
         locked: 'bloccato',
         unlocked: 'Achievement sbloccato',
         open: 'Apri la bacheca completa',
@@ -27,6 +30,9 @@ const T =
         title: 'Achievements',
         intro: 'The easter eggs of this site, collected here. Saved in this browser only.',
         progress: 'unlocked',
+        pcOnly: 'computer only',
+        phoneOnly: 'phone only',
+        bonus: 'bonus',
         locked: 'locked',
         unlocked: 'Achievement unlocked',
         open: 'Open the full board',
@@ -45,7 +51,7 @@ const headingId = `ach-title-${mode}`;
           🏆 {T.title}
         </h2>
         <p class="ach-progress">
-          <span data-ach-count>0</span>/{list.length} {T.progress}
+          <span data-ach-count>0</span>/<span data-ach-total>{list.length}</span> {T.progress}
         </p>
         <form method="dialog">
           <button type="submit" class="ach-close" aria-label={T.close}>
@@ -55,7 +61,7 @@ const headingId = `ach-title-${mode}`;
       </div>
       <ul class="ach-list" role="list">
         {list.map((a) => (
-          <li class="ach" data-ach={a.id}>
+          <li class="ach" data-ach={a.id} data-on={a.on}>
             {a.svg && !a.secret ? (
               <span class="ach-icon" aria-hidden="true" set:html={a.svg} />
             ) : (
@@ -66,6 +72,9 @@ const headingId = `ach-title-${mode}`;
             <span class="ach-text">
               <span class="ach-title">{a.secret ? '???' : a.title}</span>
               <span class="ach-desc">{a.secret ? '???' : a.desc}</span>
+              {(a.on || a.bonus) && (
+                <span class="ach-tag">{a.bonus ? `🎁 ${T.bonus}` : a.on === 'pc' ? `🖱️ ${T.pcOnly}` : `📱 ${T.phoneOnly}`}</span>
+              )}
             </span>
             <span class="visually-hidden" data-ach-state>
               {T.locked}
@@ -84,11 +93,11 @@ const headingId = `ach-title-${mode}`;
       </h1>
       <p class="ach-intro">{T.intro}</p>
       <p class="ach-progress">
-        <span data-ach-count>0</span>/{list.length} {T.progress}
+        <span data-ach-count>0</span>/<span data-ach-total>{list.length}</span> {T.progress}
       </p>
       <ul class="ach-list ach-list--page" role="list">
         {list.map((a) => (
-          <li class="ach" data-ach={a.id}>
+          <li class="ach" data-ach={a.id} data-on={a.on}>
             {a.svg && !a.secret ? (
               <span class="ach-icon" aria-hidden="true" set:html={a.svg} />
             ) : (
@@ -99,6 +108,9 @@ const headingId = `ach-title-${mode}`;
             <span class="ach-text">
               <span class="ach-title">{a.secret ? '???' : a.title}</span>
               <span class="ach-desc">{a.secret ? '???' : a.desc}</span>
+              {(a.on || a.bonus) && (
+                <span class="ach-tag">{a.bonus ? `🎁 ${T.bonus}` : a.on === 'pc' ? `🖱️ ${T.pcOnly}` : `📱 ${T.phoneOnly}`}</span>
+              )}
             </span>
             <span class="visually-hidden" data-ach-state>
               {T.locked}
@@ -229,6 +241,15 @@ const headingId = `ach-title-${mode}`;
   .ach-desc {
     font-size: 0.875rem;
     color: var(--color-text-muted);
+  }
+
+  .ach-tag {
+    justify-self: start;
+    margin-top: 4px;
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--color-text) 8%, transparent);
+    font-size: 0.75rem;
   }
 
   .ach-more {

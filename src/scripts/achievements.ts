@@ -10,6 +10,7 @@ interface Item {
   secret: boolean;
   bonus: boolean;
   svg?: string;
+  on?: 'pc' | 'phone';
   title: string;
   desc: string;
 }
@@ -34,6 +35,10 @@ const write = (s: Record<string, number>) => {
   }
 };
 
+// this device: a computer (mouse or trackpad) or a phone / tablet (touch only)
+const device = (): 'pc' | 'phone' => (matchMedia('(any-hover: hover) and (any-pointer: fine)').matches ? 'pc' : 'phone');
+const counts = (a: Item) => !a.on || a.on === device(); // possible here
+
 // boards and counters: unlocked ones in colour, secret ones get their real name once unlocked
 function render() {
   if (!data) return;
@@ -53,8 +58,10 @@ function render() {
       li.querySelector('.ach-desc')!.textContent = item.desc;
     }
   });
-  const count = data.list.filter((a) => got[a.id]).length;
-  document.querySelectorAll('[data-ach-count]').forEach((el) => (el.textContent = String(count)));
+  // the counter: what's possible on this device (bonus ones included), plus any already won elsewhere in this browser
+  const mine = data.list.filter((a) => counts(a) || got[a.id]);
+  document.querySelectorAll('[data-ach-count]').forEach((el) => (el.textContent = String(mine.filter((a) => got[a.id]).length)));
+  document.querySelectorAll('[data-ach-total]').forEach((el) => (el.textContent = String(mine.length)));
 }
 
 // ---------- the notice ----------
@@ -126,8 +133,8 @@ function unlock(id: string) {
     queue.push(item);
     if (!showing) next();
   }
-  // every other one unlocked (bonus ones aside): platinum
-  if (id !== 'platinum' && data.list.every((a) => a.id === 'platinum' || a.bonus || got[a.id]))
+  // every other one possible on this device unlocked (bonus ones aside): platinum
+  if (id !== 'platinum' && data.list.every((a) => a.id === 'platinum' || a.bonus || !counts(a) || got[a.id]))
     window.setTimeout(() => unlock('platinum'), 600);
 }
 
