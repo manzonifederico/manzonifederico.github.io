@@ -207,8 +207,9 @@ const s = t(lang);
     animation: core 8s ease-in-out infinite alternate;
   }
 
-  /* right-hand lobe */
+  /* right-hand lobe (lopsided, so as it turns the bulge changes shape) */
   .blob::after {
+    border-radius: 62% 38% 55% 45% / 48% 58% 42% 52%;
     left: 52%;
     top: 22%;
     width: 52%;
@@ -218,6 +219,7 @@ const s = t(lang);
 
   /* bottom lobe */
   .lobe {
+    border-radius: 40% 60% 48% 52% / 58% 44% 56% 42%;
     left: 14%;
     top: 44%;
     width: 58%;
@@ -236,19 +238,19 @@ const s = t(lang);
 
   @keyframes lobe-a {
     from {
-      transform: translate(-10%, -6%) scale(0.8);
+      transform: translate(-16%, -8%) rotate(-18deg) scale(0.7, 0.75);
     }
     to {
-      transform: translate(16%, 12%) scale(1.15);
+      transform: translate(26%, 16%) rotate(16deg) scale(1.3, 1.12);
     }
   }
 
   @keyframes lobe-b {
     from {
-      transform: translate(8%, -12%) scale(0.85, 0.75);
+      transform: translate(14%, -16%) rotate(14deg) scale(0.75, 0.65);
     }
     to {
-      transform: translate(-6%, 10%) scale(1.12, 1.05);
+      transform: translate(-12%, 15%) rotate(-12deg) scale(1.25, 1.1);
     }
   }
 
