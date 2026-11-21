@@ -21,7 +21,10 @@ const { lang } = Astro.props;
     footer.appendChild(note); // lives inside the footer, right under its last row
     const MAX = 80; // px the footer can stretch
     const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-    const atBottom = () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+    // at the end of the page. On phones the address bar that slides in and out changes the screen height, so being
+    // "exactly at the end" isn't reliable: also near the end (120px) when the page stops moving under the finger
+    const gap = () => document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+    const atBottom = () => gap() <= 2;
     let base = 0; // the footer's own bottom padding
     let stretch = 0;
     let found = false;
@@ -50,10 +53,14 @@ const { lang } = Astro.props;
 
     // phones: a finger that keeps dragging up once the page is at its end (with some resistance)
     let startY: number | null = null;
+    let lastY = 0; // the page's scroll position at the previous move
+    let lastFinger = 0;
     document.addEventListener(
       'touchstart',
       (e) => {
         startY = e.touches.length === 1 ? e.touches[0].clientY : null;
+        lastY = window.scrollY;
+        lastFinger = startY ?? 0;
       },
       { passive: true },
     );
@@ -61,11 +68,16 @@ const { lang } = Astro.props;
       'touchmove',
       (e) => {
         if (startY === null) return;
-        if (!atBottom() && !stretch) {
-          startY = e.touches[0].clientY; // count the pull from where the page reached its end
+        const finger = e.touches[0].clientY;
+        const pushingDown = finger < lastFinger; // finger going up = trying to scroll further down
+        const stuck = pushingDown && Math.abs(window.scrollY - lastY) < 1 && gap() <= 120;
+        lastY = window.scrollY;
+        lastFinger = finger;
+        if (!atBottom() && !stuck && !stretch) {
+          startY = finger; // count the pull from where the page reached its end
           return;
         }
-        setStretch((startY - e.touches[0].clientY) * 0.45);
+        setStretch((startY - finger) * 0.45);
       },
       { passive: true },
     );
@@ -83,7 +95,7 @@ const { lang } = Astro.props;
     window.addEventListener(
       'wheel',
       (e) => {
-        if (e.deltaY <= 0 || (!atBottom() && !stretch)) return;
+        if (e.deltaY <= 0 || (gap() > 4 && !stretch)) return;
         setStretch(stretch + e.deltaY * 0.12);
         window.clearTimeout(wheelRelease);
         wheelRelease = window.setTimeout(release, 220);
