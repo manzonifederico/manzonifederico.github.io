@@ -10,6 +10,7 @@ interface Item {
   secret: boolean;
   bonus: boolean;
   svg?: string;
+  hint?: string;
   on?: 'pc' | 'phone';
   title: string;
   desc: string;
@@ -18,7 +19,9 @@ interface Item {
 const KEY = 'achievements';
 const html = document.documentElement;
 const dataEl = document.querySelector<HTMLScriptElement>('[data-ach-data]');
-const data = dataEl ? (JSON.parse(dataEl.textContent ?? '{}') as { unlocked: string; locked: string; list: Item[] }) : null;
+const data = dataEl
+  ? (JSON.parse(dataEl.textContent ?? '{}') as { unlocked: string; locked: string; tease: string; list: Item[] })
+  : null;
 
 const read = (): Record<string, number> => {
   try {
@@ -50,6 +53,8 @@ function render() {
     li.classList.toggle('is-unlocked', on);
     const state = li.querySelector('[data-ach-state]');
     if (state) state.textContent = on ? '' : data.locked;
+    const trigger = li.querySelector<HTMLButtonElement>('[data-hint-trigger]');
+    if (trigger) trigger.hidden = on; // revealed: no more clue needed
     if (item.secret && on) {
       const icon = li.querySelector('.ach-icon')!;
       if (item.svg) icon.innerHTML = item.svg; // our own flag drawing (src/data/achievements.ts)
@@ -150,6 +155,56 @@ function unlock(id: string) {
 }
 
 document.addEventListener('achieve', (e) => unlock(String((e as CustomEvent<string>).detail)));
+
+// ---------- clues on the secret cards ----------
+// Pressed twice (double click, double tap, or Enter / Space twice) a ??? card shows a bubble with a clue. The very
+// first time ever it only teases ("Not telling you"); after that, a very vague hint. The bubble is a live region, so
+// screen readers read it; it stays 5 s (longer while the pointer or focus is on the card) and Esc closes it.
+const TEASED = 'ach-hint-teased';
+const lastPress = new WeakMap<HTMLElement, number>();
+function showHint(li: HTMLElement, text: string) {
+  li.querySelector('.ach-hint')?.remove();
+  const bubble = document.createElement('p');
+  bubble.className = 'ach-hint';
+  bubble.setAttribute('role', 'status');
+  li.appendChild(bubble);
+  // filled a moment after it's in the page, so screen readers notice the change
+  window.setTimeout(() => (bubble.textContent = text), 30);
+  let timer = 0;
+  const close = () => {
+    window.clearTimeout(timer);
+    bubble.remove();
+    li.removeEventListener('pointerleave', later);
+    li.removeEventListener('focusout', later);
+  };
+  const later = () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => (li.matches(':hover, :focus-within') ? later() : close()), 5000);
+  };
+  later();
+  li.addEventListener('pointerleave', later);
+  li.addEventListener('focusout', later);
+  li.addEventListener('keydown', (e) => e.key === 'Escape' && close(), { once: true });
+}
+document.addEventListener('click', (e) => {
+  const btn = (e.target as Element | null)?.closest?.<HTMLElement>('[data-hint-trigger]');
+  const li = btn?.closest<HTMLElement>('[data-ach]');
+  if (!btn || !li || !data) return;
+  const now = performance.now();
+  const before = lastPress.get(li) ?? 0;
+  lastPress.set(li, now);
+  if (now - before > 500) return; // the first press of a pair
+  lastPress.set(li, 0);
+  let teased = false;
+  try {
+    teased = localStorage.getItem(TEASED) === '1';
+    localStorage.setItem(TEASED, '1');
+  } catch {
+    teased = true; // storage blocked: straight to the clue
+  }
+  const item = data.list.find((a) => a.id === li.dataset.ach);
+  showHint(li, teased ? item?.hint ?? data.tease : data.tease);
+});
 
 // "Let's talk": any contact used (an e-mail, copying an address, LinkedIn, GitHub, ORCID, ResearchGate)
 document.addEventListener('click', (e) => {

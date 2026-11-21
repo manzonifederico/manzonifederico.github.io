@@ -18,6 +18,9 @@ const T =
         title: 'Achievement',
         intro: 'Gli easter egg del sito, raccolti qui. Restano salvati solo in questo browser.',
         progress: 'sbloccati',
+        tip: 'Suggerimento: fai doppio clic (o tocca due volte) su un ??? per un indizio.',
+        hintLabel: 'Achievement segreto. Premi due volte per un indizio.',
+        tease: 'Non te lo dico 😏',
         pcOnly: 'solo computer',
         phoneOnly: 'solo telefono',
         bonus: 'bonus',
@@ -30,6 +33,9 @@ const T =
         title: 'Achievements',
         intro: 'The easter eggs of this site, collected here. Saved in this browser only.',
         progress: 'unlocked',
+        tip: 'Tip: double-click (or tap twice) a ??? for a clue.',
+        hintLabel: 'Secret achievement. Press twice for a clue.',
+        tease: 'Not telling you 😏',
         pcOnly: 'computer only',
         phoneOnly: 'phone only',
         bonus: 'bonus',
@@ -39,7 +45,7 @@ const T =
         close: 'Close',
       };
 // what the script needs: the toast heading and every achievement's text in this language (also the secret ones)
-const data = JSON.stringify({ unlocked: T.unlocked, locked: T.locked, list }).replace(/</g, '\\u003c');
+const data = JSON.stringify({ unlocked: T.unlocked, locked: T.locked, tease: T.tease, list }).replace(/</g, '\\u003c');
 const headingId = `ach-title-${mode}`;
 ---
 
@@ -53,6 +59,7 @@ const headingId = `ach-title-${mode}`;
         <p class="ach-progress">
           <span data-ach-count>0</span>/<span data-ach-total>{list.length}</span> {T.progress}
         </p>
+        <p class="ach-tip">{T.tip}</p>
         <form method="dialog">
           <button type="submit" class="ach-close" aria-label={T.close}>
             ×
@@ -79,6 +86,7 @@ const headingId = `ach-title-${mode}`;
             <span class="visually-hidden" data-ach-state>
               {T.locked}
             </span>
+            {a.secret && <button type="button" class="ach-hint-btn" data-hint-trigger aria-label={T.hintLabel} />}
           </li>
         ))}
       </ul>
@@ -95,6 +103,7 @@ const headingId = `ach-title-${mode}`;
       <p class="ach-progress">
         <span data-ach-count>0</span>/<span data-ach-total>{list.length}</span> {T.progress}
       </p>
+      <p class="ach-tip">{T.tip}</p>
       <ul class="ach-list ach-list--page" role="list">
         {list.map((a) => (
           <li class="ach" data-ach={a.id} data-on={a.on}>
@@ -115,6 +124,7 @@ const headingId = `ach-title-${mode}`;
             <span class="visually-hidden" data-ach-state>
               {T.locked}
             </span>
+            {a.secret && <button type="button" class="ach-hint-btn" data-hint-trigger aria-label={T.hintLabel} />}
           </li>
         ))}
       </ul>
@@ -141,6 +151,12 @@ const headingId = `ach-title-${mode}`;
   .ach-dialog[open] {
     display: flex;
     flex-direction: column;
+    overflow: hidden; /* only the list scrolls (one scrollbar, not two) */
+  }
+
+  .ach-dialog .ach-list {
+    flex: 1 1 auto;
+    min-height: 0; /* lets the list shrink to the window and scroll inside it */
   }
 
   .ach-dialog::backdrop {
@@ -199,19 +215,23 @@ const headingId = `ach-title-${mode}`;
   }
 
   .ach {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
     border-radius: 14px;
     border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+  }
+
+  /* locked: icon and text faded and grey (not the clue bubble, which stays fully readable) */
+  .ach:not(.is-unlocked) > .ach-icon,
+  .ach:not(.is-unlocked) > .ach-text {
     opacity: 0.55;
     filter: grayscale(1);
   }
 
   .ach.is-unlocked {
-    opacity: 1;
-    filter: none;
     border-color: var(--color-fill-line, var(--color-brand));
     background: color-mix(in srgb, var(--color-brand) 8%, transparent);
   }
@@ -242,6 +262,68 @@ const headingId = `ach-title-${mode}`;
   .ach-desc {
     font-size: 0.875rem;
     color: var(--color-text-muted);
+  }
+
+  .ach-tip {
+    grid-column: 1;
+    margin: 2px 0 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .ach-page .ach-tip {
+    margin-top: 4px;
+  }
+
+  /* secret cards: an invisible button over the whole card, pressed twice for a clue (mouse, finger or keyboard) */
+  .ach-hint-btn {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: none;
+    cursor: help;
+  }
+
+  .ach-hint-btn:focus-visible {
+    outline: 3px solid var(--color-focus, var(--color-brand));
+    outline-offset: 2px;
+  }
+
+  .ach-hint-btn[hidden] {
+    display: none;
+  }
+
+  /* the clue: a bubble inside the card (so the window's edges never cut it), read out by screen readers */
+  .ach :global(.ach-hint) {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    z-index: 1;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    animation: hint-in 200ms ease both;
+  }
+
+  @keyframes hint-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ach :global(.ach-hint) {
+      animation: none;
+    }
   }
 
   .ach-tag {

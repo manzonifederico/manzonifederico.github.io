@@ -16,8 +16,9 @@ export interface Achievement {
   /** only possible on one kind of device: 'pc' needs a mouse or trackpad, 'phone' a touch screen. Platinum asks only
    *  for the ones possible on the device in use */
   on?: 'pc' | 'phone';
-  en: { title: string; desc: string };
-  it: { title: string; desc: string };
+  /** hint: a very vague clue for secret ones, shown when the ??? card is pressed twice */
+  en: { title: string; desc: string; hint?: string };
+  it: { title: string; desc: string; hint?: string };
 }
 
 // the flag of the Republic of Venice (public/icons/venice-flag.webp, from the public-domain SVG on Wikimedia Commons;
@@ -27,15 +28,15 @@ const VENICE_FLAG = '<img src="/icons/venice-flag.webp" alt="" width="240" heigh
 export const achievements: Achievement[] = [
   { id: 'first-squash', icon: '🦟', en: { title: 'First blood', desc: 'Squash one of the little arrows' }, it: { title: 'Primo sangue', desc: 'Schiaccia una delle frecce' } },
   { id: 'died', icon: '💀', en: { title: 'You died', desc: 'Lose to the big arrow' }, it: { title: 'Sei morto', desc: 'Perdi contro la freccia gigante' } },
-  { id: 'praise', icon: '☀️', secret: true, en: { title: 'Praise the Sun', desc: 'See the soldiers praise the sun on the game-over screen' }, it: { title: 'Lode al Sole', desc: 'Vedi i soldatini lodare il sole nella schermata di game over' } },
+  { id: 'praise', icon: '☀️', secret: true, en: { title: 'Praise the Sun', desc: 'See the soldiers praise the sun on the game-over screen', hint: 'After a fiery ending, look up' }, it: { title: 'Lode al Sole', desc: 'Vedi i soldatini lodare il sole nella schermata di game over', hint: 'Dopo una fine bollente, guarda in alto' } },
   { id: 'died-10', icon: '🔥', en: { title: 'Prepare to die', desc: 'Die 10 times' }, it: { title: 'Preparati a morire', desc: 'Muori 10 volte' } },
   { id: 'phone-shake', on: 'phone', icon: '📳', en: { title: 'Earthquake', desc: 'Shake your phone while the arrows are around' }, it: { title: 'Terremoto', desc: 'Scuoti il telefono mentre ci sono le frecce' } },
-  { id: 'star', on: 'pc', icon: '✴️', secret: true, en: { title: 'Patience', desc: 'Leave the mouse still until something happens' }, it: { title: 'Pazienza', desc: 'Lascia fermo il mouse finché succede qualcosa' } },
-  { id: 'shake-square', on: 'pc', icon: '🟦', secret: true, en: { title: 'Where’s my pointer?', desc: 'Shake the mouse' }, it: { title: 'Dov’è il puntatore?', desc: 'Scuoti il mouse' } },
-  { id: 'bottom-note', icon: '🙈', secret: true, en: { title: 'Nothing to see here', desc: 'Pull past the end of the page' }, it: { title: 'Niente da vedere', desc: 'Tira oltre la fine della pagina' } },
+  { id: 'star', on: 'pc', icon: '✴️', secret: true, en: { title: 'Patience', desc: 'Leave the mouse still until something happens', hint: 'Good things come to those who wait' }, it: { title: 'Pazienza', desc: 'Lascia fermo il mouse finché succede qualcosa', hint: 'Chi aspetta, qualcosa ottiene' } },
+  { id: 'shake-square', on: 'pc', icon: '🟦', secret: true, en: { title: 'Where’s my pointer?', desc: 'Shake the mouse', hint: 'Sometimes all it takes is a little shake' }, it: { title: 'Dov’è il puntatore?', desc: 'Scuoti il mouse', hint: 'A volte basta una scossa' } },
+  { id: 'bottom-note', icon: '🙈', secret: true, en: { title: 'Nothing to see here', desc: 'Pull past the end of the page', hint: 'There’s always something below the bottom' }, it: { title: 'Niente da vedere', desc: 'Tira oltre la fine della pagina', hint: 'C’è sempre qualcosa sotto il fondo' } },
   { id: 'rovigo', on: 'pc', icon: '😴', en: { title: 'Boring town', desc: 'Find out where I grew up' }, it: { title: 'Città noiosa', desc: 'Scopri dove sono cresciuto' } },
-  { id: 'bacaro', on: 'pc', icon: '🍷', svg: VENICE_FLAG, secret: true, en: { title: 'Bacaro tour', desc: 'Hover over Venice' }, it: { title: 'Bacaro tour', desc: 'Passa sopra Venezia' } },
-  { id: 'credits', on: 'pc', icon: '🤖', secret: true, en: { title: 'Credits', desc: 'Find out who helped build this site' }, it: { title: 'Titoli di coda', desc: 'Scopri chi ha aiutato a costruire il sito' } },
+  { id: 'bacaro', on: 'pc', icon: '🍷', svg: VENICE_FLAG, secret: true, en: { title: 'Bacaro tour', desc: 'Hover over Venice', hint: 'Some cities deserve a closer look' }, it: { title: 'Bacaro tour', desc: 'Passa sopra Venezia', hint: 'Certe città meritano uno sguardo più da vicino' } },
+  { id: 'credits', on: 'pc', icon: '🤖', secret: true, en: { title: 'Credits', desc: 'Find out who helped build this site', hint: 'Every story ends with its credits' }, it: { title: 'Titoli di coda', desc: 'Scopri chi ha aiutato a costruire il sito', hint: 'Ogni storia finisce con i titoli di coda' } },
   { id: 'nudge', on: 'pc', icon: '🤔', en: { title: 'Indecisive', desc: 'Keep the pointer on a project for 10 seconds' }, it: { title: 'Indeciso', desc: 'Tieni il puntatore su un progetto per 10 secondi' } },
   { id: 'full-story', icon: '📖', en: { title: 'Bookworm', desc: 'Open the full story of a project' }, it: { title: 'Topo di biblioteca', desc: 'Apri la versione completa di un progetto' } },
   { id: 'read-all', icon: '📚', en: { title: 'Well-read', desc: 'Read every project to the end' }, it: { title: 'Lettore accanito', desc: 'Leggi tutti i progetti fino in fondo' } },
@@ -44,9 +45,9 @@ export const achievements: Achievement[] = [
   { id: 'contact', icon: '📬', en: { title: 'Let’s talk', desc: 'Get in touch through one of my contacts' }, it: { title: 'Parliamone', desc: 'Usa uno dei miei contatti' } },
   { id: 'recruiter', icon: '🕵️', en: { title: 'Unbiased', desc: 'Turn on recruiter mode' }, it: { title: 'Senza pregiudizi', desc: 'Attiva la modalità recruiter' } },
   { id: 'gamepad', icon: '🎮', bonus: true, en: { title: 'Player 2 has joined', desc: 'Connect a game controller' }, it: { title: 'Player 2 è entrato', desc: 'Collega un controller' } },
-  { id: 'brainrot', icon: '🧠', secret: true, en: { title: 'Brainrotted', desc: 'Get killed by a brainrot' }, it: { title: 'Brainrottato', desc: 'Fatti uccidere da un brainrot' } },
-  { id: 'tung', icon: '🪵', secret: true, en: { title: 'Tung tung tung', desc: 'Meet Tung Tung Tung Sahur' }, it: { title: 'Tung tung tung', desc: 'Incontra Tung Tung Tung Sahur' } },
-  { id: 'lirili', icon: '🐘', secret: true, en: { title: 'Elephant in the desert', desc: 'Meet Lirilì Larilà' }, it: { title: 'Elefante nel deserto', desc: 'Incontra Lirilì Larilà' } },
+  { id: 'brainrot', icon: '🧠', secret: true, en: { title: 'Brainrotted', desc: 'Get killed by a brainrot', hint: 'Some words don’t like being poked' }, it: { title: 'Brainrottato', desc: 'Fatti uccidere da un brainrot', hint: 'Certe parole non amano essere punzecchiate' } },
+  { id: 'tung', icon: '🪵', secret: true, en: { title: 'Tung tung tung', desc: 'Meet Tung Tung Tung Sahur', hint: 'Knock knock: it’s almost dawn' }, it: { title: 'Tung tung tung', desc: 'Incontra Tung Tung Tung Sahur', hint: 'Toc toc: sta per albeggiare' } },
+  { id: 'lirili', icon: '🐘', secret: true, en: { title: 'Elephant in the desert', desc: 'Meet Lirilì Larilà', hint: 'Someone is taking a walk in the desert' }, it: { title: 'Elefante nel deserto', desc: 'Incontra Lirilì Larilà', hint: 'Qualcuno sta passeggiando nel deserto' } },
   { id: 'platinum', icon: '🏆', en: { title: 'Platinum', desc: 'Unlock every achievement possible on this device (the controller one is a bonus)' }, it: { title: 'Platino', desc: 'Sblocca tutti gli achievement possibili su questo dispositivo (quello del controller è un bonus)' } },
 ];
 
