@@ -21,7 +21,8 @@ interface Props {
 }
 const { project, lang } = Astro.props;
 const s = t(lang);
-// a "did you know" label on the title of the projects whose name has a story (not clickable: normal pointer)
+// a hover label on the title of some projects: a "did you know" when the name has a story, a joke on Instagram
+// (not clickable: normal pointer)
 const TITLE_NOTES: Record<string, Record<Lang, string>> = {
   agora: {
     en: 'Did you know? In ancient Greek, agorà is the city’s public square',
@@ -30,6 +31,10 @@ const TITLE_NOTES: Record<string, Record<Lang, string>> = {
   cicerone: {
     en: 'Did you know? Cicero was a Roman orator: tour guides are called cicerones after him',
     it: 'Lo sapevi? Cicerone era un oratore romano: da lui le guide turistiche si chiamano ciceroni',
+  },
+  'instagram-redesign': {
+    en: 'Mark wouldn’t like this',
+    it: 'A Mark non piacerebbe',
   },
 };
 const titleNote = TITLE_NOTES[project.slug]?.[lang];
