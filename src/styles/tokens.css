@@ -103,7 +103,7 @@
   --popup-bg: rgba(46, 46, 46, 0.96);
   --color-chip-soft: rgba(111, 168, 255, 0.18);
   --switch-track: rgba(255, 255, 255, 0.3);
-  --sunfest-bridge: linear-gradient(90deg, var(--sunfest-bg) 0, var(--sunfest-bg) max(45%, 360px), #262626 100%); /* the two Sunfest cards and the neck between them share this left-to-right fade (MyWork.astro) */ /* neck between the two dark Sunfest cards */
+  --sunfest-bridge: linear-gradient(90deg, var(--sunfest-bg) 0, var(--sunfest-bg) min(max(45%, 360px), 60%), #262626 100%); /* the two Sunfest cards and the neck between them share this left-to-right fade (MyWork.astro); solid behind the text (at least 360px, at most 60% so narrow cards still fade) */
 }
 
 
@@ -196,7 +196,7 @@
     --popup-bg: rgba(46, 46, 46, 0.96);
     --color-chip-soft: rgba(111, 168, 255, 0.18);
     --switch-track: rgba(255, 255, 255, 0.3);
-    --sunfest-bridge: linear-gradient(90deg, var(--sunfest-bg) 0, var(--sunfest-bg) max(45%, 360px), #262626 100%); /* the two Sunfest cards and the neck between them share this left-to-right fade (MyWork.astro) */ /* neck between the two dark Sunfest cards */
+    --sunfest-bridge: linear-gradient(90deg, var(--sunfest-bg) 0, var(--sunfest-bg) min(max(45%, 360px), 60%), #262626 100%); /* the two Sunfest cards and the neck between them share this left-to-right fade (MyWork.astro); solid behind the text (at least 360px, at most 60% so narrow cards still fade) */
   }
 
 
