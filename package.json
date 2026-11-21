@@ -22,7 +22,8 @@
     "@fontsource/poppins": "^5.3.0",
     "@fontsource/roboto": "^5.3.0",
     "@fontsource/rubik": "^5.3.0",
-    "astro": "^7.4.13"
+    "astro": "^7.4.13",
+    "qrcode-generator": "^2.0.4"
   },
   "engines": {
     "node": ">=22.23"
