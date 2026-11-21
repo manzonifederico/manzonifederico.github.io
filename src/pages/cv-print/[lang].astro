@@ -12,10 +12,10 @@ import { cvByLang, cvProfile } from '../../data/cv';
 import { contact, site } from '../../data/site';
 import type { Lang } from '../../i18n/ui';
 
-// dev server only: the published site doesn't include these pages (the Italian CV isn't public yet)
+// dev server only: the published site doesn't include this page. English only: there is no Italian CV on purpose
 export function getStaticPaths() {
   if (import.meta.env.PROD) return [];
-  return [{ params: { lang: 'en' } }, { params: { lang: 'it' } }];
+  return [{ params: { lang: 'en' } }];
 }
 
 const lang = Astro.params.lang as Lang;
