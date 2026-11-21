@@ -1,0 +1,162 @@
+{
+  "agora/slide-10.png": {
+    "en": "Board view",
+    "it": "Bacheca"
+  },
+  "agora/slide-15.png": {
+    "en": "Add a post",
+    "it": "Aggiungi un post"
+  },
+  "agora/slide-17.png": {
+    "en": "Map and timetable",
+    "it": "Mappa e orari"
+  },
+  "agora/slide-19.png": {
+    "en": "Doodling board",
+    "it": "Bacheca da disegno"
+  },
+  "agora/slide-20.png": {
+    "en": "Game catalogue",
+    "it": "Catalogo giochi"
+  },
+  "agora/slide-21.png": {
+    "en": "Game running",
+    "it": "Gioco in corso"
+  },
+  "agora/slide-24.png": {
+    "en": "Website",
+    "it": "Sito web"
+  },
+  "agora/slide-26.png": {
+    "en": "App menu",
+    "it": "Menu dell'app"
+  },
+  "agora/slide-27.png": {
+    "en": "App boards",
+    "it": "Bacheche nell'app"
+  },
+  "bk-vs-mc/app-overview.png": {
+    "en": "Home screens",
+    "it": "Schermate home"
+  },
+  "bk-vs-mc/menu-ordering.png": {
+    "en": "Ordering",
+    "it": "Ordinazione"
+  },
+  "cicerone/kiosk-navigation.png": {
+    "en": "Kiosk map",
+    "it": "Mappa del totem"
+  },
+  "cicerone/kiosk-map.png": {
+    "en": "Route preview",
+    "it": "Anteprima percorso"
+  },
+  "cicerone/webapp-1.png": {
+    "en": "Web app home",
+    "it": "Home della web app"
+  },
+  "cicerone/webapp-2.png": {
+    "en": "Room schedule",
+    "it": "Occupazione aule"
+  },
+  "cicerone/webapp-3.png": {
+    "en": "Event details",
+    "it": "Dettagli evento"
+  },
+  "instagram-redesign/mockup-time-spent.png": {
+    "en": "Time spent",
+    "it": "Tempo trascorso"
+  },
+  "sunfest/lofi-wireframes.png": {
+    "en": "Wireframes",
+    "it": "Wireframe"
+  },
+  "sunfest/home-top-bar.png": {
+    "en": "Top bar",
+    "it": "Barra in alto"
+  },
+  "sunfest/footer.png": {
+    "en": "Footer",
+    "it": "Footer"
+  },
+  "sunfest/ui-cards.png": {
+    "en": "Buttons",
+    "it": "Pulsanti"
+  },
+  "sunfest/ui-elements-1.png": {
+    "en": "Overlays",
+    "it": "Overlay"
+  },
+  "sunfest/ui-elements-2.png": {
+    "en": "Cards",
+    "it": "Card"
+  },
+  "sunfest/gallery-1.png": {
+    "en": "Home page",
+    "it": "Home page"
+  },
+  "sunfest/gallery-2.png": {
+    "en": "Lineup page",
+    "it": "Pagina lineup"
+  },
+  "sunfest/gallery-3.png": {
+    "en": "Artist details",
+    "it": "Dettagli artista"
+  },
+  "sunfest/gallery-4.png": {
+    "en": "Program page",
+    "it": "Pagina programma"
+  },
+  "sunfest/gallery-5.png": {
+    "en": "Location page",
+    "it": "Pagina location"
+  },
+  "sunfest/gallery-6.png": {
+    "en": "Camping page",
+    "it": "Pagina campeggio"
+  },
+  "sunfest/gallery-7.png": {
+    "en": "FAQ page",
+    "it": "Pagina FAQ"
+  },
+  "sunfest/gallery-8.png": {
+    "en": "Tickets",
+    "it": "Biglietti"
+  },
+  "sunfest/gallery-9.png": {
+    "en": "Volunteer page",
+    "it": "Pagina volontari"
+  },
+  "sunfest/gallery-10.png": {
+    "en": "About us page",
+    "it": "Pagina About us"
+  },
+  "projects/cicerone-ar-obstacle.png": {
+    "en": "AR navigation",
+    "it": "Navigazione AR"
+  },
+  "projects/cicerone-navigation.png": {
+    "en": "Navigation",
+    "it": "Navigazione"
+  },
+  "projects/cicerone-add-stop.png": {
+    "en": "Add a stop",
+    "it": "Aggiungi una tappa"
+  },
+  "projects/instagram-content-preferences.png": {
+    "en": "Content preferences",
+    "it": "Preferenze contenuti"
+  },
+  "projects/instagram-time-management.png": {
+    "en": "Time management",
+    "it": "Gestione del tempo"
+  },
+  "projects/instagram-functionalities.png": {
+    "en": "Functionalities",
+    "it": "Funzionalità"
+  },
+  "projects/instagram-blocked.png": {
+    "en": "App blocked",
+    "it": "App bloccata"
+  }
+}

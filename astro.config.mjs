@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import rehypeVersionIds from './src/plugins/rehype-version-ids.mjs';
 import rehypePiiNames from './src/plugins/rehype-pii-names.mjs';
+import rehypeImageLabels from './src/plugins/rehype-image-labels.mjs';
 import cspHashes from './src/plugins/csp-hashes.mjs';
 import articleImages from './src/plugins/article-images.mjs';
 
@@ -42,6 +43,6 @@ export default defineConfig({
     responsiveStyles: false,
   },
   markdown: {
-    rehypePlugins: [rehypeVersionIds, rehypePiiNames],
+    rehypePlugins: [rehypeVersionIds, rehypePiiNames, rehypeImageLabels],
   },
 });
