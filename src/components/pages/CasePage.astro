@@ -590,9 +590,9 @@ const articleJsonLd = {
     let clicks = 0;
     let lastClick = 0;
     let deathSound: HTMLAudioElement | null = null;
-    // characters who don't kill you: they show up in their own video (Tenor GIFs as MP4, muted) and say their name
-    // (the original meme audio from MyInstants, cut to the name). The name plays with the video, twice, then the video
-    // carries on looping in silence.
+    // characters who don't kill you: they show up in their own video (Tenor GIFs as MP4, muted) and say their line
+    // (meme audio from MyInstants, cut: Tung's name; Lirilì Larilà's "lirilì larilà, l'elefante che va qua e là").
+    // The line plays with the video, twice, then the video carries on looping in silence.
     const SPECIAL: Record<string, { video: string; audio: string }> = {
       'Tung Tung Tung Sahur': { video: '/video/tung-tung-tung-sahur.mp4', audio: '/audio/tung-tung-tung-sahur.mp3' },
       'Lirilì Larilà': { video: '/video/lirili-larila.mp4', audio: '/audio/lirili-larila.mp3' },
@@ -603,7 +603,9 @@ const articleJsonLd = {
     // the sounds here always play: ten clicks in a row are a deliberate request (the arrow game's sound switch on the
     // home page doesn't apply to this easter egg)
     const sayName = () => {
-      if (!voice || plays >= NAME_PLAYS) return;
+      // at the start of a loop, but never over itself: a line longer than the video (Lirilì Larilà's) waits for the
+      // next loop instead of being cut off
+      if (!voice || plays >= NAME_PLAYS || (plays > 0 && !voice.ended)) return;
       plays++;
       voice.currentTime = 0;
       voice.play().catch(() => {});
