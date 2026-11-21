@@ -37,7 +37,7 @@ const { lang } = Astro.props;
       // under the signature and switches, whatever their height on this screen
       // (measured against the footer itself: the row sits inside a container, so offsetTop would be off)
       const rows = footer.querySelector<HTMLElement>('.footer-bottom');
-      if (rows) note.style.top = `${Math.round(rows.getBoundingClientRect().bottom - footer.getBoundingClientRect().top + 16)}px`;
+      if (rows) note.style.top = `${Math.round(rows.getBoundingClientRect().bottom - footer.getBoundingClientRect().top + 34)}px`;
       note.style.opacity = String(Math.min(1, stretch / 45) * 0.75);
       if (stretch) window.scrollTo(0, document.documentElement.scrollHeight); // keep the stretched end in view
       if (stretch > 40 && !found) {
