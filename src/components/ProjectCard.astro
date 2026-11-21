@@ -110,9 +110,10 @@ const media = await Promise.all(
     overflow: hidden;
     transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
     /* drawn only when near the screen: the cards are far down the page, and this way their logo fonts (~200 KB)
-       and images aren't fetched or laid out on load. The size is a guess until a card has been shown once */
+       and images aren't fetched or laid out on load. The height is a guess until a card has been shown once; only
+       the height (a single-value contain-intrinsic-size would also make the card 640px wide and overflow phones) */
     content-visibility: auto;
-    contain-intrinsic-size: auto 640px;
+    contain-intrinsic-block-size: auto 640px;
   }
 
   .card:not(.card--grouped):hover,

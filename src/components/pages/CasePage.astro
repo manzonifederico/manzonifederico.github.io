@@ -632,7 +632,21 @@ const articleJsonLd = {
       // the character in the pointer label right now, or a random one (touch screens have no label)
       const label = document.querySelector('#view-cursor.is-visible .vc-label')?.textContent?.trim();
       const names: string[] = JSON.parse(rotDeath.dataset.names ?? '[]');
-      const name = label && names.includes(label) ? label : names[Math.floor(Math.random() * names.length)];
+      // with no label (phones): Tung Tung Tung Sahur the first time, Lirilì Larilà the second, then anyone at random
+      // (counted on this device)
+      let name = label && names.includes(label) ? label : '';
+      if (!name) {
+        let seen = 0;
+        try {
+          seen = Number(localStorage.getItem('brainrot-seen') ?? '0');
+          localStorage.setItem('brainrot-seen', String(seen + 1));
+        } catch {
+          /* storage blocked: random */
+          seen = 2;
+        }
+        const FIRST = ['Tung Tung Tung Sahur', 'Lirilì Larilà'];
+        name = FIRST[seen] ?? names[Math.floor(Math.random() * names.length)];
+      }
       const special = SPECIAL[name];
       rotDeath.classList.toggle('is-tung', !!special);
       rotDeath.querySelector('.death-title')!.textContent = special
@@ -680,11 +694,30 @@ const articleJsonLd = {
      "you died" line under the title */
   .tung-video {
     display: block;
-    width: auto;
-    max-width: min(80vw, 640px);
-    height: min(52vh, 80vw); /* square or landscape: the width follows the video's own proportions */
+    /* a fixed box, with the video fitted inside at its own proportions (square or landscape, never stretched) */
+    width: min(84vw, 640px);
+    height: min(46vh, 84vw);
     margin: 0 auto 24px;
-    border-radius: 12px;
+    object-fit: contain;
+  }
+
+  /* the brainrot screen on small screens: smaller title (long names wrap onto fewer lines), and if it still doesn't
+     fit, it scrolls instead of being cut off */
+  :global([data-brainrot-death]) {
+    overflow-y: auto;
+  }
+
+  @media (max-width: 560px) {
+    :global([data-brainrot-death]) :global(.death-band) {
+      padding-block: 40px;
+    }
+    :global([data-brainrot-death]) :global(.death-title) {
+      font-size: clamp(1.35rem, 6.5vw, 2rem);
+      letter-spacing: 0.04em;
+    }
+    :global([data-brainrot-death]) :global(.death-sub) {
+      font-size: 1rem;
+    }
   }
 
   .tung-video[hidden] {
