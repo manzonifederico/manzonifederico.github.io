@@ -1,27 +1,161 @@
 ---
+// Page not found. GitHub Pages serves this one file for every address that doesn't exist, in either language, so the
+// page speaks Italian when the address started with /it/ (the script below), English otherwise (and without scripts).
+// It tries to guess what you were looking for (an address close to a project's, e.g. /work/agra/ → Agorà) and always
+// lists the projects, so a dead link never leaves you stuck.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/Footer.astro';
-import { t } from '../i18n/ui';
-const s = t('en');
+import { t, localePath, type Lang } from '../i18n/ui';
+import { projects } from '../data/projects';
+
+const langs: Lang[] = ['en', 'it'];
+const more = { en: 'Or have a look at one of my projects:', it: 'Oppure dai un’occhiata a uno dei miei progetti:' };
+const maybe = { en: 'Maybe you were looking for', it: 'Forse cercavi' };
+const shown = projects.filter((p) => !p.comingSoon);
+// what the script compares the address with: every project's slug, and where it lives in each language
+const targets = shown.map((p) => ({ slug: p.slug, title: p.title, en: localePath('en', `/work/${p.slug}/`), it: localePath('it', `/work/${p.slug}/`) }));
 ---
 
 <BaseLayout title="Page not found | Federico Manzoni" alternates={false} noindex>
   <main id="main" class="container nf">
-    <h1 class="title">{s.notFoundTitle}</h1>
-    <p>{s.notFoundText} <span lang="it">({t('it').notFoundText})</span></p>
-    <p><a href="/">{s.goHome}</a></p>
-    <p><a href="/it/" lang="it">{t('it').goHome}</a></p>
+    {
+      langs.map((l) => (
+        <div class="nf-text" lang={l} data-nf={l} hidden={l === 'it'}>
+          <h1 class="title">{t(l).notFoundTitle}</h1>
+          <p>{t(l).notFoundText}</p>
+          <p class="nf-maybe" data-nf-maybe hidden>
+            {maybe[l]} <a data-nf-maybe-link href="/"></a>?
+          </p>
+          <p>
+            <a class="nf-home" href={localePath(l, '/')}>{t(l).goHome}</a>
+          </p>
+          <p class="nf-more">{more[l]}</p>
+          <ul class="nf-projects" role="list">
+            {shown.map((p) => (
+              <li>
+                <a href={localePath(l, `/work/${p.slug}/`)}>{p.title}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+    <script type="application/json" data-nf-targets set:html={JSON.stringify(targets)} />
   </main>
   <Footer lang="en" />
 </BaseLayout>
 
+<script>
+  const it = /^\/it(\/|$)/.test(location.pathname);
+  const lang = it ? 'it' : 'en';
+  // the visitor's language: show that text, hide the other (English stays when there's no script)
+  document.querySelectorAll<HTMLElement>('[data-nf]').forEach((el) => (el.hidden = el.dataset.nf !== lang));
+  if (it) {
+    document.documentElement.lang = 'it';
+    document.title = 'Pagina non trovata | Federico Manzoni';
+  }
+
+  // a guess: the project whose name is closest to a part of the address (a typo, an old or cut address)
+  type Target = { slug: string; title: string; en: string; it: string };
+  const targets: Target[] = JSON.parse(document.querySelector('[data-nf-targets]')?.textContent ?? '[]');
+  // every part of the address except the language and "work" ("/work/agora/x" still finds Agorà)
+  const words = location.pathname
+    .toLowerCase()
+    .split('/')
+    .map((w) => decodeURIComponent(w))
+    .filter((w) => w.length >= 3 && w !== 'work' && w !== 'it');
+  const distance = (a: string, b: string) => {
+    const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+      let prev = row[0];
+      row[0] = i;
+      for (let j = 1; j <= b.length; j++) {
+        const keep = row[j];
+        row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+        prev = keep;
+      }
+    }
+    return row[b.length];
+  };
+  // compared with the whole name and with each of its parts ("instagram" → instagram-redesign), and the start of the
+  // name counts as a match ("sunfest-us" → sunfest-usability); a guess is shown only if at most a third of it is wrong
+  let best: Target | null = null;
+  let score = Infinity;
+  for (const last of words)
+    for (const t of targets) {
+      for (const name of [t.slug, ...t.slug.split('-').filter((p) => p.length >= 4)]) {
+        const d = last.length >= 4 && name.startsWith(last) ? 0 : distance(last, name);
+        const ratio = d / name.length;
+        if (d <= Math.max(1, Math.floor(name.length / 3)) && ratio < score) {
+          score = ratio;
+          best = t;
+        }
+      }
+    }
+  if (best) {
+    const box = document.querySelector<HTMLElement>(`[data-nf="${lang}"] [data-nf-maybe]`);
+    const link = box?.querySelector<HTMLAnchorElement>('[data-nf-maybe-link]');
+    if (box && link) {
+      link.href = best[lang];
+      link.textContent = best.title;
+      box.hidden = false;
+    }
+  }
+</script>
+
 <style>
   .nf {
     padding-top: 120px;
+    padding-bottom: 64px;
+  }
+
+  .nf-text {
     display: grid;
     gap: 16px;
   }
+
+  .nf-text[hidden] {
+    display: none;
+  }
+
   .nf a {
     color: var(--color-link);
+  }
+
+  .nf-maybe {
+    font-size: 1.15rem;
+  }
+
+  .nf-maybe a {
+    font-weight: 600;
+  }
+
+  .nf-more {
+    margin-top: 16px;
+  }
+
+  .nf-projects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* the projects as pills, big enough to tap */
+  .nf-projects a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--color-brand-ink);
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: background var(--dur) var(--ease);
+  }
+
+  .nf-projects a:hover {
+    background: var(--color-brand-soft);
   }
 </style>
