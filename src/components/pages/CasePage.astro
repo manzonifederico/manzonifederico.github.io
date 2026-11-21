@@ -365,8 +365,10 @@ const articleJsonLd = {
         data-killed={lang === 'it' ? '{name} ti ha ucciso' : '{name} killed you'}
         data-names={JSON.stringify(BRAINROT)}>
         <div class="death-band">
-          {/* when the character is Tung Tung Tung Sahur, his video plays instead of the death (Tenor GIF, MP4, muted) */}
-          <video class="tung-video" src="/video/tung-tung-tung-sahur.mp4" muted loop playsinline preload="none" hidden />
+          {/* when the character is Tung Tung Tung Sahur, his video plays instead of the death (Tenor GIF, MP4, muted),
+              with the chant from the original meme audio (MyInstants, cut to the name: public/audio/tung-tung-tung-sahur.mp3)
+              at the start of every loop */}
+          <video class="tung-video" src="/video/tung-tung-tung-sahur.mp4" muted playsinline preload="none" hidden />
           <h2 class="death-title" id="brainrot-death-title" />
           <p class="death-sub" id="brainrot-death-sub">
             {lang === 'it'
@@ -590,6 +592,29 @@ const articleJsonLd = {
     let clicks = 0;
     let lastClick = 0;
     let deathSound: HTMLAudioElement | null = null;
+    let tungSound: HTMLAudioElement | null = null;
+    const soundAllowed = () => {
+      try {
+        return localStorage.getItem('game-sound') !== '0'; // the arrow game's sound switch
+      } catch {
+        return true;
+      }
+    };
+    const chant = () => {
+      if (!soundAllowed()) return;
+      tungSound ??= new Audio('/audio/tung-tung-tung-sahur.mp3');
+      tungSound.volume = 0.9;
+      tungSound.currentTime = 0;
+      tungSound.play().catch(() => {});
+    };
+    // the video plays again from the start each time it ends, and the chant with it, so they stay in time
+    const tungVideo = rotDeath.querySelector<HTMLVideoElement>('.tung-video');
+    tungVideo?.addEventListener('ended', () => {
+      if (!rotDeath.open || tungVideo.hidden) return;
+      tungVideo.currentTime = 0;
+      tungVideo.play().catch(() => {});
+      chant();
+    });
     brainrot.addEventListener('click', () => {
       const now = performance.now();
       clicks = now - lastClick < 1200 ? clicks + 1 : 1; // "in a row": at most 1.2 s between clicks
@@ -613,6 +638,7 @@ const articleJsonLd = {
           video.currentTime = 0;
           video.play().catch(() => {});
         }
+        if (tung) chant(); // the name, once, even with reduced motion
       }
       const form = rotDeath.querySelector<HTMLElement>('form');
       if (form) form.inert = true; // the clicks still coming in don't close it straight away
@@ -622,13 +648,7 @@ const articleJsonLd = {
         rotDeath.querySelector<HTMLButtonElement>('.death-btn')?.focus();
       }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1700);
       // the same "you died" sound as the arrow game, unless its sound switch is off
-      let soundOn = true;
-      try {
-        soundOn = localStorage.getItem('game-sound') !== '0';
-      } catch {
-        /* storage blocked: sound on */
-      }
-      if (!soundOn || tung) return;
+      if (!soundAllowed() || tung) return;
       deathSound ??= new Audio('/audio/you-died.mp3');
       deathSound.volume = 0.9;
       deathSound.currentTime = 0;
@@ -636,6 +656,7 @@ const articleJsonLd = {
     });
     rotDeath.addEventListener('close', () => {
       deathSound?.pause();
+      tungSound?.pause();
       rotDeath.querySelector<HTMLVideoElement>('.tung-video')?.pause();
     });
   }
