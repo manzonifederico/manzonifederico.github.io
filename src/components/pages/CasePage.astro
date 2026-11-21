@@ -42,8 +42,13 @@ const TITLE_NOTES: Record<string, Record<Lang, string>> = {
   },
 };
 const titleNote = TITLE_NOTES[project.slug]?.[lang];
-// Instagram: hovering "brainrot" in the subtitle shows one of the Italian brainrot characters, a new one each time
+// Instagram: hovering "brainrot" in the subtitle shows one of the Italian brainrot characters, a new one each time.
+// The three favourites come up more often (each is in the list four times: together about half the picks)
+const FAVOURITES = ['Bombardiro Crocodilo', 'Tung Tung Tung Sahur', 'Ballerina Cappuccina'];
 const BRAINROT = [
+  ...FAVOURITES,
+  ...FAVOURITES,
+  ...FAVOURITES,
   'Tralalero Tralala',
   'Bombardiro Crocodilo',
   'Tung Tung Tung Sahur',
