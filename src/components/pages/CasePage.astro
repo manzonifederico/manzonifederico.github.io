@@ -139,6 +139,7 @@ const articleJsonLd = {
   type="article"
   image={og?.src}
   imageAlt={wide?.alt}
+  noindex={project.comingSoon}
   bodyClass={project.theme}>
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(articleJsonLd).replace(/</g, '\\u003c')} />
   <main id="main">

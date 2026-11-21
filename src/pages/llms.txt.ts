@@ -18,6 +18,7 @@ export const GET: APIRoute = ({ site: base }) => {
   const url = (path: string) => new URL(path, base).href;
 
   const work = projects
+    .filter((p) => !p.comingSoon) // work in progress: nothing to say yet
     .map((p) => `- [${p.title}: ${p.subtitle}](${url(`/work/${p.slug}/`)}): ${p.description} (${p.tags.join(', ')})`)
     .join('\n');
 

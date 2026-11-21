@@ -27,7 +27,14 @@ export default defineConfig({
     sitemap({
       // tells search engines that /x/ and /it/x/ are the same page in two languages
       i18n: { defaultLocale: 'en', locales: { en: 'en', it: 'it' } },
-      filter: (page) => !page.includes('/404') && !page.includes('/sunfest25') && !page.includes('/cv-print') && !page.includes('/achievements'),
+      // out: the 404, the Sunfest25 mini-site, the CV print page, the trophies, and work in progress that is still only
+      // an outline ("comingSoon" in src/data/projects.ts: they are "noindex" too)
+      filter: (page) =>
+        !page.includes('/404') &&
+        !page.includes('/sunfest25') &&
+        !page.includes('/cv-print') &&
+        !page.includes('/achievements') &&
+        !page.includes('/work/re-onboarding'),
       lastmod: new Date(),
     }),
     // security policy: the hash of each inline script, added after the build (src/plugins/csp-hashes.mjs)

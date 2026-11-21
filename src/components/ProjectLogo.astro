@@ -51,6 +51,11 @@ const isSunfest = project.slug === 'sunfest' || project.slug === 'sunfest-usabil
     font-size: clamp(3rem, 1.6rem + 6vw, 8rem); /* 128px */
   }
 
+  /* "Re-onboarding": "onboarding" is one long word, so on narrow phones the title gets a little smaller to fit */
+  .logo--hero.logo--re-onboarding {
+    font-size: min(clamp(3rem, 1.6rem + 6vw, 8rem), 13vw);
+  }
+
   .sun {
     width: 0.85em;
     height: auto;

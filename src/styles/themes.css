@@ -16,7 +16,7 @@
   --theme-sub-weight: 400;
   --theme-heading-font: 'Poppins', system-ui, sans-serif;
   --theme-body-font: 'Poppins', system-ui, sans-serif;
-  --theme-panel: #1d2944;
+  --theme-panel: #fff; /* the reading sheet: white with black text, as in the other themes */
   --theme-small-ink: #ffffff;
 }
 

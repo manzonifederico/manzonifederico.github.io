@@ -75,7 +75,7 @@ export const projects: Project[] = [
     title: 'Re-onboarding',
     subtitle: 'Returning to a video game after a break',
     description: 'Re-onboarding: a study on how players navigate, remember and adapt when they return to a game after a break. Coming soon.',
-    tags: ['User Research', 'Games'],
+    tags: ['Experimental Design', 'User Research', 'Games', 'Uni Project', 'Thesis Project'],
     team: ['Federico Manzoni (me)'],
     resources: [],
     it: {
