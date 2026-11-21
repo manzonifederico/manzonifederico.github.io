@@ -365,6 +365,8 @@ const articleJsonLd = {
         data-killed={lang === 'it' ? '{name} ti ha ucciso' : '{name} killed you'}
         data-names={JSON.stringify(BRAINROT)}>
         <div class="death-band">
+          {/* when the character is Tung Tung Tung Sahur, his video plays instead of the death (Tenor GIF, MP4, muted) */}
+          <video class="tung-video" src="/video/tung-tung-tung-sahur.mp4" muted loop playsinline preload="none" hidden />
           <h2 class="death-title" id="brainrot-death-title" />
           <p class="death-sub" id="brainrot-death-sub">
             {lang === 'it'
@@ -598,7 +600,20 @@ const articleJsonLd = {
       const label = document.querySelector('#view-cursor.is-visible .vc-label')?.textContent?.trim();
       const names: string[] = JSON.parse(rotDeath.dataset.names ?? '[]');
       const name = label && names.includes(label) ? label : names[Math.floor(Math.random() * names.length)];
-      rotDeath.querySelector('.death-title')!.textContent = (rotDeath.dataset.killed ?? '{name}').replace('{name}', name);
+      // Tung Tung Tung Sahur doesn't kill you: he shows up, in his own video
+      const tung = name === 'Tung Tung Tung Sahur';
+      rotDeath.classList.toggle('is-tung', tung);
+      rotDeath.querySelector('.death-title')!.textContent = tung
+        ? name
+        : (rotDeath.dataset.killed ?? '{name}').replace('{name}', name);
+      const video = rotDeath.querySelector<HTMLVideoElement>('.tung-video');
+      if (video) {
+        video.hidden = !tung;
+        if (tung && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          video.currentTime = 0;
+          video.play().catch(() => {});
+        }
+      }
       const form = rotDeath.querySelector<HTMLElement>('form');
       if (form) form.inert = true; // the clicks still coming in don't close it straight away
       rotDeath.showModal();
@@ -613,17 +628,39 @@ const articleJsonLd = {
       } catch {
         /* storage blocked: sound on */
       }
-      if (!soundOn) return;
+      if (!soundOn || tung) return;
       deathSound ??= new Audio('/audio/you-died.mp3');
       deathSound.volume = 0.9;
       deathSound.currentTime = 0;
       deathSound.play().catch(() => {});
     });
-    rotDeath.addEventListener('close', () => deathSound?.pause());
+    rotDeath.addEventListener('close', () => {
+      deathSound?.pause();
+      rotDeath.querySelector<HTMLVideoElement>('.tung-video')?.pause();
+    });
   }
 </script>
 
 <style>
+  /* brainrot easter egg (Instagram): Tung Tung Tung Sahur's video, square, above his name; his screen has no
+     "you died" line under the title */
+  .tung-video {
+    display: block;
+    width: min(52vh, 80vw);
+    aspect-ratio: 1;
+    margin: 0 auto 24px;
+    border-radius: 12px;
+    object-fit: cover;
+  }
+
+  .tung-video[hidden] {
+    display: none;
+  }
+
+  :global(.death.is-tung) .death-sub {
+    display: none;
+  }
+
   /* "Show names" button: only visible in reviewer mode */
   .names-btn {
     display: none;
