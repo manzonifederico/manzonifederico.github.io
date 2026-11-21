@@ -76,10 +76,33 @@ function hops(dot: HTMLElement) {
   });
 }
 
+// notes already opened (in this browser, localStorage "notes-seen", reset by ?replay): their marker turns paler and
+// stops moving (no drift, no hops), and they still answer a tap. Kept by their label (data-cursor)
+const SEEN = 'notes-seen';
+const seen = new Set<string>();
+try {
+  (JSON.parse(localStorage.getItem(SEEN) ?? '[]') as string[]).forEach((k) => seen.add(k));
+} catch {
+  /* storage blocked: this page only */
+}
+const markSeen = (note: HTMLElement) => {
+  note.classList.add('is-seen');
+  const key = note.dataset.cursor ?? '';
+  if (!key || seen.has(key)) return;
+  seen.add(key);
+  try {
+    localStorage.setItem(SEEN, JSON.stringify([...seen]));
+  } catch {
+    /* storage blocked */
+  }
+};
+
 // found first, marked after (a note made a button would hide the one inside it, Venice in "a town near Venice")
 const notes = [...document.querySelectorAll<HTMLElement>('[data-cursor]')].filter(isNote);
 notes.forEach((el) => {
   el.classList.add('tap-note');
+  const known = seen.has(el.dataset.cursor ?? '');
+  if (known) el.classList.add('is-seen');
   // a project's title: only its square answers (a 45px area with the square in the middle, so the big title doesn't
   // pop a bubble wherever it's touched); the square is the button, the heading stays a heading
   if (el.matches('h1, h2, h3')) {
@@ -90,7 +113,7 @@ notes.forEach((el) => {
     dot.setAttribute('aria-label', html.lang === 'it' ? 'Curiosità sul titolo' : 'About the title');
     dot.tabIndex = 0;
     glueToLastWord(el, dot);
-    hops(dot);
+    if (!known) hops(dot);
     return;
   }
   el.tabIndex = 0; // reachable with a keyboard
@@ -155,6 +178,7 @@ const tap = (note: HTMLElement, x?: number) => {
   const dot = note.querySelector<HTMLElement>(':scope > .tap-dot');
   if (dot) stopHops.get(dot)?.(); // found: no need to hop any more
   if (hiddenNow(note)) return;
+  markSeen(note);
   show(note, { x });
   // the same achievements a mouse unlocks by passing over (data-achieve: Rovigo, Venice, the signature)
   if (note.dataset.achieve) document.dispatchEvent(new CustomEvent('achieve', { detail: note.dataset.achieve }));

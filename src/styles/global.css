@@ -882,6 +882,29 @@ html.touch-notes li.tap-note::after {
    the project's colour. It is the only part of the title that answers a tap: a see-through 45px box with the square in
    its middle; negative margins keep it from moving the title (baseline of an empty inline-block = its bottom margin
    edge: 45 - 18 - 9 = 18px under the square) */
+/* notes already opened (.is-seen, touch-notes.ts): the marker turns paler and stops moving; they still answer a tap */
+html.touch-notes span.tap-note.is-seen {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4'%3E%3Cpath d='M0 3.4 3 .6 6 3.4' fill='none' stroke='%23145ee1' stroke-width='1.3' stroke-opacity='.4'/%3E%3C/svg%3E");
+  animation: none;
+}
+
+:root[data-theme='dark'].touch-notes span.tap-note.is-seen {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4'%3E%3Cpath d='M0 3.4 3 .6 6 3.4' fill='none' stroke='%237fb2ff' stroke-width='1.3' stroke-opacity='.4'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']).touch-notes span.tap-note.is-seen {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4'%3E%3Cpath d='M0 3.4 3 .6 6 3.4' fill='none' stroke='%237fb2ff' stroke-width='1.3' stroke-opacity='.4'/%3E%3C/svg%3E");
+  }
+}
+
+html.touch-notes .tap-note.is-seen:is(li, p)::after,
+html.touch-notes .photo-frame.tap-note.is-seen::after,
+html.touch-notes .tap-note.is-seen .tap-dot::before {
+  opacity: 0.4;
+  animation: none;
+}
+
 /* the title's last word and its square: never split across lines */
 .tap-dot-glue {
   white-space: nowrap;
@@ -892,7 +915,7 @@ html.touch-notes .tap-dot {
   display: inline-block;
   width: 45px;
   height: 45px;
-  margin: -18px -18px -18px -15px;
+  margin: -18px -18px -18px -13px; /* the square 5px after the last letter */
   vertical-align: baseline;
   position: relative;
 }
