@@ -15,7 +15,11 @@ const s = t(lang);
 
 <div class="profile">
   <div class="photo-col">
-    <div class="photo-frame">
+    <!-- hover (normal mode only, hidden in recruiter mode like the other personal notes): where the photo was taken -->
+    <div
+      class="photo-frame"
+      data-cursor={lang === 'it' ? 'Scattata sul Lago di Garda' : 'Taken at Lake Garda'}
+      data-cursor-pii>
       <Image class="photo pii pii-photo" src={profile} alt={s.photoAlt} width={200} height={200} densities={[1, 2]} />
     </div>
     <button
