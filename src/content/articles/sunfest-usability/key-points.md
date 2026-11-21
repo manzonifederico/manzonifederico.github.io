@@ -53,7 +53,7 @@
 - N = 12 → low power; no significance may mean low sensitivity, not equivalence.
 - Lab setting: no real-world distractions, time pressure or mobile use.
 - Researcher presence: possible social desirability bias or Hawthorne effects.
-- Figma prototype without full interactivity or cross-device optimisation.
+- Figma prototype: it worked, but it was not a real website, so the comparison with a live site has limits; no cross-device optimisation.
 
 ## Learnings and next steps
 

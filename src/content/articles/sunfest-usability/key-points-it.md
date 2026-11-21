@@ -53,7 +53,7 @@
 - N = 12 → bassa potenza; l’assenza di significatività può indicare scarsa sensibilità, non equivalenza.
 - Laboratorio: niente distrazioni reali, fretta o uso da mobile.
 - Presenza del ricercatore: possibile bias di desiderabilità sociale o effetto Hawthorne.
-- Prototipo Figma non completamente interattivo né ottimizzato per diversi dispositivi.
+- Prototipo Figma: funzionava, ma non era un sito vero, quindi il confronto con un sito live ha dei limiti; non ottimizzato per diversi dispositivi.
 
 ## Lezioni e prossimi passi
 

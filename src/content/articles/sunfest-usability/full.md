@@ -120,7 +120,7 @@ None of the differences is statistically significant, but together the numbers p
 
 On Poplar Utopia, correctness stayed high, but participants often needed more clicks and pages, and on both the lineup and program tasks they used the intended page only in 41.7% of cases. That points to an **information architecture** weakness: the content is there, but the intended page is not perceived as the most efficient way in.
 
-**FAQs are hard everywhere.** Task C was the most difficult on both websites, with correctness dropping to 75% and more time and exploration needed. FAQ sections impose a heavy reading load and do not match the quick fact-finding people expect. More scannable structures or alternative formats, such as keyword-based search or contextual prompts, could help.
+**FAQs are hard everywhere.** Task C was the most difficult on both websites, with correctness dropping to 75% and more exploration needed; on Poplar it also took the most time. FAQ sections impose a heavy reading load and do not match the quick fact-finding people expect. More scannable structures or alternative formats, such as keyword-based search or contextual prompts, could help.
 
 ## Limitations
 
@@ -128,7 +128,7 @@ On Poplar Utopia, correctness stayed high, but participants often needed more cl
 - **Sample size:** with N = 12 the statistical power was low, so the lack of significant differences may reflect low sensitivity rather than real equivalence.
 - **Setting:** the controlled lab setting kept the procedure consistent but left out the distractions, time pressure and mobile use of real-world information seeking.
 - **Observer effects:** the researcher’s presence may have caused social desirability bias or Hawthorne effects.
-- **Prototype:** the Figma prototype lacked full interactivity and cross-device optimisation, which may have changed how people perceived it compared with a finished site.
+- **Prototype:** the Figma prototype worked, but it was still a prototype and not a real website, so comparing it with a live site has limits. It was also not optimised for different devices, which may have changed how people perceived it compared with a finished site.
 
 Together, these limits reduce the external and ecological validity of the findings, so they should be generalised to real festival scenarios with caution.
 

@@ -120,7 +120,7 @@ Nessuna delle differenze è statisticamente significativa, ma nel loro insieme i
 
 Su Poplar Utopia la correttezza è rimasta alta, ma i partecipanti avevano spesso bisogno di più clic e più pagine, e sia nel task sulla lineup sia in quello sul programma hanno usato la pagina prevista solo nel 41,7% dei casi. Questo indica un punto debole nell’**architettura dell’informazione**: i contenuti ci sono, ma la pagina prevista non viene percepita come la via d’accesso più efficiente.
 
-**Le FAQ sono difficili ovunque.** Il task C è stato il più difficile su entrambi i siti, con la correttezza scesa al 75% e più tempo ed esplorazione necessari. Le sezioni FAQ impongono un carico di lettura elevato e non corrispondono alla ricerca rapida di informazioni che le persone si aspettano. Strutture più facili da scorrere o formati alternativi, come una ricerca per parole chiave o suggerimenti contestuali, potrebbero aiutare.
+**Le FAQ sono difficili ovunque.** Il task C è stato il più difficile su entrambi i siti, con la correttezza scesa al 75% e più esplorazione necessaria; su Poplar è stato anche il task più lungo. Le sezioni FAQ impongono un carico di lettura elevato e non corrispondono alla ricerca rapida di informazioni che le persone si aspettano. Strutture più facili da scorrere o formati alternativi, come una ricerca per parole chiave o suggerimenti contestuali, potrebbero aiutare.
 
 ## Limiti
 
@@ -128,7 +128,7 @@ Su Poplar Utopia la correttezza è rimasta alta, ma i partecipanti avevano spess
 - **Dimensione del campione:** con N = 12 la potenza statistica era bassa, quindi l’assenza di differenze significative potrebbe dipendere dalla scarsa sensibilità più che da una reale equivalenza.
 - **Contesto:** il laboratorio controllato ha mantenuto la procedura coerente, ma ha escluso le distrazioni, la fretta e l’uso da mobile tipici della ricerca di informazioni nella vita reale.
 - **Effetto osservatore:** la presenza del ricercatore può aver causato bias di desiderabilità sociale o effetto Hawthorne.
-- **Prototipo:** il prototipo Figma non era completamente interattivo né ottimizzato per diversi dispositivi, e questo può aver cambiato la percezione rispetto a un sito finito.
+- **Prototipo:** il prototipo Figma funzionava, ma restava un prototipo e non un sito vero, quindi il confronto con un sito live ha dei limiti. Inoltre non era ottimizzato per diversi dispositivi, e questo può aver cambiato la percezione rispetto a un sito finito.
 
 Nel complesso, questi limiti riducono la validità esterna ed ecologica dei risultati, che vanno quindi generalizzati con cautela agli scenari reali dei festival.
 
