@@ -686,12 +686,21 @@ const articleJsonLd = {
     display: none;
   }
 
-  /* the word to tap 10 times: on phones, quick taps mustn't select the text, zoom the page or flash a grey box */
+  /* the word to tap 10 times: on phones, quick taps mustn't select the text, zoom the page or flash a grey box.
+     The whole subtitle line ignores double-tap zoom (a finger that lands just beside the word would otherwise zoom
+     the page; pinch zoom still works), and the word gets a slightly larger touch area */
+  .case-sub:has([data-brainrot]),
+  :global(.death) {
+    touch-action: manipulation;
+  }
+
   .case-sub :global([data-brainrot]) {
     -webkit-user-select: none;
     user-select: none;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    padding: 6px 4px;
+    margin: -6px -4px;
   }
 
   @media (pointer: coarse) {
