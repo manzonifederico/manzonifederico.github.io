@@ -1132,6 +1132,14 @@ const articleJsonLd = {
     color: var(--theme-small-ink, inherit);
   }
 
+  /* narrow screens: the index opens in a light (or, in dark themes, dark) panel, so its links take the panel's own
+     text colour, not the theme's small text colour meant for the page background (white on Re-onboarding's blue) */
+  @media (max-width: 1179px) {
+    .legend-list a {
+      color: inherit;
+    }
+  }
+
   .reader {
     background: var(--theme-panel);
     color: var(--sheet-ink, #000);

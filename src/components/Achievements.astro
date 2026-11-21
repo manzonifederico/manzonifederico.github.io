@@ -330,6 +330,11 @@ const headingId = `ach-title-${mode}`;
     font-weight: 600;
   }
 
+  /* the page title: "Achievements" is one long word, so on narrow phones it gets a little smaller to fit */
+  .ach-page-title {
+    font-size: min(var(--fs-title), 11.5vw);
+  }
+
   .ach-desc {
     font-size: 0.875rem;
     color: var(--color-text-muted);
