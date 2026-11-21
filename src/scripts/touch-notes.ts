@@ -97,7 +97,22 @@ const markSeen = (note: HTMLElement) => {
   }
 };
 
-// found first, marked after (a note made a button would hide the one inside it, Venice in "a town near Venice")
+// for screen readers and keyboards every note is a button (named by its own words, or the title's "About the title"),
+// described as "Learn more"; what it says is read out by the bubble (a live region) once it opens
+const hint = document.createElement('span');
+hint.id = 'tap-note-hint';
+hint.hidden = true; // still usable as a description
+hint.textContent = html.lang === 'it' ? 'Per saperne di più' : 'Learn more';
+document.body.appendChild(hint);
+const buttons = new Map<HTMLElement, HTMLElement>(); // note → the element that is its button
+const asButton = (note: HTMLElement, btn: HTMLElement) => {
+  btn.setAttribute('role', 'button');
+  btn.tabIndex = 0;
+  btn.setAttribute('aria-describedby', hint.id);
+  buttons.set(note, btn);
+};
+
+// found first, marked after (a note made a button would hide the one inside it)
 const notes = [...document.querySelectorAll<HTMLElement>('[data-cursor]')].filter(isNote);
 notes.forEach((el) => {
   el.classList.add('tap-note');
@@ -109,16 +124,107 @@ notes.forEach((el) => {
     el.classList.add('tap-note--dot');
     const dot = document.createElement('span');
     dot.className = 'tap-dot';
-    dot.setAttribute('role', 'button');
     dot.setAttribute('aria-label', html.lang === 'it' ? 'Curiosità sul titolo' : 'About the title');
-    dot.tabIndex = 0;
+    asButton(el, dot);
     glueToLastWord(el, dot);
     if (!known) hops(dot);
     return;
   }
-  el.tabIndex = 0; // reachable with a keyboard
-  if (el.matches('span')) el.setAttribute('role', 'button'); // a word in a sentence (chips keep their role)
+  // a word in a sentence or the photo: the note itself is the button
+  if (el.matches('span, div')) return asButton(el, el);
+  // a chip (a list item) or the signature (a paragraph) keep what they are: their words go in a button inside them
+  const btn = document.createElement('span');
+  btn.className = 'tap-note-btn';
+  btn.append(...el.childNodes);
+  el.append(btn);
+  asButton(el, btn);
 });
+
+// recruiter mode hides the personal notes: then they aren't buttons either (nothing to open), and come back after
+const syncPersonal = () =>
+  buttons.forEach((btn, note) => {
+    if (!('cursorPii' in note.dataset)) return;
+    if (hiddenNow(note)) {
+      btn.removeAttribute('role');
+      btn.removeAttribute('tabindex');
+      btn.removeAttribute('aria-describedby');
+    } else if (!btn.hasAttribute('role')) asButton(note, btn);
+  });
+syncPersonal();
+new MutationObserver(syncPersonal).observe(html, { attributes: true, attributeFilter: ['data-unbiased'] });
+
+// ---------- chips: their whole outline, round ends too, gently serrated like the underlines ----------
+// A clip-path polygon that walks around the chip's pill shape and moves in and out of it as it goes, redrawn when the
+// chip changes size: sharp teeth 6px apart and 2px deep (as in the underlines), or once the chip has been opened soft
+// waves, wider (10px) and shallower (1.2px). 7 s after the page opens the teeth drift along the edge for 5 s, like the
+// underlines; the opened ones stay still.
+type Edge = { period: number; depth: number; smooth: boolean };
+const TEETH: Edge = { period: 6, depth: 2, smooth: false };
+const WAVES: Edge = { period: 10, depth: 1.2, smooth: true };
+const pill = (w: number, h: number, edge: Edge, phase = 0) => {
+  const r = h / 2;
+  const straight = Math.max(0, w - h);
+  const arc = Math.PI * r;
+  const perimeter = 2 * straight + 2 * arc;
+  const count = Math.max(1, Math.round(perimeter / edge.period)); // whole teeth all the way round
+  const per = edge.smooth ? 8 : 2; // points per tooth: a soft curve, or tip and valley
+  const n = count * per;
+  const step = perimeter / n;
+  const points: string[] = [];
+  for (let i = 0; i < n; i++) {
+    let s = (((i + phase * per) * step) % perimeter + perimeter) % perimeter;
+    const inset = edge.smooth ? (edge.depth * (1 - Math.cos((2 * Math.PI * (i % per)) / per))) / 2 : i % 2 ? edge.depth : 0;
+    const rr = r - inset;
+    let x: number;
+    let y: number;
+    if (s < straight) {
+      x = r + s; // top edge, left to right
+      y = inset;
+    } else if ((s -= straight) < arc) {
+      const a = -Math.PI / 2 + s / r; // right end
+      x = w - r + rr * Math.cos(a);
+      y = r + rr * Math.sin(a);
+    } else if ((s -= arc) < straight) {
+      x = w - r - s; // bottom edge, right to left
+      y = h - inset;
+    } else {
+      const a = Math.PI / 2 + (s - straight) / r; // left end
+      x = r + rr * Math.cos(a);
+      y = r + rr * Math.sin(a);
+    }
+    points.push(`${x.toFixed(1)}px ${y.toFixed(1)}px`);
+  }
+  return `polygon(${points.join(',')})`;
+};
+const drifts = new WeakMap<HTMLElement, Animation>();
+function shapeChip(chip: HTMLElement) {
+  const w = chip.offsetWidth;
+  const h = chip.offsetHeight;
+  if (!w || !h) return;
+  const seenChip = chip.classList.contains('is-seen');
+  const edge = seenChip ? WAVES : TEETH;
+  chip.style.clipPath = pill(w, h, edge);
+  drifts.get(chip)?.cancel();
+  if (seenChip || reduce.matches || !chip.animate) return;
+  // one tooth further along per second, 5 times, starting 7 s after the page opened
+  const wait = 7000 - performance.now();
+  if (wait < -5000) return; // that moment is over
+  drifts.set(
+    chip,
+    chip.animate([{ clipPath: pill(w, h, edge, 0) }, { clipPath: pill(w, h, edge, 1) }], {
+      duration: 1000,
+      iterations: 5,
+      delay: Math.max(0, wait),
+      easing: 'linear',
+    }),
+  );
+}
+const chips = notes.filter((n) => n.matches('li'));
+chips.forEach(shapeChip);
+if ('ResizeObserver' in window) {
+  const ro = new ResizeObserver((entries) => entries.forEach((e) => shapeChip(e.target as HTMLElement)));
+  chips.forEach((c) => ro.observe(c));
+}
 
 /** the note a tap (or a key) on this element is for: a title only through its square */
 const noteAt = (t: EventTarget | null) => {
@@ -175,10 +281,12 @@ const show = (target: HTMLElement, opts: { x?: number; text?: string; card?: boo
 };
 
 const tap = (note: HTMLElement, x?: number) => {
-  const dot = note.querySelector<HTMLElement>(':scope > .tap-dot');
+  const dot = note.querySelector<HTMLElement>('.tap-dot');
   if (dot) stopHops.get(dot)?.(); // found: no need to hop any more
   if (hiddenNow(note)) return;
   markSeen(note);
+  if (note.matches('li')) shapeChip(note); // soft waves now
+  bubble.setAttribute('aria-live', 'polite'); // asked for: read it out
   show(note, { x });
   // the same achievements a mouse unlocks by passing over (data-achieve: Rovigo, Venice, the signature)
   if (note.dataset.achieve) document.dispatchEvent(new CustomEvent('achieve', { detail: note.dataset.achieve }));
@@ -188,11 +296,12 @@ document.addEventListener('click', (e) => {
   const note = noteAt(e.target);
   if (!note) return;
   // a title's bubble points at its square
-  const dot = note.querySelector<HTMLElement>(':scope > .tap-dot');
+  const dot = note.querySelector<HTMLElement>('.tap-dot');
   const x = dot ? dot.getBoundingClientRect().left + dot.offsetWidth / 2 : e.detail ? e.clientX : undefined;
   tap(note, x);
 });
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && shownFor) return hide(); // Esc closes the bubble
   const note = noteAt(e.target);
   if (!note || (e.key !== 'Enter' && e.key !== ' ')) return;
   e.preventDefault();
@@ -252,6 +361,7 @@ if (cards.length && 'IntersectionObserver' in window) {
       /* no lines */
     }
     if (lines.length && !shownFor) {
+      bubble.setAttribute('aria-live', 'off'); // nobody asked: a nudge isn't read out over what someone is listening to
       show(card, { text: pick(card, lines), card: true }); // above the card
       card.classList.add('is-nudged'); // outlined in its colour while the bubble is up (global.css)
       if (first) document.dispatchEvent(new CustomEvent('achieve', { detail: 'nudge' }));
