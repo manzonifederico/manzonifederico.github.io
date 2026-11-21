@@ -188,6 +188,7 @@ const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.sit
       const loadCursor = () => (cursor ??= import('../scripts/view-cursor'));
       if (fine.matches) loadCursor();
       else {
+        import('../scripts/touch-notes'); // touch screens: the same labels, as a speech bubble on tap
         fine.addEventListener?.('change', () => fine.matches && loadCursor());
         const onMove = (e: PointerEvent) => {
           if (e.pointerType !== 'mouse') return;
