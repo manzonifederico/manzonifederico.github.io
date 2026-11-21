@@ -1,12 +1,16 @@
 ---
 // A small pill label (e.g. "UX/UI Design"). Colours come from the project theme.
+// `note` (optional): a label that follows the pointer on hover (src/scripts/view-cursor.ts), e.g. the university
+// on "Uni Project"; `noteFlag`: a small logo or flag after it (FLAGS in view-cursor.ts).
 interface Props {
   label: string;
+  note?: string;
+  noteFlag?: string;
 }
-const { label } = Astro.props;
+const { label, note, noteFlag } = Astro.props;
 ---
 
-<li class="tag">{label}</li>
+<li class="tag" data-cursor={note} data-cursor-flag={noteFlag}>{label}</li>
 
 <style>
   .tag {

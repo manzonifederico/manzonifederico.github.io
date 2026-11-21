@@ -168,7 +168,13 @@ const articleJsonLd = {
             )}
           </p>
           <ul class="tags" role="list" aria-label={s.tags}>
-            {project.tags.map((tag) => <Tag label={tagLabel(lang, tag)} />)}
+            {project.tags.map((tag) => (
+              <Tag
+                label={tagLabel(lang, tag)}
+                note={tag === 'Uni Project' ? (lang === 'it' ? 'Università di Trento' : 'University of Trento') : undefined}
+                noteFlag={tag === 'Uni Project' ? 'unitn' : undefined}
+              />
+            ))}
           </ul>
         </header>
 
@@ -316,7 +322,7 @@ const articleJsonLd = {
       </div>
     </article>
 
-    <p class="home-link"><a href={localePath(lang, '/')}>{s.goHome}</a></p>
+    <p class="home-link"><a href={localePath(lang, '/')} data-cursor={lang === 'it' ? 'Vai alla home' : 'Go to home page'}>{s.goHome}</a></p>
 
     {
       related && (

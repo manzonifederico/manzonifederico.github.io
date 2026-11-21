@@ -646,6 +646,18 @@ html.classic-pointer #view-cursor {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
 }
 
+/* the University of Trento seal (public/icons/unitn-seal.png, from unitn.it): drawn in the label's text colour */
+#view-cursor .vc-seal {
+  width: 1.35em;
+  height: 1.35em;
+  vertical-align: -0.35em;
+  border-radius: 0;
+  box-shadow: none;
+  background: currentColor;
+  -webkit-mask: url('/icons/unitn-seal.png') center / contain no-repeat;
+  mask: url('/icons/unitn-seal.png') center / contain no-repeat;
+}
+
 #view-cursor .vc-label {
   padding: 4px 10px;
   border-radius: 14px; /* a pill on one line, a rounded box when a long label wraps */
