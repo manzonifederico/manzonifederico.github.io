@@ -592,12 +592,12 @@ const articleJsonLd = {
     let deathSound: HTMLAudioElement | null = null;
     // characters who don't kill you: they show up in their own video (Tenor GIFs as MP4, muted) and say their line
     // (meme audio from MyInstants, cut: Tung's name; Lirilì Larilà's "lirilì larilà, l'elefante che va qua e là").
-    // The line plays with the video, twice, then the video carries on looping in silence.
+    // The line plays once with the video, then the video carries on looping in silence.
     const SPECIAL: Record<string, { video: string; audio: string }> = {
       'Tung Tung Tung Sahur': { video: '/video/tung-tung-tung-sahur.mp4', audio: '/audio/tung-tung-tung-sahur.mp3' },
       'Lirilì Larilà': { video: '/video/lirili-larila.mp4', audio: '/audio/lirili-larila.mp3' },
     };
-    const NAME_PLAYS = 2;
+    const NAME_PLAYS = 1; // the line is said once; the video keeps looping in silence
     let voice: HTMLAudioElement | null = null;
     let plays = 0;
     // the sounds here always play: ten clicks in a row are a deliberate request (the arrow game's sound switch on the
