@@ -24,6 +24,37 @@ const isNote = (el: HTMLElement) =>
   !el.closest('dialog') &&
   !el.matches('img, [datacursor], [data-cursor-plain], [data-brainrot], [aria-current]');
 
+// a title's square says "touch me": 10 s after the page opens it hops 3 times (1.2 s apart), waits 7 s, hops 3 times
+// again, then rests 30 s; that 4 times in all. Touching it stops it for good. Reduced motion: no hops.
+const stopHops = new WeakMap<HTMLElement, () => void>();
+function hops(dot: HTMLElement) {
+  if (reduce.matches) return;
+  const FIRST = 10000;
+  const HOPS = 3;
+  const HOP_EVERY = 1200;
+  const BURSTS = 2; // hop bursts per round
+  const BURST_GAP = 7000; // between the two bursts
+  const ROUND_GAP = 30000; // between rounds
+  const ROUNDS = 4;
+  const hop = () => {
+    dot.classList.remove('is-hop');
+    void dot.offsetWidth; // restart the animation
+    dot.classList.add('is-hop');
+  };
+  const timers: number[] = [];
+  let t = Math.max(0, FIRST - performance.now()); // 10 s from when the page opened (this script loads a bit later)
+  for (let round = 0; round < ROUNDS; round++) {
+    for (let burst = 0; burst < BURSTS; burst++) {
+      for (let i = 0; i < HOPS; i++) timers.push(window.setTimeout(hop, t + i * HOP_EVERY));
+      t += (HOPS - 1) * HOP_EVERY + (burst < BURSTS - 1 ? BURST_GAP : ROUND_GAP);
+    }
+  }
+  stopHops.set(dot, () => {
+    timers.forEach((id) => window.clearTimeout(id));
+    dot.classList.remove('is-hop');
+  });
+}
+
 // found first, marked after (a note made a button would hide the one inside it, Venice in "a town near Venice")
 const notes = [...document.querySelectorAll<HTMLElement>('[data-cursor]')].filter(isNote);
 notes.forEach((el) => {
@@ -38,6 +69,7 @@ notes.forEach((el) => {
     dot.setAttribute('aria-label', html.lang === 'it' ? 'Curiosità sul titolo' : 'About the title');
     dot.tabIndex = 0;
     el.appendChild(dot);
+    hops(dot);
     return;
   }
   el.tabIndex = 0; // reachable with a keyboard
@@ -99,6 +131,8 @@ const show = (target: HTMLElement, opts: { x?: number; text?: string; card?: boo
 };
 
 const tap = (note: HTMLElement, x?: number) => {
+  const dot = note.querySelector<HTMLElement>(':scope > .tap-dot');
+  if (dot) stopHops.get(dot)?.(); // found: no need to hop any more
   if (hiddenNow(note)) return;
   show(note, { x });
   // the same achievements a mouse unlocks by passing over (data-achieve: Rovigo, Venice, the signature)

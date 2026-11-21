@@ -864,7 +864,48 @@ html.touch-notes .tap-dot {
   height: 45px;
   margin: -18px -18px -18px -15px;
   vertical-align: baseline;
-  background: linear-gradient(var(--theme-tag-bg, var(--color-brand)) 0 0) 18px 18px / 9px 9px no-repeat;
+  position: relative;
+}
+
+html.touch-notes .tap-dot::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  width: 9px;
+  height: 9px;
+  background: var(--theme-tag-bg, var(--color-brand));
+}
+
+/* "touch me": every so often the square hops a little and turns into a dot while in the air (touch-notes.ts) */
+html.touch-notes .tap-dot.is-hop::before {
+  animation: dot-hop 600ms var(--ease);
+}
+
+@keyframes dot-hop {
+  0%,
+  100% {
+    transform: none;
+    border-radius: 0;
+  }
+  35% {
+    transform: translateY(-8px);
+    border-radius: 50%;
+  }
+  65% {
+    transform: translateY(0);
+    border-radius: 50%;
+  }
+  80% {
+    transform: translateY(-2px);
+    border-radius: 35%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.touch-notes .tap-dot.is-hop::before {
+    animation: none;
+  }
 }
 
 /* the photo: the square sits in its corner (the whole photo can be tapped) */
