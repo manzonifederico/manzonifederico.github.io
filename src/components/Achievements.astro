@@ -137,7 +137,7 @@ const headingId = `ach-title-${mode}`;
             {g.key === 'extra' && (
               <div class="ach-extra-head">
                 <hr class="ach-divider" />
-                <h3 class="ach-extra-title">{T.extra}</h3>
+                <h2 class="ach-extra-title">{T.extra}</h2>
                 <p class="ach-extra-note">{T.extraNote}</p>
               </div>
             )}
@@ -291,11 +291,15 @@ const headingId = `ach-title-${mode}`;
     border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
   }
 
-  /* locked: icon and text faded and grey (not the clue bubble, which stays fully readable) */
-  .ach:not(.is-unlocked) > .ach-icon,
-  .ach:not(.is-unlocked) > .ach-text {
+  /* locked: the icon faded and grey, the title grey; the words stay at full contrast so they can still be read (the
+     clue bubble isn't touched either) */
+  .ach:not(.is-unlocked) > .ach-icon {
     opacity: 0.55;
     filter: grayscale(1);
+  }
+
+  .ach:not(.is-unlocked) .ach-title {
+    color: var(--color-text-muted);
   }
 
   .ach.is-unlocked {
