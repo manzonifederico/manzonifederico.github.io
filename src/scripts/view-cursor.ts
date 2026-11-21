@@ -97,6 +97,15 @@ function setup(mouseSeen = false) {
     el.classList.toggle('is-plain', !target.matches(CLICKABLE));
     const it = document.documentElement.lang === 'it' ? target.dataset.cursorIt : undefined;
     label.textContent = it ?? target.dataset.cursor ?? '';
+    // data-cursor-random: a JSON list, one line picked at random each time the pointer arrives
+    if (target.dataset.cursorRandom) {
+      try {
+        const lines: string[] = JSON.parse(target.dataset.cursorRandom);
+        if (lines.length) label.textContent = lines[Math.floor(Math.random() * lines.length)];
+      } catch {
+        /* keep data-cursor */
+      }
+    }
     const flag = FLAGS[target.dataset.cursorFlag ?? ''];
     if (flag) label.insertAdjacentHTML('beforeend', flag);
     // the article page's theme sits on <body>: only the article sheet, a project card or the footer

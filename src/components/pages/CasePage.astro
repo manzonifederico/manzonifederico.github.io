@@ -38,7 +38,25 @@ const TITLE_NOTES: Record<string, Record<Lang, string>> = {
   },
 };
 const titleNote = TITLE_NOTES[project.slug]?.[lang];
+// Instagram: hovering "brainrot" in the subtitle shows one of the Italian brainrot characters, a new one each time
+const BRAINROT = [
+  'Tralalero Tralala',
+  'Bombardiro Crocodilo',
+  'Tung Tung Tung Sahur',
+  'Ballerina Cappuccina',
+  'Brr Brr Patapim',
+  'Lirilì Larilà',
+  'Chimpanzini Bananini',
+  'Bombombini Gusini',
+  'Trippi Troppi',
+  'Cappuccino Assassino',
+  'Frigo Camelo',
+  'Boneca Ambalabu',
+  'La Vaca Saturno Saturnita',
+  'Glorbo Fruttodrillo',
+];
 const text = projectText(project, lang);
+const subParts = project.slug === 'instagram-redesign' ? text.subtitle.split(/(brainrot)/i) : [text.subtitle];
 
 const entries = await getCollection('articles', (e) => e.id.startsWith(`${project.slug}/`));
 const byVersion = Object.fromEntries(entries.map((e) => [e.id.split('/')[1], e]));
@@ -131,7 +149,15 @@ const articleJsonLd = {
 
         <header class="case-head container" id="start">
           <h1 class="case-title" data-cursor={titleNote}><ProjectLogo project={project} size="hero" /></h1>
-          <p class="case-sub">{text.subtitle}</p>
+          <p class="case-sub">
+            {subParts.map((part, i) =>
+              i % 2 ? (
+                <span data-cursor={BRAINROT[0]} data-cursor-random={JSON.stringify(BRAINROT)}>{part}</span>
+              ) : (
+                part
+              ),
+            )}
+          </p>
           <ul class="tags" role="list" aria-label={s.tags}>
             {project.tags.map((tag) => <Tag label={tagLabel(lang, tag)} />)}
           </ul>
