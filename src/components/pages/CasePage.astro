@@ -1015,6 +1015,12 @@ const articleJsonLd = {
     border-radius: var(--radius-sm);
   }
 
+  /* published build: the image's proportions (--r, added by src/plugins/article-images.mjs) give it the same width
+     as above before it has loaded, so its space is kept and the text doesn't jump */
+  .prose :global(img[style*='--r']) {
+    width: min(100%, 680px, calc(70vh * var(--r)));
+  }
+
   /* Image galleries: responsive grid, 1 column on phones */
   .prose :global(.gallery) {
     margin: 1.4em auto 1.8em;

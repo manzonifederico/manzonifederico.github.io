@@ -725,6 +725,7 @@ html.lite .blob::before,
 html.lite .blob::after,
 html.lite .blob .lobe {
   animation: none !important;
+  will-change: auto; /* standing still, they don't need their own graphics-card layers */
 }
 
 /* the opt-in note for lighter mode */

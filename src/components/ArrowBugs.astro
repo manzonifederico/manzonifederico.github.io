@@ -818,10 +818,14 @@ const s = t(lang);
       cancelAnimationFrame(raf);
       raf = 0;
     }
+    sensors(on && !fine.matches);
     if (!on) {
       tiltX = tiltY = 0;
-      html.style.removeProperty('--tilt-x');
-      html.style.removeProperty('--tilt-y');
+      shown = [0, 0];
+      glows().forEach((g) => {
+        g.style.removeProperty('--tilt-x');
+        g.style.removeProperty('--tilt-y');
+      });
     }
   }
 
@@ -991,16 +995,43 @@ const s = t(lang);
     last = [g.x, g.y, g.z];
   };
   // tilt: the blue glows lean towards the low side (CSS reads --tilt-x / --tilt-y) and the arrows slide downhill
+  // the variables are set on the glows themselves (not the whole page), at most once a frame and only when they
+  // change by half a pixel or more, so a tilting phone restyles two elements instead of the whole document
   const clamp = (v: number) => Math.max(-1, Math.min(1, v));
+  const glows = () => document.querySelectorAll<HTMLElement>('.blob');
+  let tiltFrame = 0;
+  let shown = [0, 0];
   const onTilt = (e: DeviceOrientationEvent) => {
-    if (e.gamma == null || e.beta == null || !enabled() || fine.matches) return;
+    if (e.gamma == null || e.beta == null) return;
     tiltX = clamp(e.gamma / 30);
     tiltY = clamp((e.beta - 45) / 30); // a phone in the hand usually sits at about 45°
-    html.style.setProperty('--tilt-x', `${(tiltX * 22).toFixed(1)}px`);
-    html.style.setProperty('--tilt-y', `${(tiltY * 16).toFixed(1)}px`);
+    if (tiltFrame) return;
+    tiltFrame = requestAnimationFrame(() => {
+      tiltFrame = 0;
+      const x = tiltX * 22;
+      const y = tiltY * 16;
+      if (Math.abs(x - shown[0]) < 0.5 && Math.abs(y - shown[1]) < 0.5) return;
+      shown = [x, y];
+      glows().forEach((g) => {
+        g.style.setProperty('--tilt-x', `${x.toFixed(1)}px`);
+        g.style.setProperty('--tilt-y', `${y.toFixed(1)}px`);
+      });
+    });
   };
-  if (typeof DeviceMotionEvent !== 'undefined') addEventListener('devicemotion', onMotion);
-  if (typeof DeviceOrientationEvent !== 'undefined') addEventListener('deviceorientation', onTilt);
+  // the phone's motion sensors are listened to only while the game is on, on a touch screen: otherwise they would
+  // wake this code ~60 times a second for nothing
+  let listening = false;
+  function sensors(on: boolean) {
+    if (on === listening) return;
+    listening = on;
+    const pairs: [string, EventListener][] = [];
+    if (typeof DeviceMotionEvent !== 'undefined') pairs.push(['devicemotion', onMotion as EventListener]);
+    if (typeof DeviceOrientationEvent !== 'undefined') pairs.push(['deviceorientation', onTilt as EventListener]);
+    for (const [type, fn] of pairs) {
+      if (on) window.addEventListener(type, fn);
+      else window.removeEventListener(type, fn);
+    }
+  }
 
   document.addEventListener('arrows-mode', sync);
   fine.addEventListener?.('change', sync);

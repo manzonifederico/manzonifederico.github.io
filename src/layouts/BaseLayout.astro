@@ -174,9 +174,27 @@ const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.sit
     <OverscrollNote lang={lang} />
     <script>
       import '../scripts/unbiased';
-      import '../scripts/view-cursor';
-      import '../scripts/gamepad';
       import '../scripts/perf';
+
+      // loaded only when they can be used, so phones and keyboard users don't download or run them:
+      // the pointer extras once there is a mouse (now, or at its first move on a touch device)…
+      const fine = matchMedia('(any-hover: hover) and (any-pointer: fine)');
+      let cursor: Promise<unknown> | null = null;
+      const loadCursor = () => (cursor ??= import('../scripts/view-cursor'));
+      if (fine.matches) loadCursor();
+      else {
+        fine.addEventListener?.('change', () => fine.matches && loadCursor());
+        const onMove = (e: PointerEvent) => {
+          if (e.pointerType !== 'mouse') return;
+          document.removeEventListener('pointermove', onMove);
+          loadCursor();
+        };
+        document.addEventListener('pointermove', onMove, { passive: true });
+      }
+      // …and the controller support once a controller is connected (or already is)
+      const loadPad = () => import('../scripts/gamepad');
+      if (Array.from(navigator.getGamepads?.() ?? []).some((p) => p && p.connected)) loadPad();
+      else addEventListener('gamepadconnected', loadPad, { once: true });
     </script>
   </body>
 </html>

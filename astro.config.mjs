@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import rehypeVersionIds from './src/plugins/rehype-version-ids.mjs';
 import rehypePiiNames from './src/plugins/rehype-pii-names.mjs';
 import cspHashes from './src/plugins/csp-hashes.mjs';
+import articleImages from './src/plugins/article-images.mjs';
 
 // `site` is the public URL of the deployed website (canonical links, sitemap, robots.txt, social previews).
 // On GitHub Pages the deploy workflow (.github/workflows/deploy.yml) passes it in SITE_URL (that also covers a
@@ -29,6 +30,8 @@ export default defineConfig({
       lastmod: new Date(),
     }),
     // security policy: the hash of each inline script, added after the build (src/plugins/csp-hashes.mjs)
+    // article images: download size that matches the column, space kept while loading (src/plugins/article-images.mjs)
+    articleImages(),
     cspHashes(),
   ],
   // article images (markdown) get several sizes (srcset), so phones and normal screens don't download the

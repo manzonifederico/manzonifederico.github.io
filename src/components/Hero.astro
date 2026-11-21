@@ -28,7 +28,7 @@ const s = t(lang);
 
 <script>
   // EN / IT and the theme button sit in the top-right corner, where the moving blob sometimes reaches. A few times a
-  // second this works out how much of the blob's colour is behind them (from the blob's real position: its layers are
+  // second (only while the blob moves) this works out how much of the blob's colour is behind them (from the blob's real position: its layers are
   // blurred ellipses) and picks the ink that reads better there: the brand blue on the page, the light ink on the blob.
   // It only runs while the top of the page is on screen.
   const hero = document.querySelector<HTMLElement>('.hero');
@@ -117,18 +117,25 @@ const s = t(lang);
       if (onBlob > onPage * (now === 'dark' ? 1.15 : 1)) corner.dataset.ink = 'light';
       else if (onPage > onBlob * (now === 'light' ? 1.15 : 1)) corner.dataset.ink = 'dark';
     };
-    const start = () => {
-      if (!timer) timer = window.setInterval(check, 200);
-      check();
-    };
-    const stop = () => {
+    // repeated only while the blob moves: in lighter mode or with reduced motion it stands still, so one check
+    // (and one after a resize or a theme change) is enough
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    let onScreen = false;
+    const update = () => {
       window.clearInterval(timer);
       timer = 0;
+      if (!onScreen || document.hidden) return;
+      check();
+      if (!root.classList.contains('lite') && !reduce.matches) timer = window.setInterval(check, 250);
     };
-    new IntersectionObserver(([e]) => (e.isIntersecting && !document.hidden ? start() : stop())).observe(corner);
-    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    new IntersectionObserver(([e]) => {
+      onScreen = e.isIntersecting;
+      update();
+    }).observe(corner);
+    document.addEventListener('visibilitychange', update);
+    reduce.addEventListener?.('change', update);
     addEventListener('resize', check, { passive: true });
-    new MutationObserver(check).observe(root, { attributes: true, attributeFilter: ['data-theme', 'class'] });
+    new MutationObserver(update).observe(root, { attributes: true, attributeFilter: ['data-theme', 'class'] });
   }
 
   export {}; // a module, so its names stay private

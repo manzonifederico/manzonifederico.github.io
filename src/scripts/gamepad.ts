@@ -4,7 +4,8 @@
 //   B                   → close an open pop-up or dialog; on a project page, go back
 //   right stick         → scroll the page
 //   LB / RB             → previous / next reading version on a project page (Key points, Full story, Summary)
-// Nothing runs until a controller is connected; a short note explains the buttons the first time in a visit.
+// Nothing runs until a controller is connected (BaseLayout only loads this file then); a short note explains the
+// buttons the first time in a visit.
 
 const LABELS = {
   en: { title: 'Controller connected 🎮', text: 'D-pad to move, A to select, B to go back, right stick to scroll.' },
@@ -172,7 +173,11 @@ addEventListener('gamepadconnected', () => {
 });
 // back to the mouse or touch: the controller's highlight style goes away
 addEventListener('pointerdown', () => html.classList.remove('gamepad-nav'), { passive: true });
-// a controller already connected when the page opens (some browsers only report it after a button press)
-if (Array.from(navigator.getGamepads?.() ?? []).some((p) => p && p.connected) && !raf) raf = requestAnimationFrame(poll);
+// this file is loaded by BaseLayout when a controller connects, so that controller is already here: show the note
+// and start reading it (some browsers only report a controller after a button press)
+if (Array.from(navigator.getGamepads?.() ?? []).some((p) => p && p.connected) && !raf) {
+  note();
+  raf = requestAnimationFrame(poll);
+}
 
 export {}; // a module, so its names stay private
