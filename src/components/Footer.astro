@@ -118,22 +118,22 @@ const emailLabel = (email: string) => {
             </span>
           )
         }
+        <!-- achievements: how many easter eggs this visitor has found; opens the board (src/components/Achievements.astro) -->
+        <button
+          type="button"
+          class="ach-btn"
+          data-ach-open
+          aria-haspopup="dialog"
+          data-cursor={lang === 'it' ? 'Achievement' : 'Achievements'}>
+          <span aria-hidden="true">🏆</span>
+          <span class="visually-hidden">{lang === 'it' ? 'Achievement:' : 'Achievements:'}</span>
+          <span data-ach-count>0</span>/{achievements.length}
+        </button>
       </div>
       <!-- hover: a little thank-you to the AI that helped build the site -->
       <p class="sign" data-cursor="& Claude :)" data-achieve="credits">
         {s.signature.split('{name}')[0]}<span class="pii pii-name">{site.name}</span>{s.signature.split('{name}')[1]}
       </p>
-      <!-- achievements: how many easter eggs this visitor has found; opens the board (src/components/Achievements.astro) -->
-      <button
-        type="button"
-        class="ach-btn"
-        data-ach-open
-        aria-haspopup="dialog"
-        data-cursor={lang === 'it' ? 'Achievement' : 'Achievements'}>
-        <span aria-hidden="true">🏆</span>
-        <span class="visually-hidden">{lang === 'it' ? 'Achievement:' : 'Achievements:'}</span>
-        <span data-ach-count>0</span>/{achievements.length}
-      </button>
     </div>
     <Achievements lang={lang} mode="dialog" />
     <p class="visually-hidden" aria-live="polite" data-copy-status></p>
@@ -141,6 +141,22 @@ const emailLabel = (email: string) => {
 </footer>
 
 <script>
+  // phones: keep the footer's last row clear of the recruiter pop-up, whatever its height (pill or icon; not while
+  // it is open as a full card, which the visitor closes)
+  {
+    const pop = document.getElementById('unbiased-popup');
+    const footerEl = document.querySelector<HTMLElement>('footer.footer');
+    if (pop && footerEl && 'ResizeObserver' in window) {
+      const fit = () => {
+        if (pop.dataset.state === 'open' || pop.dataset.state === 'hidden' || pop.matches(':hover, :focus-within')) return;
+        const room = window.innerHeight - pop.getBoundingClientRect().top + 16;
+        footerEl.style.setProperty('--fab-room', `${Math.round(Math.min(200, Math.max(72, room)))}px`);
+      };
+      new ResizeObserver(fit).observe(pop);
+      new MutationObserver(fit).observe(pop, { attributes: true, attributeFilter: ['data-state'] });
+      addEventListener('resize', fit, { passive: true });
+    }
+  }
   // "Site pointers" switch: on = the site's own pointers, off = the browser's (html.classic-pointer, saved as
   // pointer-classic = 1). Like the "Arrow game" switch next to it, on means the feature is on.
   const pointerSwitch = document.querySelector<HTMLButtonElement>('[data-classic-pointer]');
@@ -427,9 +443,6 @@ const emailLabel = (email: string) => {
   }
 
   .ach-btn {
-    grid-column: 3;
-    grid-row: 1;
-    justify-self: end;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -540,11 +553,6 @@ const emailLabel = (email: string) => {
       grid-row: 2;
       justify-self: center;
     }
-    .ach-btn {
-      grid-column: 1;
-      grid-row: 3;
-      justify-self: center;
-    }
     .cards {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -560,10 +568,11 @@ const emailLabel = (email: string) => {
     }
   }
 
-  /* phones: room at the very bottom so the reviewer pop-up (fixed bottom right) never covers the switches */
+  /* phones: room at the very bottom so the reviewer pop-up (fixed at the bottom) never covers the switches; the
+     script below sets --fab-room to the pop-up's real height */
   @media (max-width: 700px) {
     .footer-bottom {
-      margin-bottom: 72px;
+      margin-bottom: var(--fab-room, 72px);
     }
   }
 </style>
