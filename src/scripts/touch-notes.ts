@@ -2,7 +2,7 @@
 // - Notes on things you can't click (Rovigo, Venice, the signature, the photo, a project's title, …) get a small
 //   marker, and a tap shows the bubble right above them for a few seconds (tap elsewhere or scroll and it goes).
 // - Project cards: one that stays in the middle of the screen gives a little wiggle after 10 s, then 2.2 s later one of
-//   its own lines that invite to open it (src/data/nudges.ts). The same card can do it again 30 s later, 3 times in a
+//   its lines that invite to open it, at random (src/data/nudges.ts). The same card can do it again 30 s later, 3 times in a
 //   row at most, then not for 2 minutes.
 // Things you can click keep working as before: a tap there opens the link, no bubble.
 // The bubble is a live region, so screen readers read what it says; the notes can be reached with the keyboard too.
@@ -107,7 +107,7 @@ addEventListener('scroll', () => shownFor && Math.abs(scrollY - shownAtY) > 60 &
 
 // ---------- project cards: a wiggle, then a nudge, when one rests in the middle of the screen ----------
 // 10 s in the middle: the card wiggles; 2.2 s more: a bubble with one of its lines (data-touch-nudges, src/data/nudges.ts:
-// only the project's own lines that invite most to open it). 30 s later the same card can do it again, up to 3 times
+// a pool per project, picked at random, the catchiest more often). 30 s later the same card can do it again, up to 3 times
 // in a row; then it waits at least 2 minutes before starting over.
 const cards = document.querySelectorAll<HTMLElement>('.card[data-touch-nudges]');
 if (cards.length && 'IntersectionObserver' in window) {
@@ -130,6 +130,17 @@ if (cards.length && 'IntersectionObserver' in window) {
     card.addEventListener('animationend', () => card.classList.remove('is-wiggle'), { once: true });
   };
 
+  // a random line, the first ones (the catchiest) more often: weights 5, 4, 3…; never the one this card said last time
+  const said = new Map<HTMLElement, string>();
+  const pick = (card: HTMLElement, lines: string[]) => {
+    const pool = lines.length > 1 ? lines.filter((l) => l !== said.get(card)) : lines;
+    const weights = pool.map((l) => Math.max(1, 5 - lines.indexOf(l)));
+    let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+    const line = pool.find((_, i) => (r -= weights[i]) < 0) ?? pool[0];
+    said.set(card, line);
+    return line;
+  };
+
   const talk = (card: HTMLElement) => {
     let lines: string[] = [];
     try {
@@ -138,7 +149,7 @@ if (cards.length && 'IntersectionObserver' in window) {
       /* no lines */
     }
     if (lines.length && !shownFor) {
-      show(card, { text: lines[Math.floor(Math.random() * lines.length)], card: true }); // above the card
+      show(card, { text: pick(card, lines), card: true }); // above the card
       card.classList.add('is-nudged'); // outlined in its colour while the bubble is up (global.css)
       if (first) document.dispatchEvent(new CustomEvent('achieve', { detail: 'nudge' }));
       first = false;
