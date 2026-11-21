@@ -648,13 +648,17 @@ html.classic-pointer #view-cursor {
 
 #view-cursor .vc-label {
   padding: 4px 10px;
-  border-radius: var(--radius-pill);
+  border-radius: 14px; /* a pill on one line, a rounded box when a long label wraps */
   background: var(--vc);
   color: var(--vc-ink, #fff);
   font-family: var(--font-display);
   font-size: 14px;
   font-weight: 500;
-  white-space: nowrap;
+  /* long labels (the "did you know" notes) wrap onto two balanced lines instead of one very long strip */
+  max-width: 400px;
+  width: max-content;
+  text-wrap: balance;
+  line-height: 1.35;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
   transform: translateY(-50%);
 }
