@@ -33,6 +33,7 @@ const T =
         locked: 'bloccato',
         unlocked: 'Achievement sbloccato',
         open: 'Apri la bacheca completa',
+        catchAll: 'Acchiappali tutti! ⚡',
         close: 'Chiudi',
       }
     : {
@@ -49,6 +50,7 @@ const T =
         locked: 'locked',
         unlocked: 'Achievement unlocked',
         open: 'Open the full board',
+        catchAll: 'Gotta catch ’em all! ⚡',
         close: 'Close',
       };
 // what the script needs: the toast heading and every achievement's text in this language (also the secret ones)
@@ -109,7 +111,9 @@ const headingId = `ach-title-${mode}`;
         ))}
       </div>
       <p class="ach-more">
-        <a href={localePath(lang, '/achievements/')}>{T.open} →</a>
+        <a href={localePath(lang, '/achievements/')} data-cursor={T.catchAll}>
+          {T.open} →
+        </a>
       </p>
     </dialog>
   ) : (
