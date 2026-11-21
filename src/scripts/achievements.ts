@@ -8,6 +8,7 @@ interface Item {
   id: string;
   icon: string;
   secret: boolean;
+  bonus: boolean;
   title: string;
   desc: string;
 }
@@ -120,8 +121,9 @@ function unlock(id: string) {
     queue.push(item);
     if (!showing) next();
   }
-  // every other one unlocked: platinum
-  if (id !== 'platinum' && data.list.every((a) => a.id === 'platinum' || got[a.id])) window.setTimeout(() => unlock('platinum'), 600);
+  // every other one unlocked (bonus ones aside): platinum
+  if (id !== 'platinum' && data.list.every((a) => a.id === 'platinum' || a.bonus || got[a.id]))
+    window.setTimeout(() => unlock('platinum'), 600);
 }
 
 document.addEventListener('achieve', (e) => unlock(String((e as CustomEvent<string>).detail)));
