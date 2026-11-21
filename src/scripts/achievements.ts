@@ -159,32 +159,62 @@ document.addEventListener('achieve', (e) => unlock(String((e as CustomEvent<stri
 // ---------- clues on the secret cards ----------
 // Pressed twice (double click, double tap, or Enter / Space twice) a ??? card shows a bubble with a clue. The very
 // first time ever it only teases ("Not telling you"); after that, a very vague hint. The bubble is a live region, so
-// screen readers read it; it stays 5 s (longer while the pointer or focus is on the card) and Esc closes it.
+// screen readers read it; it goes away when you leave the card (pointer out, focus elsewhere, Esc, or after 5 s on
+// a touch screen).
 const TEASED = 'ach-hint-teased';
 const lastPress = new WeakMap<HTMLElement, number>();
-function showHint(li: HTMLElement, text: string) {
+// screen readers: the clue said through a hidden live region inside the card
+function announce(li: HTMLElement, text: string) {
+  let live = li.querySelector<HTMLElement>('.ach-live');
+  if (!live) {
+    live = document.createElement('span');
+    live.className = 'ach-live visually-hidden';
+    live.setAttribute('role', 'status');
+    li.appendChild(live);
+  }
+  live.textContent = '';
+  window.setTimeout(() => (live!.textContent = text), 30);
+}
+function showHint(li: HTMLElement, text: string, at?: { x: number; y: number }) {
   li.querySelector('.ach-hint')?.remove();
   const bubble = document.createElement('p');
   bubble.className = 'ach-hint';
   bubble.setAttribute('role', 'status');
   li.appendChild(bubble);
-  // filled a moment after it's in the page, so screen readers notice the change
-  window.setTimeout(() => (bubble.textContent = text), 30);
-  let timer = 0;
-  const close = () => {
+  // filled a moment after it's in the page, so screen readers notice the change; then placed where the card was
+  // pressed (the centre with a keyboard), kept inside the card
+  window.setTimeout(() => {
+    bubble.textContent = text;
+    const r = li.getBoundingClientRect();
+    const w = bubble.offsetWidth;
+    const h = bubble.offsetHeight;
+    const x = at ? at.x - r.left + 12 : (r.width - w) / 2;
+    const y = at ? at.y - r.top - h / 2 : (r.height - h) / 2;
+    bubble.style.left = `${Math.round(Math.max(8, Math.min(x, r.width - w - 8)))}px`;
+    bubble.style.top = `${Math.round(Math.max(4, Math.min(y, r.height - h - 4)))}px`;
+  }, 30);
+  // it goes away when you leave the card: the mouse moving out, the keyboard focus moving on, Esc; with a finger
+  // (which never "leaves") after 5 s or a tap somewhere else
+  const timer = window.setTimeout(() => close(), 5000);
+  const onLeave = (e: PointerEvent) => e.pointerType !== 'touch' && close();
+  const onOutside = (e: PointerEvent) => !li.contains(e.target as Node) && close();
+  const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
+  const onFocusOut = (e: FocusEvent) => !li.contains(e.relatedTarget as Node | null) && close();
+  function close() {
     window.clearTimeout(timer);
     bubble.remove();
-    li.removeEventListener('pointerleave', later);
-    li.removeEventListener('focusout', later);
-  };
-  const later = () => {
-    window.clearTimeout(timer);
-    timer = window.setTimeout(() => (li.matches(':hover, :focus-within') ? later() : close()), 5000);
-  };
-  later();
-  li.addEventListener('pointerleave', later);
-  li.addEventListener('focusout', later);
-  li.addEventListener('keydown', (e) => e.key === 'Escape' && close(), { once: true });
+    li.removeEventListener('pointerleave', onLeave);
+    li.removeEventListener('keydown', onKey);
+    li.removeEventListener('focusout', onFocusOut);
+    document.removeEventListener('pointerdown', onOutside);
+  }
+  // a mouse resting on the card keeps it; the 5 s only apply when no pointer is over the card
+  li.addEventListener('pointerenter', (e) => e.pointerType !== 'touch' && window.clearTimeout(timer), { once: true });
+  if (li.matches(':hover')) window.clearTimeout(timer);
+  li.addEventListener('pointerleave', onLeave);
+  li.addEventListener('keydown', onKey);
+  li.addEventListener('focusout', onFocusOut);
+  document.addEventListener('pointerdown', onOutside);
 }
 document.addEventListener('click', (e) => {
   const btn = (e.target as Element | null)?.closest?.<HTMLElement>('[data-hint-trigger]');
@@ -203,7 +233,28 @@ document.addEventListener('click', (e) => {
     teased = true; // storage blocked: straight to the clue
   }
   const item = data.list.find((a) => a.id === li.dataset.ach);
-  showHint(li, teased ? item?.hint ?? data.tease : data.tease);
+  const text = teased ? item?.hint ?? data.tease : data.tease;
+  // with a mouse: the clue is the label that follows the pointer (src/scripts/view-cursor.ts), gone as soon as the
+  // pointer leaves the card; screen readers still get it through a hidden live region
+  const pe = e as PointerEvent;
+  if (pe.pointerType === 'mouse' && document.getElementById('view-cursor')) {
+    btn.dataset.cursor = text;
+    btn.dataset.cursorPlain = '';
+    document.dispatchEvent(new CustomEvent('cursor-show', { detail: btn }));
+    btn.addEventListener(
+      'pointerleave',
+      () => {
+        delete btn.dataset.cursor;
+        delete btn.dataset.cursorPlain;
+      },
+      { once: true },
+    );
+    announce(li, text);
+    return;
+  }
+  // finger or keyboard: a bubble in the card, at the press point (the centre with a keyboard)
+  const at = pe.clientX || pe.clientY ? { x: pe.clientX, y: pe.clientY } : undefined;
+  showHint(li, text, at);
 });
 
 // "Let's talk": any contact used (an e-mail, copying an address, LinkedIn, GitHub, ORCID, ResearchGate)

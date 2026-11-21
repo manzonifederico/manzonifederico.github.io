@@ -104,7 +104,8 @@ function setup(mouseSeen = false) {
     if ('cursorPii' in target.dataset && document.documentElement.dataset.unbiased === 'true') return;
     current = target;
     // something you can click gets the square instead of the pointer; anything else keeps the normal pointer
-    el.classList.toggle('is-plain', !target.matches(CLICKABLE));
+    // data-cursor-plain: a label that is a note, not an invitation to click (e.g. a trophy's clue)
+    el.classList.toggle('is-plain', !target.matches(CLICKABLE) || 'cursorPlain' in target.dataset);
     const it = document.documentElement.lang === 'it' ? target.dataset.cursorIt : undefined;
     label.textContent = it ?? target.dataset.cursor ?? '';
     // data-cursor-random: a JSON list, one line picked at random each time the pointer arrives
@@ -160,6 +161,14 @@ function setup(mouseSeen = false) {
   // a control that changes its own label (e.g. the theme button) refreshes the label under the pointer
   document.addEventListener('theme-change', () => current && enter(current));
   document.addEventListener('cursor-refresh', () => current && enter(current)); // any element that changed its label
+  // show the label of an element right now, under the pointer (e.g. a trophy's clue after a double click)
+  document.addEventListener('cursor-show', (e) => {
+    const target = (e as CustomEvent<HTMLElement>).detail;
+    if (!target?.dataset.cursor) return;
+    current = null;
+    enter(target);
+    if (!raf) raf = requestAnimationFrame(follow);
+  });
   document.addEventListener('pointerdown', () => current && el.classList.add('is-pressed'));
   document.addEventListener('pointerup', () => el.classList.remove('is-pressed'));
 

@@ -296,20 +296,24 @@ const headingId = `ach-title-${mode}`;
     display: none;
   }
 
-  /* the clue: a bubble inside the card (so the window's edges never cut it), read out by screen readers */
+  /* the clue: looks like the labels that follow the pointer (src/scripts/view-cursor.ts), shown where the card was
+     pressed and kept inside the card (so the window's edges never cut it); read out by screen readers */
   .ach :global(.ach-hint) {
     position: absolute;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
     z-index: 1;
-    padding: 8px 12px;
-    border-radius: 12px;
-    background: #1a1a1a;
-    color: #fff;
-    font-size: 0.875rem;
+    max-width: calc(100% - 16px);
+    margin: 0;
+    padding: 4px 10px;
+    border-radius: 14px;
+    background: var(--color-fill);
+    color: var(--color-on-fill);
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 500;
     line-height: 1.35;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    text-wrap: balance;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    pointer-events: none;
     animation: hint-in 200ms ease both;
   }
 

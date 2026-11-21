@@ -323,8 +323,8 @@ button {
   /* where a context label follows the pointer on something you can click, the label's own square replaces the
      cursor; on things you can't click (a hover note like "Rovigo" or the signature) the normal pointer stays and
      the label sits next to it (view-cursor.ts, .is-plain) */
-  html.has-view-cursor :is(a[href], button, summary, label, select, [role='button'], [role='tab'], [role='switch'], .card)[data-cursor],
-  html.has-view-cursor :is(a[href], button, summary, label, select, [role='button'], [role='tab'], [role='switch'], .card)[data-cursor] * {
+  html.has-view-cursor :is(a[href], button, summary, label, select, [role='button'], [role='tab'], [role='switch'], .card)[data-cursor]:not([data-cursor-plain]),
+  html.has-view-cursor :is(a[href], button, summary, label, select, [role='button'], [role='tab'], [role='switch'], .card)[data-cursor]:not([data-cursor-plain]) * {
     cursor: none !important;
   }
 
