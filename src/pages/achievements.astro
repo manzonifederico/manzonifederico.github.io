@@ -13,10 +13,10 @@ import { localePath } from '../i18n/ui';
   <main id="main" class="container">
     <div class="ach-top">
       <a class="ach-back" href={localePath('en', '/')} data-cursor="Go to home page">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
           <path fill="currentColor" d="M6 19h3.5v-6h5v6H18v-9l-6-4.5L6 10zm-2 2V9l8-6l8 6v12h-7.5v-6h-1v6z" />
         </svg>
-        <span class="visually-hidden">Home</span>
+        <span>Home</span>
       </a>
       <div class="ach-controls">
         <ThemeSwitch lang="en" />
@@ -40,14 +40,18 @@ import { localePath } from '../i18n/ui';
     padding-inline: inherit;
   }
 
-  /* round button with an outlined house, styled like the project filter chips: blue outline, light fill on hover */
+  /* pill with an outlined house and "Home", styled like the project filter chips: blue outline, light fill on hover */
   .ach-back {
-    display: inline-grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 6px 16px 6px 12px;
     border: 1px solid var(--color-brand-ink);
-    border-radius: 50%;
+    border-radius: var(--radius-pill);
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 500;
+    text-decoration: none;
     background: var(--color-surface);
     color: var(--color-brand-ink);
     transition: background var(--dur) var(--ease);
