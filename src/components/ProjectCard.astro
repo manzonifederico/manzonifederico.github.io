@@ -47,10 +47,20 @@ const media = await Promise.all(
       </svg>
     )
   }
+  {
+    project.comingSoon && (
+      // the "Work in progress" chip on the dashes (it rides them after a while, see the script); the link says it to
+      // screen readers, so the chip itself, whose label changes, is hidden from them
+      <span class="wip-chip" data-wip-chip aria-hidden="true">
+        <span data-wip-label>Work in progress</span>
+      </span>
+    )
+  }
   <div class="card-head">
     <Heading class="card-title">
       <a class="card-link" href={href}>
         <ProjectLogo project={project} size="card" />
+        {project.comingSoon && <span class="visually-hidden">{lang === 'it' ? ' (lavoro in corso)' : ' (work in progress)'}</span>}
       </a>
     </Heading>
     <p class="card-sub">{text.subtitle}</p>
@@ -117,6 +127,129 @@ const media = await Promise.all(
       },
       { once: true },
     );
+  });
+
+  // ---------- work in progress: the chip on the dashed outline ----------
+  // It sits on the top dashes, lined up with the title ("Work in progress"). After 15 s with the page still (no
+  // scrolling, pointer, keys or touches) and the card on screen, it rides the dashes around the card like a carriage
+  // on a rail, staying upright and reading "WIP". Any movement sends it back along the rail to its place, where it
+  // reads "Work in progress" again. Not with reduced motion. Without scripts it simply sits in its place.
+  document.querySelectorAll<HTMLElement>('.card--compact').forEach((card) => {
+    const chip = card.querySelector<HTMLElement>('[data-wip-chip]');
+    const label = chip?.querySelector<HTMLElement>('[data-wip-label]');
+    const title = card.querySelector<HTMLElement>('.card-title');
+    if (!chip || !label || !title) return;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const OUT = 6; // the dashes run 6px outside the card
+    const R = 36; // their corner radius
+    const SPEED = 55; // px per second on the rail
+    const BACK = 900; // px per second on the way back
+    const IDLE = 15000;
+
+    // the rail: a rounded rectangle around the card. A point at distance s along it, clockwise from the top-left
+    // corner's end
+    const rail = () => {
+      const w = card.offsetWidth + OUT * 2;
+      const h = card.offsetHeight + OUT * 2;
+      const r = Math.min(R, w / 2, h / 2);
+      const top = w - 2 * r;
+      const side = h - 2 * r;
+      const arc = (Math.PI / 2) * r;
+      const length = 2 * top + 2 * side + 4 * arc;
+      const at = (s: number) => {
+        s = ((s % length) + length) % length;
+        const corner = (cx: number, cy: number, from: number, d: number) => {
+          const a = from + d / r;
+          return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+        };
+        let p: number[];
+        if (s < top) p = [r + s, 0];
+        else if ((s -= top) < arc) p = corner(w - r, r, -Math.PI / 2, s);
+        else if ((s -= arc) < side) p = [w, r + s];
+        else if ((s -= side) < arc) p = corner(w - r, h - r, 0, s);
+        else if ((s -= arc) < top) p = [w - r - s, h];
+        else if ((s -= top) < arc) p = corner(r, h - r, Math.PI / 2, s);
+        else if ((s -= arc) < side) p = [0, h - r - s];
+        else p = corner(r, r, Math.PI, s - side);
+        return [p[0] - OUT, p[1] - OUT]; // in the card's own coordinates
+      };
+      return { length, at, r };
+    };
+
+    // home: on the top dashes, the chip's left edge lined up with the title
+    const home = () => {
+      const { r } = rail();
+      const left = title.getBoundingClientRect().left - card.getBoundingClientRect().left;
+      return Math.max(0, left + OUT + chip.offsetWidth / 2 - r);
+    };
+    let s = 0; // where the chip is on the rail
+    const place = () => {
+      const [x, y] = rail().at(s);
+      chip.style.transform = `translate(${Math.round(x - chip.offsetWidth / 2)}px, ${Math.round(y - chip.offsetHeight / 2)}px)`;
+    };
+    const setLabel = (moving: boolean) => {
+      label.textContent = moving ? 'WIP' : 'Work in progress';
+      chip.classList.toggle('is-moving', moving);
+    };
+    const settle = () => {
+      setLabel(false);
+      s = home();
+      place();
+    };
+    chip.classList.add('is-railed'); // from now on the script places it
+    settle();
+
+    let raf = 0;
+    let last = 0;
+    let mode: 'still' | 'ride' | 'back' = 'still';
+    const frame = (t: number) => {
+      const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
+      last = t;
+      if (mode === 'ride') s += SPEED * dt;
+      else if (mode === 'back') {
+        // the short way round to its place
+        const { length } = rail();
+        const goal = home();
+        let d = (((goal - s) % length) + length) % length;
+        if (d > length / 2) d -= length;
+        const step = BACK * dt;
+        if (Math.abs(d) <= step) {
+          mode = 'still';
+          settle();
+          raf = 0;
+          last = 0;
+          return;
+        }
+        s += Math.sign(d) * step;
+      }
+      place();
+      raf = requestAnimationFrame(frame);
+    };
+    const run = (next: 'ride' | 'back') => {
+      mode = next;
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+
+    let visible = false;
+    let idle = 0;
+    const wait = () => {
+      window.clearTimeout(idle);
+      if (reduce.matches) return;
+      idle = window.setTimeout(() => {
+        if (!visible || document.hidden) return wait();
+        setLabel(true);
+        run('ride');
+      }, IDLE);
+    };
+    const stir = () => {
+      if (mode === 'ride') run('back');
+      wait();
+    };
+    for (const type of ['scroll', 'wheel', 'pointermove', 'pointerdown', 'keydown', 'touchstart'])
+      addEventListener(type, stir, { passive: true });
+    addEventListener('resize', () => mode === 'still' && settle());
+    new IntersectionObserver(([e]) => (visible = e.isIntersecting)).observe(card);
+    wait();
   });
 </script>
 
@@ -384,6 +517,41 @@ const media = await Promise.all(
     overflow: visible;
     content-visibility: visible;
     contain-intrinsic-block-size: none;
+  }
+
+  /* the chip on the dashes: without scripts it sits on the top dashes, lined up with the title; the script then
+     places it (is-railed) and moves it along the dashes */
+  .wip-chip {
+    position: absolute;
+    left: 28px;
+    top: -6px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    background: #24345c;
+    color: #fff;
+    box-shadow: 0 0 0 2px #fff; /* a white ring: it stands out on the dashes and on the card */
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: var(--fs-small);
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .wip-chip.is-railed {
+    left: 0;
+    top: 0;
+    will-change: transform;
+  }
+
+  @media (max-width: 900px) {
+    .wip-chip:not(.is-railed) {
+      left: 18px;
+    }
   }
 
   .card-dash rect {
