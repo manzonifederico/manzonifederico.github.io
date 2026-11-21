@@ -320,10 +320,16 @@ button {
     cursor: var(--cur-zoom-out) !important;
   }
 
-  /* where a context label follows the pointer, the label's own square replaces the cursor */
-  html.has-view-cursor [data-cursor],
-  html.has-view-cursor [data-cursor] * {
+  /* where a context label follows the pointer on something you can click, the label's own square replaces the
+     cursor; on things you can't click (a hover note like "Rovigo" or the signature) the normal pointer stays and
+     the label sits next to it (view-cursor.ts, .is-plain) */
+  html.has-view-cursor :is(a[href], button, summary, label, select, [role='button'], [role='tab'], [role='switch'], .card)[data-cursor],
+  html.has-view-cursor :is(a[href], button, summary, label, select, [role='button'], [role='tab'], [role='switch'], .card)[data-cursor] * {
     cursor: none !important;
+  }
+
+  html.has-view-cursor:not(.classic-pointer) [data-cursor]:not(a[href], button, summary, label, select, [role='button'], [role='tab'], [role='switch'], .card) {
+    cursor: var(--cur-arrow);
   }
 
   /* recruiter mode hides the labels on personal details (e.g. Rovigo): there the normal pointer stays */
@@ -664,6 +670,19 @@ html.classic-pointer #view-cursor {
 
 #view-cursor.is-pressed .vc-dot {
   transform: scale(0.7);
+}
+
+/* on things you can't click the real pointer stays: no square, and the label moves clear of the pointer's tip */
+#view-cursor.is-plain .vc-dot {
+  visibility: hidden;
+}
+
+#view-cursor.is-plain .vc-label {
+  transform: translate(10px, 0);
+}
+
+#view-cursor.is-plain.is-flipped .vc-label {
+  transform: translate(-4px, 0);
 }
 
 /* ---------- Layout helpers ---------- */

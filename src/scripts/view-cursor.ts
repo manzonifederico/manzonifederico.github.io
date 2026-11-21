@@ -19,6 +19,8 @@ const FLAGS: Record<string, string> = {
   gb: '<svg class="vc-flag" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="vc-gb-a"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="vc-gb-b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#vc-gb-a)"><path fill="#012169" d="M0 0v30h60V0z"/><path stroke="#fff" stroke-width="6" d="M0 0l60 30m0-30L0 30"/><path stroke="#c8102e" stroke-width="4" d="M0 0l60 30m0-30L0 30" clip-path="url(#vc-gb-b)"/><path stroke="#fff" stroke-width="10" d="M30 0v30M0 15h60"/><path stroke="#c8102e" stroke-width="6" d="M30 0v30M0 15h60"/></g></svg>',
 };
 const isClassic = () => document.documentElement.classList.contains('classic-pointer');
+// the same list as the pointer rules in global.css ("where a context label follows the pointer…")
+const CLICKABLE = "a[href], button, summary, label, select, [role='button'], [role='tab'], [role='switch'], .card";
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
 function setup(mouseSeen = false) {
@@ -61,6 +63,8 @@ function setup(mouseSeen = false) {
     if (isClassic()) return;
     if ('cursorPii' in target.dataset && document.documentElement.dataset.unbiased === 'true') return;
     current = target;
+    // something you can click gets the square instead of the pointer; anything else keeps the normal pointer
+    el.classList.toggle('is-plain', !target.matches(CLICKABLE));
     const it = document.documentElement.lang === 'it' ? target.dataset.cursorIt : undefined;
     label.textContent = it ?? target.dataset.cursor ?? '';
     const flag = FLAGS[target.dataset.cursorFlag ?? ''];
