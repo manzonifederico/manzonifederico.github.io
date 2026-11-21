@@ -10,9 +10,15 @@ export interface Achievement {
   secret?: boolean;
   /** a bonus: not needed for Platinum (e.g. it needs hardware not everyone has) */
   bonus?: boolean;
+  /** an SVG drawn instead of the emoji (e.g. a flag that has no emoji) */
+  svg?: string;
   en: { title: string; desc: string };
   it: { title: string; desc: string };
 }
+
+// the flag of the Republic of Venice (the same one as the "Bacaro tour?" label in src/scripts/view-cursor.ts)
+const VENICE_FLAG =
+  '<svg viewBox="0 0 34 20" aria-hidden="true"><path fill="#a5122a" d="M0 0h22l4 1.67-4 1.66 4 1.67-4 1.67 4 1.66-4 1.67 4 1.67-4 1.66 4 1.67-4 1.67 4 1.66-4 1.67H0z"/><circle cx="6.4" cy="6.2" r="3" fill="#f7dc7a" opacity=".6"/><g fill="#f2c230"><path d="M10 8.6 12.6 3.2l1.2.5-.4 1.6 1.3-.9.9.7-1.1 1.3 1.4-.4.5.9-3.6 2.1z"/><path d="M6.8 9.2c3.2-1.3 7-1.4 10.2-.4.9.3 1.2 1.3.7 2.1-3.4 1-7.3 1-10.4.2-.8-.4-1-1.4-.5-1.9z"/><circle cx="6.4" cy="7" r="2.2"/></g><path d="M8 10.8v4.6M9.8 11.2v4.2M14.6 11.2v4.2M16.4 10.9v4.5M17.4 9.4c1.6-.2 2.2-1.6 1.4-3" stroke="#f2c230" stroke-width="1.1" stroke-linecap="round" fill="none"/></svg>';
 
 export const achievements: Achievement[] = [
   { id: 'first-squash', icon: '🦟', en: { title: 'First blood', desc: 'Squash one of the little arrows' }, it: { title: 'Primo sangue', desc: 'Schiaccia una delle frecce' } },
@@ -24,7 +30,7 @@ export const achievements: Achievement[] = [
   { id: 'shake-square', icon: '🟦', secret: true, en: { title: 'Where’s my pointer?', desc: 'Shake the mouse' }, it: { title: 'Dov’è il puntatore?', desc: 'Scuoti il mouse' } },
   { id: 'bottom-note', icon: '🙈', secret: true, en: { title: 'Nothing to see here', desc: 'Pull past the end of the page' }, it: { title: 'Niente da vedere', desc: 'Tira oltre la fine della pagina' } },
   { id: 'rovigo', icon: '😴', en: { title: 'Boring town', desc: 'Find out where I grew up' }, it: { title: 'Città noiosa', desc: 'Scopri dove sono cresciuto' } },
-  { id: 'bacaro', icon: '🍷', secret: true, en: { title: 'Bacaro tour', desc: 'Hover over Venice' }, it: { title: 'Bacaro tour', desc: 'Passa sopra Venezia' } },
+  { id: 'bacaro', icon: '🍷', svg: VENICE_FLAG, secret: true, en: { title: 'Bacaro tour', desc: 'Hover over Venice' }, it: { title: 'Bacaro tour', desc: 'Passa sopra Venezia' } },
   { id: 'credits', icon: '🤖', secret: true, en: { title: 'Credits', desc: 'Find out who helped build this site' }, it: { title: 'Titoli di coda', desc: 'Scopri chi ha aiutato a costruire il sito' } },
   { id: 'nudge', icon: '🤔', en: { title: 'Indecisive', desc: 'Keep the pointer on a project for 10 seconds' }, it: { title: 'Indeciso', desc: 'Tieni il puntatore su un progetto per 10 secondi' } },
   { id: 'full-story', icon: '📖', en: { title: 'Bookworm', desc: 'Open the full story of a project' }, it: { title: 'Topo di biblioteca', desc: 'Apri la versione completa di un progetto' } },
@@ -39,4 +45,4 @@ export const achievements: Achievement[] = [
 ];
 
 export const achievementText = (lang: Lang) =>
-  achievements.map((a) => ({ id: a.id, icon: a.icon, secret: !!a.secret, bonus: !!a.bonus, ...a[lang] }));
+  achievements.map((a) => ({ id: a.id, icon: a.icon, svg: a.svg, secret: !!a.secret, bonus: !!a.bonus, ...a[lang] }));

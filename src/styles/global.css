@@ -791,6 +791,12 @@ html.gamepad-nav :focus {
   font-size: 1.35rem;
 }
 
+.ach-toast-icon svg {
+  width: 26px;
+  height: auto;
+  border-radius: 2px;
+}
+
 .ach-toast-text {
   display: grid;
   font-family: var(--font-display);

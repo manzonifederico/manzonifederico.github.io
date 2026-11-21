@@ -56,9 +56,13 @@ const headingId = `ach-title-${mode}`;
       <ul class="ach-list" role="list">
         {list.map((a) => (
           <li class="ach" data-ach={a.id}>
-            <span class="ach-icon" aria-hidden="true">
-              {a.secret ? '❔' : a.icon}
-            </span>
+            {a.svg && !a.secret ? (
+              <span class="ach-icon" aria-hidden="true" set:html={a.svg} />
+            ) : (
+              <span class="ach-icon" aria-hidden="true">
+                {a.secret ? '❔' : a.icon}
+              </span>
+            )}
             <span class="ach-text">
               <span class="ach-title">{a.secret ? '???' : a.title}</span>
               <span class="ach-desc">{a.secret ? '???' : a.desc}</span>
@@ -85,9 +89,13 @@ const headingId = `ach-title-${mode}`;
       <ul class="ach-list ach-list--page" role="list">
         {list.map((a) => (
           <li class="ach" data-ach={a.id}>
-            <span class="ach-icon" aria-hidden="true">
-              {a.secret ? '❔' : a.icon}
-            </span>
+            {a.svg && !a.secret ? (
+              <span class="ach-icon" aria-hidden="true" set:html={a.svg} />
+            ) : (
+              <span class="ach-icon" aria-hidden="true">
+                {a.secret ? '❔' : a.icon}
+              </span>
+            )}
             <span class="ach-text">
               <span class="ach-title">{a.secret ? '???' : a.title}</span>
               <span class="ach-desc">{a.secret ? '???' : a.desc}</span>
@@ -200,6 +208,13 @@ const headingId = `ach-title-${mode}`;
     flex: none;
     font-size: 1.6rem;
     line-height: 1;
+  }
+
+  .ach-icon :global(svg) {
+    display: block;
+    width: 1.4em;
+    height: auto;
+    border-radius: 2px;
   }
 
   .ach-text {

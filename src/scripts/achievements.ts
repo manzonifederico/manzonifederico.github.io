@@ -9,6 +9,7 @@ interface Item {
   icon: string;
   secret: boolean;
   bonus: boolean;
+  svg?: string;
   title: string;
   desc: string;
 }
@@ -45,7 +46,9 @@ function render() {
     const state = li.querySelector('[data-ach-state]');
     if (state) state.textContent = on ? '' : data.locked;
     if (item.secret && on) {
-      li.querySelector('.ach-icon')!.textContent = item.icon;
+      const icon = li.querySelector('.ach-icon')!;
+      if (item.svg) icon.innerHTML = item.svg; // our own flag drawing (src/data/achievements.ts)
+      else icon.textContent = item.icon;
       li.querySelector('.ach-title')!.textContent = item.title;
       li.querySelector('.ach-desc')!.textContent = item.desc;
     }
@@ -96,7 +99,9 @@ function next() {
   el.className = 'ach-toast';
   el.setAttribute('role', 'status');
   el.innerHTML = '<span class="ach-toast-icon" aria-hidden="true"></span><span class="ach-toast-text"><strong></strong><span></span></span>';
-  el.querySelector('.ach-toast-icon')!.textContent = item.icon;
+  const icon = el.querySelector('.ach-toast-icon')!;
+  if (item.svg) icon.innerHTML = item.svg; // our own flag drawing (src/data/achievements.ts)
+  else icon.textContent = item.icon;
   el.querySelector('strong')!.textContent = `🏆 ${data.unlocked}`;
   el.querySelector('.ach-toast-text span')!.textContent = item.title;
   document.body.appendChild(el);
