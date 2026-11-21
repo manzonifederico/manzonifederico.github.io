@@ -111,7 +111,9 @@ function next() {
   else icon.textContent = item.icon;
   el.querySelector('strong')!.textContent = `🏆 ${data.unlocked}`;
   el.querySelector('.ach-toast-text span')!.textContent = item.title;
-  document.body.appendChild(el);
+  // inside a window that is open (the death screens, the board): those sit above the whole page, so a notice
+  // added to the page itself would be hidden under them
+  (document.querySelector('dialog[open]') ?? document.body).appendChild(el);
   chime();
   window.setTimeout(() => el.classList.add('is-out'), 3800);
   window.setTimeout(() => {
@@ -131,7 +133,10 @@ function unlock(id: string) {
   render();
   if (html.dataset.unbiased !== 'true') {
     queue.push(item);
-    if (!showing) next();
+    if (!showing) {
+      showing = true;
+      window.setTimeout(next, 80); // a moment later, so a window opening right now (e.g. "You died") is already up
+    }
   }
   // every other one possible on this device unlocked (bonus ones aside): platinum
   if (id !== 'platinum' && data.list.every((a) => a.id === 'platinum' || a.bonus || !counts(a) || got[a.id]))

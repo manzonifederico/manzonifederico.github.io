@@ -11,7 +11,7 @@ import ThemeSwitch from '../ThemeSwitch.astro';
 import Tag from '../Tag.astro';
 import MyWork from '../MyWork.astro';
 import Footer from '../Footer.astro';
-import { getProject, projectText, type Project } from '../../data/projects';
+import { getProject, projectText, projects, type Project } from '../../data/projects';
 import { site } from '../../data/site';
 import { t, tagLabel, localePath, type Lang } from '../../i18n/ui';
 import '../../styles/death.css'; // the souls-like screen of the brainrot easter egg (Instagram)
@@ -142,7 +142,7 @@ const articleJsonLd = {
   bodyClass={project.theme}>
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(articleJsonLd).replace(/</g, '\\u003c')} />
   <main id="main">
-    <article class="case">
+    <article class="case" data-slug={project.slug} data-projects={projects.length}>
       <div class="case-panel">
         <div class="topbar container">
           <a class="back" href={localePath(lang, '/') + '#work'}>
@@ -583,6 +583,29 @@ const articleJsonLd = {
 
   fromHash();
   spy();
+
+  // ---------- "Well-read" achievement: a project counts as read when its article's end comes into view ----------
+  {
+    const article = document.querySelector<HTMLElement>('article.case[data-slug]');
+    const end = document.getElementById('end');
+    if (article && end && 'IntersectionObserver' in window) {
+      const seen = new IntersectionObserver(([e]) => {
+        if (!e.isIntersecting) return;
+        seen.disconnect();
+        try {
+          const read = new Set<string>(JSON.parse(localStorage.getItem('articles-read') ?? '[]'));
+          read.add(article.dataset.slug!);
+          localStorage.setItem('articles-read', JSON.stringify([...read]));
+          if (read.size >= Number(article.dataset.projects)) {
+            document.dispatchEvent(new CustomEvent('achieve', { detail: 'read-all' })); // src/scripts/achievements.ts
+          }
+        } catch {
+          /* storage blocked: not counted */
+        }
+      });
+      seen.observe(end);
+    }
+  }
 
   // ---------- Instagram easter egg: 10 clicks in a row on "brainrot" → "<character> killed you" ----------
   const brainrot = document.querySelector<HTMLElement>('[data-brainrot]');

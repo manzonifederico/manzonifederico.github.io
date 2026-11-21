@@ -38,6 +38,7 @@ export const achievements: Achievement[] = [
   { id: 'credits', on: 'pc', icon: '🤖', secret: true, en: { title: 'Credits', desc: 'Find out who helped build this site' }, it: { title: 'Titoli di coda', desc: 'Scopri chi ha aiutato a costruire il sito' } },
   { id: 'nudge', on: 'pc', icon: '🤔', en: { title: 'Indecisive', desc: 'Keep the pointer on a project for 10 seconds' }, it: { title: 'Indeciso', desc: 'Tieni il puntatore su un progetto per 10 secondi' } },
   { id: 'full-story', icon: '📖', en: { title: 'Bookworm', desc: 'Open the full story of a project' }, it: { title: 'Topo di biblioteca', desc: 'Apri la versione completa di un progetto' } },
+  { id: 'read-all', icon: '📚', en: { title: 'Well-read', desc: 'Read every project to the end' }, it: { title: 'Lettore accanito', desc: 'Leggi tutti i progetti fino in fondo' } },
   { id: 'dark', icon: '🌙', en: { title: 'Dark side', desc: 'Switch to the dark theme' }, it: { title: 'Lato oscuro', desc: 'Passa al tema scuro' } },
   { id: 'language', icon: '🌍', en: { title: 'Bilingual', desc: 'Read the site in the other language' }, it: { title: 'Bilingue', desc: 'Leggi il sito nell’altra lingua' } },
   { id: 'recruiter', icon: '🕵️', en: { title: 'Unbiased', desc: 'Turn on recruiter mode' }, it: { title: 'Senza pregiudizi', desc: 'Attiva la modalità recruiter' } },
