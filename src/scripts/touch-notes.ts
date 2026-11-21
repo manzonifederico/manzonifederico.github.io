@@ -24,6 +24,27 @@ const isNote = (el: HTMLElement) =>
   !el.closest('dialog') &&
   !el.matches('img, [datacursor], [data-cursor-plain], [data-brainrot], [aria-current]');
 
+// the square always sits right after the title's last letter: the last word and the square go in one piece that
+// can't break across lines (otherwise a long title, e.g. "Instagram Redesign", could leave it alone on a new line)
+function glueToLastWord(title: HTMLElement, dot: HTMLElement) {
+  const walker = document.createTreeWalker(title, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => (n.textContent?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP),
+  });
+  let last: Text | null = null;
+  while (walker.nextNode()) last = walker.currentNode as Text;
+  const m = last?.textContent?.match(/\S+(?=\s*$)/);
+  if (!last || !m || m.index === undefined) {
+    title.appendChild(dot);
+    return;
+  }
+  const word = last.splitText(m.index); // "…Instagram " | "Redesign"
+  word.splitText(m[0].length); // anything after the word (spaces) stays outside
+  const glue = document.createElement('span');
+  glue.className = 'tap-dot-glue';
+  word.before(glue);
+  glue.append(word, dot);
+}
+
 // a title's square says "touch me": 10 s after the page opens it hops 3 times (1.2 s apart), waits 7 s, hops 3 times
 // again, then rests 30 s; that 4 times in all. Touching it stops it for good. Reduced motion: no hops.
 const stopHops = new WeakMap<HTMLElement, () => void>();
@@ -68,7 +89,7 @@ notes.forEach((el) => {
     dot.setAttribute('role', 'button');
     dot.setAttribute('aria-label', html.lang === 'it' ? 'Curiosità sul titolo' : 'About the title');
     dot.tabIndex = 0;
-    el.appendChild(dot);
+    glueToLastWord(el, dot);
     hops(dot);
     return;
   }

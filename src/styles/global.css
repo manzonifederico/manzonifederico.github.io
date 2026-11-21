@@ -853,10 +853,40 @@ html.touch-notes li.tap-note::after {
   mask-size: 6px 3px;
 }
 
+/* "touch me": 7 s after the page opens the zigzags drift slowly sideways for 5 s, then stop (5 s at most, so moving
+   things never distract for long; not at all with reduced motion). 30px = 5 zigzags, so it ends where it started */
+@media (prefers-reduced-motion: no-preference) {
+  html.touch-notes span.tap-note {
+    animation: zz-drift 5s linear 7s;
+  }
+
+  html.touch-notes .tap-note:is(li, p)::after {
+    animation: zz-drift-mask 5s linear 7s;
+  }
+}
+
+@keyframes zz-drift {
+  to {
+    background-position: 30px 100%;
+  }
+}
+
+@keyframes zz-drift-mask {
+  to {
+    -webkit-mask-position: 30px 0;
+    mask-position: 30px 0;
+  }
+}
+
 /* the title's square (.tap-dot, added by touch-notes.ts): 9px, its bottom on the text's baseline like a full stop, in
    the project's colour. It is the only part of the title that answers a tap: a see-through 45px box with the square in
    its middle; negative margins keep it from moving the title (baseline of an empty inline-block = its bottom margin
    edge: 45 - 18 - 9 = 18px under the square) */
+/* the title's last word and its square: never split across lines */
+.tap-dot-glue {
+  white-space: nowrap;
+}
+
 html.touch-notes .tap-dot {
   -webkit-tap-highlight-color: transparent;
   display: inline-block;
