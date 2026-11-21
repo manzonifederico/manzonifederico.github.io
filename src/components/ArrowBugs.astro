@@ -1,7 +1,7 @@
 ---
 // Easter egg on the home page (not with reduced motion; with a mouse, also not with the "Classic pointer" switch):
-// a few small dashed arrows (like the ones under the name) wander around the page and run away from the
-// pointer. Click one and it gets squashed like a mosquito. Squash them all and a big arrow flies in, grabs the
+// a few small dashed arrows (like the ones under the name) wander around the top of the page, from "Hey!" to the end
+// of the bio, and run away from the pointer. Click one and it gets squashed like a mosquito. Squash them all and a big arrow flies in, grabs the
 // pointer and carries it off, followed by a souls-like "game over" screen with a user-research joke.
 // The big arrow's finale is picked at random: with a mouse it can also steal the pointer; on touch screens
 // (no pointer to steal) it is one of three attacks: explodes, swings a double axe at the glass, casts a
@@ -138,6 +138,8 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
   const BIG = pixelArrow(12);
   const POINTER = `<svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 2 L3 18 L14.5 12.5 Z" fill="#145ee1" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
 
+  // x on the screen, y on the page (not the screen): the arrows live in the part of the page from "Hey!" to the end of
+  // the bio, and scroll away with it
   type Bug = { el: HTMLElement; x: number; y: number; vx: number; vy: number; wander: number; rot: number; alive: boolean };
   let bugs: Bug[] = [];
   let caught = 0;
@@ -177,12 +179,29 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
     }
   };
 
+  // the play area, in page coordinates: from just above "Hey!" to the bottom of the bio (the whole screen if the page
+  // has neither)
+  const field = () => {
+    const from = document.querySelector('.hero-title')?.getBoundingClientRect();
+    const to = document.querySelector('.about')?.getBoundingClientRect();
+    return {
+      top: from ? from.top + scrollY - 24 : scrollY,
+      bottom: to ? to.bottom + scrollY : scrollY + innerHeight,
+    };
+  };
+  // the pointer on the page (my is on the screen)
+  const pageY = () => (my < -9000 ? my : my + scrollY);
+
   function spawn() {
     if (!layer) return;
     layer.replaceChildren();
     caught = 0;
     const W = innerWidth;
-    const H = innerHeight;
+    // where they appear: the part of the play area on screen right now, or the play area itself if none of it is
+    const f = field();
+    const top = Math.max(f.top, scrollY) + 40;
+    const bottom = Math.min(f.bottom, scrollY + innerHeight) - 40;
+    const [y0, y1] = bottom > top ? [top, bottom] : [f.top + 40, f.bottom - 40];
     bugs = Array.from({ length: COUNT }, () => {
       const el = document.createElement('div');
       el.className = 'bug';
@@ -193,8 +212,8 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
       let y = 0;
       do {
         x = 40 + Math.random() * (W - 80);
-        y = 40 + Math.random() * (H - 80);
-      } while (Math.hypot(x - mx, y - my) < FLEE * 1.5);
+        y = y0 + Math.random() * (y1 - y0);
+      } while (Math.hypot(x - mx, y - pageY()) < FLEE * 1.5);
       const wander = Math.random() * Math.PI * 2;
       const bug: Bug = { el, x, y, vx: Math.cos(wander) * 0.5, vy: Math.sin(wander) * 0.5, wander, rot: 0, alive: true };
       return bug;
@@ -203,15 +222,16 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
 
   function step() {
     const W = innerWidth;
-    const H = innerHeight;
     const M = 24;
+    const f = field();
+    const py = pageY();
     for (const b of bugs) {
       if (!b.alive) continue;
       b.wander += (Math.random() - 0.5) * 0.35;
       let ax = Math.cos(b.wander) * 0.05 + tiltX * 0.05; // a tilted phone: they slide downhill a little
       let ay = Math.sin(b.wander) * 0.05 + tiltY * 0.05;
       const dx = b.x - mx;
-      const dy = b.y - my;
+      const dy = b.y - py;
       const d = Math.hypot(dx, dy) || 1;
       const scared = d < FLEE;
       if (scared) {
@@ -238,8 +258,8 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
         b.vx = -b.vx;
         b.wander = Math.atan2(b.vy, b.vx);
       }
-      if (b.y < M || b.y > H - M) {
-        b.y = Math.min(H - M, Math.max(M, b.y));
+      if (b.y < f.top + M || b.y > f.bottom - M) {
+        b.y = Math.min(f.bottom - M, Math.max(f.top + M, b.y));
         b.vy = -b.vy;
         b.wander = Math.atan2(b.vy, b.vx);
       }
@@ -248,7 +268,7 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
         const diff = ((target - b.rot + 540) % 360) - 180;
         b.rot += diff * 0.2;
       }
-      b.el.style.transform = `translate3d(${b.x - 36}px, ${b.y - 25}px, 0) rotate(${b.rot}deg)`;
+      b.el.style.transform = `translate3d(${b.x - 36}px, ${b.y - scrollY - 25}px, 0) rotate(${b.rot}deg)`;
     }
     raf = requestAnimationFrame(step);
   }
@@ -865,7 +885,7 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
       const t = e.target as Element | null;
       if (t?.closest?.(CONTROLS)) return;
       const finger = e.pointerType !== 'mouse';
-      const dist = (b: Bug) => Math.hypot(b.x - e.clientX, b.y - e.clientY);
+      const dist = (b: Bug) => Math.hypot(b.x - e.clientX, b.y - scrollY - e.clientY);
       const hit = bugs.find((b) => b.alive && dist(b) < (finger ? 44 : 30));
       if (!hit) {
         // a near miss with a finger: the closest arrow darts away
@@ -873,7 +893,7 @@ import '../styles/death.css'; // the game-over screen's look, shared with the br
         if (near) {
           const d = dist(near) || 1;
           near.vx = ((near.x - e.clientX) / d) * 7;
-          near.vy = ((near.y - e.clientY) / d) * 7;
+          near.vy = ((near.y - scrollY - e.clientY) / d) * 7;
           if (finger) {
             touchMode = true;
             buzz(8);
