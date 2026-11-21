@@ -63,8 +63,8 @@ function render() {
       li.querySelector('.ach-desc')!.textContent = item.desc;
     }
   });
-  // the counter: what's possible on this device (bonus ones included), plus any already won elsewhere in this browser
-  const mine = data.list.filter((a) => counts(a) || got[a.id]);
+  // the counter: the main achievements possible on this device, plus any already won elsewhere in this browser
+  const mine = data.list.filter((a) => !a.bonus && (counts(a) || got[a.id])); // the extras don't count
   document.querySelectorAll('[data-ach-count]').forEach((el) => (el.textContent = String(mine.filter((a) => got[a.id]).length)));
   document.querySelectorAll('[data-ach-total]').forEach((el) => (el.textContent = String(mine.length)));
 }

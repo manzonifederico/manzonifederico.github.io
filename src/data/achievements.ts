@@ -30,7 +30,7 @@ export const achievements: Achievement[] = [
   { id: 'died', icon: '💀', en: { title: 'You died', desc: 'Lose to the big arrow' }, it: { title: 'Sei morto', desc: 'Perdi contro la freccia gigante' } },
   { id: 'praise', icon: '☀️', secret: true, en: { title: 'Praise the Sun', desc: 'See the soldiers praise the sun on the game-over screen', hint: 'After a fiery ending, look up' }, it: { title: 'Praise the Sun', desc: 'Vedi i soldatini lodare il sole nella schermata di game over', hint: 'Dopo una fine bollente, guarda in alto' } },
   { id: 'died-10', icon: '🔥', en: { title: 'Prepare to die', desc: 'Die 10 times' }, it: { title: 'Preparati a morire', desc: 'Muori 10 volte' } },
-  { id: 'phone-shake', on: 'phone', icon: '📳', en: { title: 'Earthquake', desc: 'Shake your phone while the arrows are around' }, it: { title: 'Terremoto', desc: 'Scuoti il telefono mentre ci sono le frecce' } },
+  { id: 'phone-shake', on: 'phone', bonus: true, icon: '📳', en: { title: 'Earthquake', desc: 'Shake your phone while the arrows are around' }, it: { title: 'Terremoto', desc: 'Scuoti il telefono mentre ci sono le frecce' } },
   { id: 'star', on: 'pc', icon: '✴️', secret: true, en: { title: 'Patience', desc: 'Leave the mouse still until something happens', hint: 'Good things come to those who wait' }, it: { title: 'Pazienza', desc: 'Lascia fermo il mouse finché succede qualcosa', hint: 'Chi aspetta, qualcosa ottiene' } },
   { id: 'shake-square', on: 'pc', icon: '🟦', secret: true, en: { title: 'Where’s my pointer?', desc: 'Shake the mouse', hint: 'Sometimes all it takes is a little shake' }, it: { title: 'Dov’è il puntatore?', desc: 'Scuoti il mouse', hint: 'A volte basta una scossa' } },
   { id: 'bottom-note', icon: '🙈', secret: true, en: { title: 'Nothing to see here', desc: 'Pull past the end of the page', hint: 'There’s always something below the bottom' }, it: { title: 'Niente da vedere', desc: 'Tira oltre la fine della pagina', hint: 'C’è sempre qualcosa sotto il fondo' } },
@@ -46,9 +46,9 @@ export const achievements: Achievement[] = [
   { id: 'recruiter', icon: '🕵️', en: { title: 'Unbiased', desc: 'Turn on recruiter mode' }, it: { title: 'Senza pregiudizi', desc: 'Attiva la modalità recruiter' } },
   { id: 'gamepad', icon: '🎮', bonus: true, en: { title: 'Player 2 has joined', desc: 'Connect a game controller' }, it: { title: 'Player 2 è entrato', desc: 'Collega un controller' } },
   { id: 'brainrot', icon: '🧠', secret: true, en: { title: 'Brainrotted', desc: 'Get killed by a brainrot', hint: 'Some words don’t like being poked' }, it: { title: 'Brainrottato', desc: 'Fatti uccidere da un brainrot', hint: 'Certe parole non amano essere punzecchiate' } },
-  { id: 'tung', icon: '🪵', secret: true, en: { title: 'Tung tung tung', desc: 'Meet Tung Tung Tung Sahur', hint: 'Knock knock: it’s almost dawn' }, it: { title: 'Tung tung tung', desc: 'Incontra Tung Tung Tung Sahur', hint: 'Toc toc: sta per albeggiare' } },
+  { id: 'tung', icon: '🪵', secret: true, en: { title: 'Tung tung tung', desc: 'Meet Tung Tung Tung Sahur', hint: '🏏🏏🏏' }, it: { title: 'Tung tung tung', desc: 'Incontra Tung Tung Tung Sahur', hint: '🏏🏏🏏' } },
   { id: 'lirili', icon: '🐘', secret: true, en: { title: 'Elephant in the desert', desc: 'Meet Lirilì Larilà', hint: 'Someone is taking a walk in the desert' }, it: { title: 'Elefante nel deserto', desc: 'Incontra Lirilì Larilà', hint: 'Qualcuno sta passeggiando nel deserto' } },
-  { id: 'platinum', icon: '🏆', en: { title: 'Platinum', desc: 'Unlock every achievement possible on this device (the controller one is a bonus)' }, it: { title: 'Platino', desc: 'Sblocca tutti gli achievement possibili su questo dispositivo (quello del controller è un bonus)' } },
+  { id: 'platinum', icon: '🏆', en: { title: 'Platinum', desc: 'Unlock every achievement possible on this device (the extras aside)' }, it: { title: 'Platino', desc: 'Sblocca tutti gli achievement possibili su questo dispositivo (extra esclusi)' } },
 ];
 
 export const achievementText = (lang: Lang) =>
