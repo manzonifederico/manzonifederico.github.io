@@ -168,6 +168,20 @@ const tagsAttr = (p: Project) => p.tags.join('|');
       }),
     );
   });
+
+  // the Sunfest pair shares one diagonal fade (dark theme), from the first card's top-left corner to the second card's
+  // bottom-right one: each piece (card, neck) paints the slice of a gradient as tall as the whole pair
+  // (--pair-h on the pair, --pair-y = where the piece starts in it), kept up to date as sizes change
+  document.querySelectorAll<HTMLElement>('.pair').forEach((pair) => {
+    const pieces = () => [...pair.querySelectorAll<HTMLElement>('.slot:not([hidden]) .card, .bridge')];
+    const measure = () => {
+      const top = pair.getBoundingClientRect().top;
+      pair.style.setProperty('--pair-h', `${Math.round(pair.offsetHeight)}px`);
+      pieces().forEach((el) => el.style.setProperty('--pair-y', `${Math.round(el.getBoundingClientRect().top - top)}px`));
+    };
+    measure();
+    if ('ResizeObserver' in window) new ResizeObserver(measure).observe(pair);
+  });
 </script>
 
 <style>
@@ -272,7 +286,7 @@ const tagsAttr = (p: Project) => p.tags.join('|');
   /* ---------- Sunfest pair: the whole group lifts together on hover ---------- */
   .pair {
     display: grid;
-    container-type: inline-size; /* the neck below shows the middle slice of the cards' gradient (100cqw wide) */
+    container-type: inline-size; /* the neck below shows its slice of the pair's gradient (as wide as the cards: 100cqw) */
     transition: transform var(--dur) var(--ease), filter var(--dur) var(--ease);
   }
 
@@ -280,6 +294,13 @@ const tagsAttr = (p: Project) => p.tags.join('|');
   .pair:focus-within {
     transform: translateY(-4px);
     filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.12));
+  }
+
+  /* each Sunfest card shows its slice of the pair's one diagonal fade (dark theme; --pair-h / --pair-y from the script) */
+  .pair :global(.card) {
+    background-size: 100% var(--pair-h, 100%);
+    background-position: 0 calc(-1 * var(--pair-y, 0px));
+    background-repeat: no-repeat;
   }
 
   /* the neck joining the two Sunfest cards: blue, with concave (rounded-in) sides cut by a mask,
@@ -299,7 +320,8 @@ const tagsAttr = (p: Project) => p.tags.join('|');
     content: '';
     width: 90px;
     height: 100%;
-    background: var(--sunfest-bridge, var(--sunfest-bg)) center / 100cqw 100% no-repeat;
+    background: var(--sunfest-bridge, var(--sunfest-bg)) center calc(-1 * var(--pair-y, 0px)) / 100cqw var(--pair-h, 100%)
+      no-repeat;
     -webkit-mask:
       radial-gradient(circle 15px at 0 50%, transparent 14.5px, #000 15px) left / 50% 100% no-repeat,
       radial-gradient(circle 15px at 100% 50%, transparent 14.5px, #000 15px) right / 50% 100% no-repeat;

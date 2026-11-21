@@ -4,7 +4,7 @@
 //   A project's title answers only on its square (a 45px area around it).
 // - Project cards: one that stays in the middle of the screen gives a little wiggle after 10 s, then 2.2 s later one
 //   of its lines that invite to open it, at random (src/data/nudges.ts). The same card can do it again 30 s later,
-//   3 times in a row at most, then not for 2 minutes.
+//   3 times in a row at most, then not for 2 minutes. Only one card at a time: the one filling most of the middle.
 // Things you can click keep working as before: a tap there opens the link, no bubble.
 // The bubble is a live region, so screen readers read what it says; the notes can be reached with the keyboard too.
 // Recruiter mode hides the personal ones (data-cursor-pii), as with the mouse. Reduced motion: no wiggle, no pop.
@@ -267,7 +267,8 @@ if (cards.length && 'IntersectionObserver' in window) {
       window.setTimeout(
         () => {
           resting.delete(card);
-          if (inMiddle.has(card)) start(card);
+          if (active === card) active = null;
+          choose(); // this card again if it is still the one in the middle, or another one
         },
         n >= IN_A_ROW ? LONG_REST : RESET,
       ),
@@ -285,16 +286,44 @@ if (cards.length && 'IntersectionObserver' in window) {
     );
   };
 
+  // one card at a time: of the cards in the middle of the screen, the one that fills most of it. While it rests after
+  // talking, the cards around it wait too (no chorus); once it leaves the middle, another one can take over
+  let active: HTMLElement | null = null;
+  const central = () => {
+    const top = innerHeight * 0.35;
+    const bottom = innerHeight * 0.65;
+    let best: HTMLElement | null = null;
+    let most = 0;
+    inMiddle.forEach((card) => {
+      if (resting.has(card)) return;
+      const r = card.getBoundingClientRect();
+      const overlap = Math.min(r.bottom, bottom) - Math.max(r.top, top);
+      if (overlap > most) {
+        most = overlap;
+        best = card;
+      }
+    });
+    return best as HTMLElement | null;
+  };
+  const choose = () => {
+    if (active && resting.has(active)) {
+      if (inMiddle.has(active)) return; // still resting right there: the others wait
+      active = null; // gone from the middle: its rest goes on, the others are free
+    }
+    const next = central();
+    if (next === active) return;
+    if (active) window.clearTimeout(timers.get(active)); // not talking yet: its countdown stops
+    active = next;
+    if (active) start(active);
+  };
+
   const io = new IntersectionObserver(
     (entries) => {
       for (const { target, isIntersecting } of entries) {
-        const card = target as HTMLElement;
-        if (isIntersecting) inMiddle.add(card);
-        else inMiddle.delete(card);
-        if (resting.has(card)) continue; // its rest keeps running, wherever it is
-        window.clearTimeout(timers.get(card));
-        if (isIntersecting) start(card);
+        if (isIntersecting) inMiddle.add(target as HTMLElement);
+        else inMiddle.delete(target as HTMLElement);
       }
+      choose();
     },
     { rootMargin: '-35% 0px -35% 0px' }, // the middle 30% of the screen
   );
