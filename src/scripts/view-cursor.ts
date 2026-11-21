@@ -102,6 +102,10 @@ function setup(mouseSeen = false) {
     if (isClassic()) return;
     if ('cursorPii' in target.dataset && document.documentElement.dataset.unbiased === 'true') return;
     current = target;
+    // an open modal dialog (e.g. the trophy board) sits above the whole page, label included: inside one, the label
+    // moves into it so it stays on top; back on the page it returns to the body
+    const host = target.closest('dialog[open]') ?? document.body;
+    if (el.parentElement !== host) host.appendChild(el);
     // something you can click gets the square instead of the pointer; anything else keeps the normal pointer
     // data-cursor-plain: a label that is a note, not an invitation to click (e.g. a trophy's clue)
     el.classList.toggle('is-plain', !target.matches(CLICKABLE) || 'cursorPlain' in target.dataset);
