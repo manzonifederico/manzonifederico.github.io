@@ -1,7 +1,7 @@
 // Touch screens: the labels that follow the mouse on a computer (view-cursor.ts) become a speech bubble.
 // - Notes on things you can't click (Rovigo, Venice, the signature, the photo, a project's title, …) get a small
 //   marker, and a tap shows the bubble right above them for a few seconds (tap elsewhere or scroll and it goes).
-// - Project cards: one that stays in the middle of the screen gives a little wiggle after 10 s, then 5 s later one of
+// - Project cards: one that stays in the middle of the screen gives a little wiggle after 10 s, then 3 s later one of
 //   its own lines that invite to open it (src/data/nudges.ts). The same card can do it again 30 s later, 3 times in a
 //   row at most, then not for 2 minutes.
 // Things you can click keep working as before: a tap there opens the link, no bubble.
@@ -104,13 +104,13 @@ document.addEventListener(
 addEventListener('scroll', () => shownFor && Math.abs(scrollY - shownAtY) > 60 && hide(), { passive: true });
 
 // ---------- project cards: a wiggle, then a nudge, when one rests in the middle of the screen ----------
-// 10 s in the middle: the card wiggles; 5 s more: a bubble with one of its lines (data-touch-nudges, src/data/nudges.ts:
+// 10 s in the middle: the card wiggles; 3 s more: a bubble with one of its lines (data-touch-nudges, src/data/nudges.ts:
 // only the project's own lines that invite most to open it). 30 s later the same card can do it again, up to 3 times
 // in a row; then it waits at least 2 minutes before starting over.
 const cards = document.querySelectorAll<HTMLElement>('.card[data-touch-nudges]');
 if (cards.length && 'IntersectionObserver' in window) {
   const WIGGLE_AFTER = 10000;
-  const TALK_AFTER = 5000; // after the wiggle
+  const TALK_AFTER = 3000; // after the wiggle
   const RESET = 30000; // before the same card can do it again
   const IN_A_ROW = 3; // times in a row, then…
   const LONG_REST = 120000; // …a longer rest
