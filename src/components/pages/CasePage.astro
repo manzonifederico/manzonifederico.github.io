@@ -619,6 +619,11 @@ const articleJsonLd = {
       sayName();
     });
     brainrot.addEventListener('click', () => {
+      // off in recruiter mode: no games while someone is screening the portfolio
+      if (document.documentElement.dataset.unbiased === 'true') {
+        clicks = 0;
+        return;
+      }
       const now = performance.now();
       clicks = now - lastClick < 1200 ? clicks + 1 : 1; // "in a row": at most 1.2 s between clicks
       lastClick = now;
