@@ -59,6 +59,36 @@ function setup(mouseSeen = false) {
     else raf = 0;
   };
 
+  // nudges: on an element with data-cursor-nudges (the project cards, src/data/nudges.ts), after 10 s of the
+  // pointer resting on it the label starts changing every 5 s, cycling through those lines
+  let nudgeTimer = 0;
+  const stopNudges = () => {
+    window.clearTimeout(nudgeTimer);
+    window.clearInterval(nudgeTimer);
+    nudgeTimer = 0;
+  };
+  const startNudges = (target: HTMLElement) => {
+    stopNudges();
+    let lines: string[] = [];
+    try {
+      lines = JSON.parse(target.dataset.cursorNudges ?? '[]');
+    } catch {
+      return;
+    }
+    if (!lines.length) return;
+    let i = 0;
+    nudgeTimer = window.setTimeout(function next() {
+      if (current !== target) return;
+      label.textContent = lines[i++ % lines.length];
+      width = el.offsetWidth;
+      place();
+      el.classList.remove('is-nudge');
+      void el.offsetWidth; // restart the little pop
+      el.classList.add('is-nudge');
+      nudgeTimer = window.setTimeout(next, 5000);
+    }, 10000);
+  };
+
   const enter = (target: HTMLElement) => {
     if (isClassic()) return;
     if ('cursorPii' in target.dataset && document.documentElement.dataset.unbiased === 'true') return;
@@ -77,12 +107,15 @@ function setup(mouseSeen = false) {
     el.style.setProperty('--vc-ink', (themed && cs.getPropertyValue('--theme-tag-ink').trim()) || 'var(--color-on-fill)');
     cx = x;
     cy = y;
-    el.classList.remove('is-flipped');
+    el.classList.remove('is-flipped', 'is-nudge');
     width = el.offsetWidth;
     place();
     el.classList.add('is-visible');
+    if (target.dataset.cursorNudges) startNudges(target);
+    else stopNudges();
   };
   const leave = () => {
+    stopNudges();
     current = null;
     el.classList.remove('is-visible', 'is-pressed');
   };

@@ -672,6 +672,29 @@ html.classic-pointer #view-cursor {
   transform: scale(0.7);
 }
 
+/* a nudge on a project card (view-cursor.ts): the new line pops in */
+#view-cursor.is-nudge .vc-label {
+  animation: vc-nudge 420ms var(--ease);
+}
+
+@keyframes vc-nudge {
+  0% {
+    transform: translateY(-50%) scale(0.85);
+  }
+  60% {
+    transform: translateY(-50%) scale(1.08);
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #view-cursor.is-nudge .vc-label {
+    animation: none;
+  }
+}
+
 /* on things you can't click the real pointer stays: no square, and the label moves clear of the pointer's tip */
 #view-cursor.is-plain .vc-dot {
   visibility: hidden;
