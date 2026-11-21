@@ -39,6 +39,14 @@ const media = await Promise.all(
   data-cursor-nudges={JSON.stringify(nudgesFor(project.slug, lang))}
   data-touch-nudges={JSON.stringify(touchNudgesFor(project.slug, lang))}
   style={`--cursor-color: ${project.cursor}`}>
+  {
+    project.comingSoon && (
+      // work in progress: a dashed outline around the card (long dashes, wide gaps), drawn so it follows the corners
+      <svg class="card-dash" aria-hidden="true" focusable="false">
+        <rect width="100%" height="100%" rx="36" ry="36" />
+      </svg>
+    )
+  }
   <div class="card-head">
     <Heading class="card-title">
       <a class="card-link" href={href}>
@@ -356,6 +364,33 @@ const media = await Promise.all(
 
   :global(.work-list[data-view='list']) .card-media {
     display: none;
+  }
+
+  /* work in progress: a dashed outline 6px around the card, in the deep blue of the theme, on the page's white */
+  .card-dash {
+    position: absolute;
+    left: -6px;
+    top: -6px;
+    width: calc(100% + 12px); /* an svg needs its size spelled out (it ignores left + right) */
+    height: calc(100% + 12px);
+    max-width: none; /* the site-wide "svg { max-width: 100% }" */
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  /* that card is small and has no pictures: always drawn (the other cards skip drawing while off screen, which also
+     cuts anything outside them) and nothing to keep inside its corners, so the outline can show */
+  .card.card--compact {
+    overflow: visible;
+    content-visibility: visible;
+    contain-intrinsic-block-size: none;
+  }
+
+  .card-dash rect {
+    fill: none;
+    stroke: #24345c;
+    stroke-width: 2;
+    stroke-dasharray: 16 12;
   }
 
   /* work in progress (no pictures yet): always as compact as in list view */

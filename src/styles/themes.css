@@ -4,7 +4,7 @@
  */
 .theme-reonboarding {
   /* work in progress: the night-blue and orange of the study's recruitment flyer */
-  --theme-bg: linear-gradient(160deg, #24345c 0%, #141c30 100%);
+  --theme-bg: linear-gradient(160deg, #3d4d78 0%, #2b3756 100%); /* a little faded: still a work in progress */
   --theme-ink: #ffffff;
   --theme-tag-bg: #ff9a3c;
   --theme-tag-ink: #1a1a1a;
