@@ -18,6 +18,7 @@ interface Props {
 }
 const { lang } = Astro.props;
 const s = t(lang);
+import '../styles/death.css'; // the game-over screen's look, shared with the brainrot easter egg
 ---
 
 <div class="bugs" aria-hidden="true" data-bugs hidden></div>
@@ -1288,27 +1289,6 @@ const s = t(lang);
   }
 
   /* ---------- game over (souls-like) ---------- */
-  .death {
-    overflow: hidden;
-    width: 100%;
-    max-width: none;
-    height: 100%;
-    max-height: none;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: #e9e3d6;
-  }
-
-  .death[open] {
-    display: grid;
-    /* one column exactly as wide as the screen, so long lines wrap on phones instead of running off */
-    grid-template-columns: minmax(0, 1fr);
-    place-items: center;
-    animation: death-in 1.4s ease both;
-  }
-
   .praise-layer {
     position: fixed;
     inset: 0;
@@ -1351,113 +1331,12 @@ const s = t(lang);
     }
   }
 
-  .death::backdrop {
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.92));
-  }
-
-  .death-band {
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    padding: clamp(64px, 9vw, 104px) 16px;
-    text-align: center;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9) 16%, rgba(0, 0, 0, 0.9) 84%, transparent);
-  }
-
-  .death-title {
-    margin: 0;
-    font-family: 'Cinzel', 'Trajan Pro', 'Optima', Georgia, 'Times New Roman', serif;
-    font-weight: 400;
-    font-size: clamp(1.75rem, 0.6rem + 4.4vw, 5rem);
-    line-height: 1.1;
-    overflow-wrap: anywhere;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-wrap: balance;
-    color: #e0443a; /* souls red, bright enough for 4.8:1 on the black band */
-    animation: death-grow 5s ease-out both;
-  }
-
-  .death-sub {
-    max-width: 52ch;
-    text-wrap: balance; /* lines of similar length, no single word left on the last line */
-    margin: 18px auto 0;
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
-    line-height: 1.5;
-    animation: death-in 1.4s ease 0.8s both;
-  }
-
-  .death form {
-    margin-top: clamp(36px, 5vw, 56px);
-    animation: death-in 1s ease 1.6s both;
-  }
-
-  /* souls-style menu option: plain text, no box, on a soft lit bar with thin lines fading out at both ends
-     (it is the only option, so it always looks selected); hover / focus make it brighter */
-  .death-btn {
-    position: relative;
-    min-width: min(420px, 90vw);
-    padding: 14px 72px;
-    border: 0;
-    border-radius: 0;
-    background: radial-gradient(ellipse 50% 70% at 50% 50%, rgba(233, 227, 214, 0.12), transparent);
-    color: rgba(233, 227, 214, 0.85);
-    font: 400 clamp(1rem, 0.95rem + 0.25vw, 1.15rem) / 1.2 Georgia, 'Times New Roman', serif;
-    letter-spacing: 0.08em;
-    transition: color 200ms ease;
-  }
-
-  .death-btn::before,
-  .death-btn::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(233, 227, 214, 0.7) 50%, transparent);
-    opacity: 0.45;
-    transition: opacity 200ms ease;
-  }
-
-  .death-btn::before {
-    top: 0;
-  }
-
-  .death-btn::after {
-    bottom: 0;
-  }
-
-  .death-btn:hover,
-  .death-btn:focus {
-    outline: none;
-    color: #fff8e8;
-    background: radial-gradient(ellipse 50% 70% at 50% 50%, rgba(233, 227, 214, 0.24), transparent);
-  }
-
-  .death-btn:hover::before,
-  .death-btn:hover::after,
-  .death-btn:focus::before,
-  .death-btn:focus::after {
-    opacity: 1;
-  }
-
-  @media (forced-colors: active) {
-    .death-btn:focus {
-      outline: 2px solid ButtonText;
-    }
-  }
-
   @media (max-width: 560px) {
     .death .death-corner {
       top: 16px;
       bottom: auto;
     }
 
-    .death .death-btn {
-      min-width: 0;
-      padding: 14px 20px;
-    }
   }
 
   /* ---------- sound switch (bottom right) ---------- */
@@ -1636,22 +1515,4 @@ const s = t(lang);
     }
   }
 
-  @keyframes death-in {
-    from {
-      opacity: 0;
-    }
-  }
-
-  @keyframes death-grow {
-    from {
-      opacity: 0;
-      transform: scale(0.94);
-    }
-    30% {
-      opacity: 1;
-    }
-    to {
-      transform: scale(1.04);
-    }
-  }
 </style>

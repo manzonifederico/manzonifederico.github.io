@@ -14,6 +14,7 @@ import Footer from '../Footer.astro';
 import { getProject, projectText, type Project } from '../../data/projects';
 import { site } from '../../data/site';
 import { t, tagLabel, localePath, type Lang } from '../../i18n/ui';
+import '../../styles/death.css'; // the souls-like screen of the brainrot easter egg (Instagram)
 
 interface Props {
   project: Project;
@@ -161,7 +162,7 @@ const articleJsonLd = {
           <p class="case-sub">
             {subParts.map((part, i) =>
               i % 2 ? (
-                <span data-cursor={BRAINROT[0]} data-cursor-random={JSON.stringify(BRAINROT)}>{part}</span>
+                <span data-cursor={BRAINROT[0]} data-cursor-random={JSON.stringify(BRAINROT)} data-brainrot>{part}</span>
               ) : (
                 part
               ),
@@ -352,6 +353,33 @@ const articleJsonLd = {
       <figcaption data-lightbox-caption aria-hidden="true"></figcaption>
     </figure>
   </dialog>
+  {
+    /* Instagram easter egg: click "brainrot" in the subtitle 10 times in a row and a brainrot character kills you,
+       souls-style (the same screen as the arrow game on the home page, styles in src/styles/death.css) */
+    project.slug === 'instagram-redesign' && (
+      <dialog
+        class="death"
+        aria-labelledby="brainrot-death-title"
+        aria-describedby="brainrot-death-sub"
+        data-brainrot-death
+        data-killed={lang === 'it' ? '{name} ti ha ucciso' : '{name} killed you'}
+        data-names={JSON.stringify(BRAINROT)}>
+        <div class="death-band">
+          <h2 class="death-title" id="brainrot-death-title" />
+          <p class="death-sub" id="brainrot-death-sub">
+            {lang === 'it'
+              ? 'Hai fissato il brainrot troppo a lungo. Ora il brainrot fissa te.'
+              : 'You stared at the brainrot for too long. Now the brainrot stares back.'}
+          </p>
+          <form method="dialog">
+            <button class="death-btn" type="submit" autofocus>
+              {s.bugsRetry}
+            </button>
+          </form>
+        </div>
+      </dialog>
+    )
+  }
 </BaseLayout>
 
 <script>
@@ -552,6 +580,47 @@ const articleJsonLd = {
 
   fromHash();
   spy();
+
+  // ---------- Instagram easter egg: 10 clicks in a row on "brainrot" → "<character> killed you" ----------
+  const brainrot = document.querySelector<HTMLElement>('[data-brainrot]');
+  const rotDeath = document.querySelector<HTMLDialogElement>('[data-brainrot-death]');
+  if (brainrot && rotDeath) {
+    let clicks = 0;
+    let lastClick = 0;
+    let deathSound: HTMLAudioElement | null = null;
+    brainrot.addEventListener('click', () => {
+      const now = performance.now();
+      clicks = now - lastClick < 1200 ? clicks + 1 : 1; // "in a row": at most 1.2 s between clicks
+      lastClick = now;
+      if (clicks < 10) return;
+      clicks = 0;
+      // the character in the pointer label right now, or a random one (touch screens have no label)
+      const label = document.querySelector('#view-cursor.is-visible .vc-label')?.textContent?.trim();
+      const names: string[] = JSON.parse(rotDeath.dataset.names ?? '[]');
+      const name = label && names.includes(label) ? label : names[Math.floor(Math.random() * names.length)];
+      rotDeath.querySelector('.death-title')!.textContent = (rotDeath.dataset.killed ?? '{name}').replace('{name}', name);
+      const form = rotDeath.querySelector<HTMLElement>('form');
+      if (form) form.inert = true; // the clicks still coming in don't close it straight away
+      rotDeath.showModal();
+      window.setTimeout(() => {
+        if (form) form.inert = false;
+        rotDeath.querySelector<HTMLButtonElement>('.death-btn')?.focus();
+      }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1700);
+      // the same "you died" sound as the arrow game, unless its sound switch is off
+      let soundOn = true;
+      try {
+        soundOn = localStorage.getItem('game-sound') !== '0';
+      } catch {
+        /* storage blocked: sound on */
+      }
+      if (!soundOn) return;
+      deathSound ??= new Audio('/audio/you-died.mp3');
+      deathSound.volume = 0.9;
+      deathSound.currentTime = 0;
+      deathSound.play().catch(() => {});
+    });
+    rotDeath.addEventListener('close', () => deathSound?.pause());
+  }
 </script>
 
 <style>
