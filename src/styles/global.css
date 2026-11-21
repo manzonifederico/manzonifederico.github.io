@@ -781,6 +781,31 @@ html.gamepad-nav :focus {
   animation: ach-out 400ms var(--ease) both;
 }
 
+/* the pointer is in the lower half: the notice comes from the top instead */
+.ach-toast.at-top {
+  top: calc(20px + env(safe-area-inset-top, 0px));
+  bottom: auto;
+  animation-name: ach-in-top;
+}
+
+.ach-toast.at-top.is-out {
+  animation-name: ach-out-top;
+}
+
+@keyframes ach-in-top {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -24px);
+  }
+}
+
+@keyframes ach-out-top {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -24px);
+  }
+}
+
 .ach-toast-icon {
   display: grid;
   place-items: center;

@@ -65,6 +65,11 @@ function render() {
 }
 
 // ---------- the notice ----------
+// it shows on the half of the screen away from the pointer, so it never covers what you're pointing at (e.g. the
+// signature's label at the bottom of the page)
+let pointerY = -1;
+addEventListener('pointermove', (e) => (pointerY = e.clientY), { passive: true });
+addEventListener('pointerdown', (e) => (pointerY = e.clientY), { passive: true });
 const queue: Item[] = [];
 let showing = false;
 function chime() {
@@ -103,7 +108,7 @@ function next() {
   }
   showing = true;
   const el = document.createElement('div');
-  el.className = 'ach-toast';
+  el.className = pointerY > window.innerHeight / 2 ? 'ach-toast at-top' : 'ach-toast';
   el.setAttribute('role', 'status');
   el.innerHTML = '<span class="ach-toast-icon" aria-hidden="true"></span><span class="ach-toast-text"><strong></strong><span></span></span>';
   const icon = el.querySelector('.ach-toast-icon')!;
@@ -135,7 +140,8 @@ function unlock(id: string) {
     queue.push(item);
     if (!showing) {
       showing = true;
-      window.setTimeout(next, 80); // a moment later, so a window opening right now (e.g. "You died") is already up
+      // a couple of seconds later: first you see what you did (a label, the "You died" screen…), then the trophy
+      window.setTimeout(next, 2000);
     }
   }
   // every other one possible on this device unlocked (bonus ones aside): platinum
