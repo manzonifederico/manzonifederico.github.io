@@ -1,3 +1,5 @@
+## Work in progress summary
+
 Games put a great deal of effort into teaching brand-new players, but far less is known about how they welcome players back. Re-onboarding is the study of my Master’s thesis at the University of Trento, which I’m running during my thesis period at the University of Waterloo (Stratford School of Interaction Design and Business and the Games Institute), and it looks at exactly that moment: coming back to a video game after a long break.
 
 We want to understand what players go through when they return to a game they stopped playing at least a month ago: what they remember, what confuses them, the frictions they run into and how they cope. And from there, how user-centred design could better support returning players, which is what we call “re-onboarding”.
