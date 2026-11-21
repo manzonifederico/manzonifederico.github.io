@@ -14,7 +14,7 @@ import { localePath } from '../i18n/ui';
     <div class="ach-top">
       <a class="ach-back" href={localePath('en', '/')} data-cursor="Go to home page">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-          <path fill="currentColor" d="M4 21V9l8-6l8 6v12h-6v-7h-4v7z" />
+          <path fill="currentColor" d="M6 19h3.5v-6h5v6H18v-9l-6-4.5L6 10zm-2 2V9l8-6l8 6v12h-7.5v-6h-1v6z" />
         </svg>
         <span class="visually-hidden">Home</span>
       </a>
@@ -40,21 +40,22 @@ import { localePath } from '../i18n/ui';
     padding-inline: inherit;
   }
 
-  /* round button with a house, like the other round controls */
+  /* round button with an outlined house, styled like the project filter chips: blue outline, light fill on hover */
   .ach-back {
     display: inline-grid;
     place-items: center;
     width: 44px;
     height: 44px;
+    border: 1px solid var(--color-brand-ink);
     border-radius: 50%;
-    background: var(--color-fill);
-    color: var(--color-on-fill);
-    box-shadow: inset 0 0 0 1px var(--color-fill-line);
-    transition: transform var(--dur) var(--ease);
+    background: var(--color-surface);
+    color: var(--color-brand-ink);
+    transition: background var(--dur) var(--ease);
   }
 
-  .ach-back:hover {
-    transform: scale(1.06);
+  .ach-back:hover,
+  .ach-back:focus-visible {
+    background: var(--color-brand-soft);
   }
 
   /* the theme button and the EN / IT switch, in the link colour */
