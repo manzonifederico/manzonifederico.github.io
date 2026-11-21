@@ -119,6 +119,10 @@ const targets = projects
     document.documentElement.lang = 'it';
     document.title = 'Pagina non trovata | Federico Manzoni';
   }
+  // "Leggi in italiano" / "Read in English": this same page in the other language (the same address with or without
+  // /it/ in front), not the home page; without scripts the link keeps pointing to the other language's home page
+  const otherPath = it ? location.pathname.replace(/^\/it(\/|$)/, '/') : `/it${location.pathname}`;
+  document.querySelectorAll<HTMLAnchorElement>('.nf-other').forEach((a) => (a.href = otherPath + location.search));
 
   // a guess: the project whose name is closest to a part of the address (a typo, an old or cut address)
   try {
