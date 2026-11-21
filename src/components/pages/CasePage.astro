@@ -365,9 +365,7 @@ const articleJsonLd = {
         data-killed={lang === 'it' ? '{name} ti ha ucciso' : '{name} killed you'}
         data-names={JSON.stringify(BRAINROT)}>
         <div class="death-band">
-          {/* when the character is Tung Tung Tung Sahur, his video plays instead of the death (Tenor GIF, MP4, muted),
-              with the chant from the original meme audio (MyInstants, cut to the name: public/audio/tung-tung-tung-sahur.mp3)
-              at the start of every loop */}
+          {/* Tung Tung Tung Sahur and Lirilì Larilà don't kill you: their video plays instead (see SPECIAL in the script) */}
           <video class="tung-video" src="/video/tung-tung-tung-sahur.mp4" muted playsinline preload="none" hidden />
           <h2 class="death-title" id="brainrot-death-title" />
           <p class="death-sub" id="brainrot-death-sub">
@@ -592,22 +590,31 @@ const articleJsonLd = {
     let clicks = 0;
     let lastClick = 0;
     let deathSound: HTMLAudioElement | null = null;
-    let tungSound: HTMLAudioElement | null = null;
+    // characters who don't kill you: they show up in their own video (Tenor GIFs as MP4, muted) and say their name
+    // (the original meme audio from MyInstants, cut to the name). The name plays with the video, twice, then the video
+    // carries on looping in silence.
+    const SPECIAL: Record<string, { video: string; audio: string }> = {
+      'Tung Tung Tung Sahur': { video: '/video/tung-tung-tung-sahur.mp4', audio: '/audio/tung-tung-tung-sahur.mp3' },
+      'Lirilì Larilà': { video: '/video/lirili-larila.mp4', audio: '/audio/lirili-larila.mp3' },
+    };
+    const NAME_PLAYS = 2;
+    let voice: HTMLAudioElement | null = null;
+    let plays = 0;
     // the sounds here always play: ten clicks in a row are a deliberate request (the arrow game's sound switch on the
     // home page doesn't apply to this easter egg)
-    const chant = () => {
-      tungSound ??= new Audio('/audio/tung-tung-tung-sahur.mp3');
-      tungSound.volume = 0.9;
-      tungSound.currentTime = 0;
-      tungSound.play().catch(() => {});
+    const sayName = () => {
+      if (!voice || plays >= NAME_PLAYS) return;
+      plays++;
+      voice.currentTime = 0;
+      voice.play().catch(() => {});
     };
-    // the video plays again from the start each time it ends, and the chant with it, so they stay in time
-    const tungVideo = rotDeath.querySelector<HTMLVideoElement>('.tung-video');
-    tungVideo?.addEventListener('ended', () => {
-      if (!rotDeath.open || tungVideo.hidden) return;
-      tungVideo.currentTime = 0;
-      tungVideo.play().catch(() => {});
-      chant();
+    // the video plays again from the start each time it ends, and the name with it, so they stay in time
+    const video = rotDeath.querySelector<HTMLVideoElement>('.tung-video');
+    video?.addEventListener('ended', () => {
+      if (!rotDeath.open || video.hidden) return;
+      video.currentTime = 0;
+      video.play().catch(() => {});
+      sayName();
     });
     brainrot.addEventListener('click', () => {
       const now = performance.now();
@@ -619,20 +626,25 @@ const articleJsonLd = {
       const label = document.querySelector('#view-cursor.is-visible .vc-label')?.textContent?.trim();
       const names: string[] = JSON.parse(rotDeath.dataset.names ?? '[]');
       const name = label && names.includes(label) ? label : names[Math.floor(Math.random() * names.length)];
-      // Tung Tung Tung Sahur doesn't kill you: he shows up, in his own video
-      const tung = name === 'Tung Tung Tung Sahur';
-      rotDeath.classList.toggle('is-tung', tung);
-      rotDeath.querySelector('.death-title')!.textContent = tung
+      const special = SPECIAL[name];
+      rotDeath.classList.toggle('is-tung', !!special);
+      rotDeath.querySelector('.death-title')!.textContent = special
         ? name
         : (rotDeath.dataset.killed ?? '{name}').replace('{name}', name);
-      const video = rotDeath.querySelector<HTMLVideoElement>('.tung-video');
       if (video) {
-        video.hidden = !tung;
-        if (tung && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          video.currentTime = 0;
-          video.play().catch(() => {});
+        video.hidden = !special;
+        if (special) {
+          if (!video.src.endsWith(special.video)) video.src = special.video;
+          voice?.pause();
+          voice = new Audio(special.audio);
+          voice.volume = 0.9;
+          plays = 0;
+          if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            video.currentTime = 0;
+            video.play().catch(() => {});
+          }
+          sayName(); // with reduced motion the video stays still, but the name is still said
         }
-        if (tung) chant(); // the name, once, even with reduced motion
       }
       const form = rotDeath.querySelector<HTMLElement>('form');
       if (form) form.inert = true; // the clicks still coming in don't close it straight away
@@ -641,8 +653,8 @@ const articleJsonLd = {
         if (form) form.inert = false;
         rotDeath.querySelector<HTMLButtonElement>('.death-btn')?.focus();
       }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1700);
+      if (special) return;
       // the same "you died" sound as the arrow game
-      if (tung) return;
       deathSound ??= new Audio('/audio/you-died.mp3');
       deathSound.volume = 0.9;
       deathSound.currentTime = 0;
@@ -650,22 +662,22 @@ const articleJsonLd = {
     });
     rotDeath.addEventListener('close', () => {
       deathSound?.pause();
-      tungSound?.pause();
-      rotDeath.querySelector<HTMLVideoElement>('.tung-video')?.pause();
+      voice?.pause();
+      video?.pause();
     });
   }
 </script>
 
 <style>
-  /* brainrot easter egg (Instagram): Tung Tung Tung Sahur's video, square, above his name; his screen has no
+  /* brainrot easter egg (Instagram): the special characters' video above their name; their screen has no
      "you died" line under the title */
   .tung-video {
     display: block;
-    width: min(52vh, 80vw);
-    aspect-ratio: 1;
+    width: auto;
+    max-width: min(80vw, 640px);
+    height: min(52vh, 80vw); /* square or landscape: the width follows the video's own proportions */
     margin: 0 auto 24px;
     border-radius: 12px;
-    object-fit: cover;
   }
 
   .tung-video[hidden] {
