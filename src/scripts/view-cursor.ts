@@ -13,6 +13,7 @@
 // The "Classic pointer" switch in the footer (html.classic-pointer, saved in localStorage) turns all of this off.
 
 import { CLICKABLE, fillLabel, hiddenNow, paintLabel } from './cursor-label';
+import { shrinkWrap } from './shrink-wrap';
 
 const fine = matchMedia('(any-hover: hover) and (any-pointer: fine)');
 const isClassic = () => document.documentElement.classList.contains('classic-pointer');
@@ -82,6 +83,7 @@ function setup(mouseSeen = false) {
       if (current !== target) return;
       if (i === 0) document.dispatchEvent(new CustomEvent('achieve', { detail: 'nudge' }));
       label.textContent = lines[i++ % lines.length];
+      shrinkWrap(label);
       width = el.offsetWidth;
       place();
       el.classList.remove('is-nudge');
@@ -103,6 +105,7 @@ function setup(mouseSeen = false) {
     // data-cursor-plain: a label that is a note, not an invitation to click (e.g. a trophy's clue)
     el.classList.toggle('is-plain', !target.matches(CLICKABLE) || 'cursorPlain' in target.dataset);
     fillLabel(label, target); // text, random line, flag (src/scripts/cursor-label.ts)
+    shrinkWrap(label); // a long label that wraps: as wide as its longest line
     paintLabel(el, target);
     cx = x;
     cy = y;

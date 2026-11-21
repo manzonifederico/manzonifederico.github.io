@@ -11,6 +11,7 @@
 // The marker: a zigzag underline on words, chips and the signature, the pointer's blue square after a project's title
 // (styles in global.css).
 import { CLICKABLE, fillLabel, hiddenNow, paintLabel } from './cursor-label';
+import { shrinkWrap } from './shrink-wrap';
 
 const html = document.documentElement;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
@@ -252,7 +253,9 @@ const hide = () => {
  *  or for a card (often taller than the screen) inside it, at the top of the part you can see */
 const show = (target: HTMLElement, opts: { x?: number; text?: string; card?: boolean } = {}) => {
   shownFor?.classList.remove('is-nudged');
+  bubble.style.left = '0px'; // measured with the whole width available, wherever it was last time
   fillLabel(bubble, target, opts.text);
+  shrinkWrap(bubble); // as wide as its longest line
   paintLabel(bubble, target);
   bubble.classList.remove('is-on', 'is-below', 'is-inside');
   const r = target.getBoundingClientRect();

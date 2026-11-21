@@ -3,6 +3,7 @@
 // Saved in this browser only (localStorage "achievements": { id: time }), nothing is sent anywhere.
 // A new one shows a short notice ("Achievement unlocked") with a soft chime (silent if the arrow game's sound switch
 // is off); no notices in recruiter mode. The 🏆 button in the footer shows the count and opens the board.
+import { shrinkWrap } from './shrink-wrap';
 
 interface Item {
   id: string;
@@ -185,6 +186,7 @@ function showHint(li: HTMLElement, text: string, at?: { x: number; y: number }) 
   // pressed (the centre with a keyboard), kept inside the card
   window.setTimeout(() => {
     bubble.textContent = text;
+    shrinkWrap(bubble); // as wide as its longest line
     const r = li.getBoundingClientRect();
     const w = bubble.offsetWidth;
     const h = bubble.offsetHeight;
