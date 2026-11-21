@@ -28,7 +28,7 @@ import mcLogo from '../assets/projects/mc-logo.png';
 
 import type { Lang } from '../i18n/ui';
 
-export type Slug = 'agora' | 'mirrormood' | 'cicerone' | 'sunfest' | 'sunfest-usability' | 'flash-quiz' | 'instagram-redesign' | 'bk-vs-mc';
+export type Slug = 're-onboarding' | 'agora' | 'mirrormood' | 'cicerone' | 'sunfest' | 'sunfest-usability' | 'flash-quiz' | 'instagram-redesign' | 'bk-vs-mc';
 
 export interface CardImage {
   src: ImageMetadata;
@@ -60,6 +60,8 @@ export interface Project {
   related?: Slug;
   /** Colour of the "View project" cursor label on this card (white text on it passes WCAG AA) */
   cursor: string;
+  /** work in progress: the card says "Coming soon" and the article is only its outline (not counted for "Well-read") */
+  comingSoon?: boolean;
 }
 
 /** Card subtitle/description in the requested language */
@@ -67,6 +69,25 @@ export const projectText = (p: Project, lang: Lang) =>
   lang === 'it' ? p.it : { subtitle: p.subtitle, description: p.description };
 
 export const projects: Project[] = [
+  {
+    // work in progress (Federico's study at the University of Waterloo): only the outline for now, text "coming soon"
+    slug: 're-onboarding',
+    title: 'Re-onboarding',
+    subtitle: 'Returning to a video game after a break',
+    description: 'Re-onboarding: a study on how players navigate, remember and adapt when they return to a game after a break. Coming soon.',
+    tags: ['User Research', 'Games'],
+    team: ['Federico Manzoni (me)'],
+    resources: [],
+    it: {
+      subtitle: 'Tornare a un videogioco dopo una pausa',
+      description:
+        'Re-onboarding: uno studio su come i giocatori si orientano, ricordano e si riadattano quando tornano a un gioco dopo una pausa. In arrivo.',
+    },
+    cursor: '#1b2540',
+    theme: 'theme-reonboarding',
+    cardImages: [],
+    comingSoon: true,
+  },
   {
     slug: 'agora',
     title: 'Agorà',

@@ -43,6 +43,7 @@ const media = await Promise.all(
     <Heading class="card-title">
       <a class="card-link" href={href}>
         <ProjectLogo project={project} size="card" />
+        {project.comingSoon && <span class="visually-hidden">{lang === 'it' ? ' (in arrivo)' : ' (coming soon)'}</span>}
       </a>
     </Heading>
     <p class="card-sub">{text.subtitle}</p>
@@ -83,6 +84,7 @@ const media = await Promise.all(
       )
     }
     {project.slug === 'bk-vs-mc' && <span class="vs">VS</span>}
+    {project.comingSoon && <span class="soon">{lang === 'it' ? 'In arrivo' : 'Coming soon'}</span>}
   </div>
 </article>
 
@@ -235,6 +237,18 @@ const media = await Promise.all(
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 500;
     font-size: clamp(2rem, 3.6vw, 3.5rem);
+  }
+
+  /* work in progress: no pictures yet, a big "Coming soon" in their place (the link says it to screen readers) */
+  .soon {
+    padding: 14px 28px;
+    border: 2px dashed currentColor;
+    border-radius: var(--radius-pill);
+    font-family: var(--theme-title-font);
+    font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    opacity: 0.85;
   }
 
   /* Agorà: kiosk render and kiosk screen side by side */
