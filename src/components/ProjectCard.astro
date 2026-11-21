@@ -52,7 +52,7 @@ const media = await Promise.all(
       // the "Work in progress" chip on the dashes (it rides them after a while, see the script); the link says it to
       // screen readers, so the chip itself, whose label changes, is hidden from them
       <span class="wip-chip" data-wip-chip aria-hidden="true">
-        <span data-wip-label>Work in progress</span>
+        <span data-wip-label>{lang === 'it' ? 'Lavori in corso' : 'Work in progress'}</span>
       </span>
     )
   }
@@ -130,9 +130,9 @@ const media = await Promise.all(
   });
 
   // ---------- work in progress: the chip on the dashed outline ----------
-  // It sits on the top dashes, lined up with the title ("Work in progress"). After 15 s with the page still (no
+  // It sits on the top dashes, lined up with the title ("Work in progress" / "Lavori in corso"). After 15 s with the page still (no
   // scrolling, pointer, keys or touches) and the card on screen, it rides the dashes around the card like a carriage
-  // on a rail, staying upright and reading "WIP". Any movement sends it back along the rail to its place, where it
+  // on a rail, staying upright and reading "WIP" ("In corso" in Italian). Any movement sends it back along the rail to its place, where it
   // reads "Work in progress" again. Not with reduced motion. Without scripts it simply sits in its place.
   document.querySelectorAll<HTMLElement>('.card--compact').forEach((card) => {
     const chip = card.querySelector<HTMLElement>('[data-wip-chip]');
@@ -187,8 +187,10 @@ const media = await Promise.all(
       const [x, y] = rail().at(s);
       chip.style.transform = `translate(${Math.round(x - chip.offsetWidth / 2)}px, ${Math.round(y - chip.offsetHeight / 2)}px)`;
     };
+    // the page's language (the 404 page has one block per language, each with its own lang)
+    const it = chip.closest('[lang]')?.getAttribute('lang') === 'it';
     const setLabel = (moving: boolean) => {
-      label.textContent = moving ? 'WIP' : 'Work in progress';
+      label.textContent = moving ? (it ? 'In corso' : 'WIP') : it ? 'Lavori in corso' : 'Work in progress';
       chip.classList.toggle('is-moving', moving);
     };
     const settle = () => {
