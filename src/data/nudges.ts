@@ -1,5 +1,6 @@
 // Nudges on the project cards: after 10 s with the pointer on a card, its "View project" label starts changing
 // every 5 s (src/scripts/view-cursor.ts), alternating a line about that project and a generic one.
+// On touch screens (src/scripts/touch-notes.ts) a card gets only its own lines that invite most to open it (STRONG).
 // The project lines only use facts that are in the articles (numbers, grades, what the project does).
 import type { Lang } from '../i18n/ui';
 
@@ -53,4 +54,22 @@ export function nudgesFor(slug: string, lang: Lang): string[] {
     if (gen[i]) out.push(gen[i]);
   }
   return out;
+}
+
+// the project lines that push most to open the project (a question, a challenge, a result), by their place in bySlug
+const STRONG: Record<string, number[]> = {
+  agora: [2],
+  mirrormood: [0],
+  cicerone: [0],
+  sunfest: [1],
+  'sunfest-usability': [0],
+  'flash-quiz': [1],
+  'instagram-redesign': [1],
+  'bk-vs-mc': [1, 0],
+};
+
+/** The lines for one card on a touch screen: only the project's own lines that invite most to open it. */
+export function touchNudgesFor(slug: string, lang: Lang): string[] {
+  const own = bySlug[slug]?.[lang] ?? [];
+  return (STRONG[slug] ?? []).map((i) => own[i]).filter(Boolean);
 }

@@ -796,58 +796,89 @@ html.classic-pointer #view-cursor {
   }
 }
 
-/* the marker that says "tap me, I have something to say" (two looks being compared, see touch-notes.ts):
-   a zigzag underline, like a spelling mistake but in the site's blue, or the blue square of the clickable pointer.
-   Words in a sentence get the zigzag; headings, chips, the signature and the photo always get the square */
+/* the marker that says "tap me, I have something to say" (see touch-notes.ts):
+   - words in a sentence: a zigzag underline, like a spelling mistake but in the site's blue;
+   - a chip or the signature (on their own colour): the same zigzag in their text colour, so it shows on any colour;
+   - a project's title: the square of the clickable pointer, in the project's colour, after it like a full stop;
+   - the photo: that square in its corner */
 html.touch-notes .tap-note {
   -webkit-tap-highlight-color: transparent;
 }
 
-html.touch-notes[data-tap-mark='zigzag'] span.tap-note {
+html.touch-notes span.tap-note {
   padding-bottom: 3px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4'%3E%3Cpath d='M0 3.4 3 .6 6 3.4' fill='none' stroke='%23145ee1' stroke-width='1.3'/%3E%3C/svg%3E") repeat-x 0 100% / 6px 4px;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
 
-:root[data-theme='dark'][data-tap-mark='zigzag'] span.tap-note {
+:root[data-theme='dark'].touch-notes span.tap-note {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4'%3E%3Cpath d='M0 3.4 3 .6 6 3.4' fill='none' stroke='%237fb2ff' stroke-width='1.3'/%3E%3C/svg%3E");
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light'])[data-tap-mark='zigzag'] span.tap-note {
+  :root:not([data-theme='light']).touch-notes span.tap-note {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4'%3E%3Cpath d='M0 3.4 3 .6 6 3.4' fill='none' stroke='%237fb2ff' stroke-width='1.3'/%3E%3C/svg%3E");
   }
 }
 
-html.touch-notes[data-tap-mark='square'] .tap-note::after,
-html.touch-notes[data-tap-mark='zigzag'] .tap-note:not(span)::after {
+html.touch-notes .tap-note:is(li, p) {
+  position: relative;
+}
+
+html.touch-notes p.tap-note {
+  width: fit-content;
+}
+
+html.touch-notes .tap-note:is(li, p)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 4px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4'%3E%3Cpath d='M0 3.4 3 .6 6 3.4' fill='none' stroke='%23000' stroke-width='1.3'/%3E%3C/svg%3E") repeat-x 0 0 / 6px 4px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4'%3E%3Cpath d='M0 3.4 3 .6 6 3.4' fill='none' stroke='%23000' stroke-width='1.3'/%3E%3C/svg%3E") repeat-x 0 0 / 6px 4px;
+  pointer-events: none;
+}
+
+/* a chip: inside it, under the words */
+html.touch-notes li.tap-note::after {
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 3px;
+  -webkit-mask-size: 6px 3px;
+  mask-size: 6px 3px;
+}
+
+/* the title's square: 9px, its bottom on the text's baseline like a full stop, in the project's colour. The box
+   around it is 45px wide and tall (see-through) so it is easy to hit with a finger; negative margins keep it from
+   moving the title (baseline of an empty inline-block = its bottom margin edge: 45 - 18 - 9 = 18px under the square) */
+html.touch-notes h1.tap-note::after {
   content: '';
   display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-left: 4px;
-  vertical-align: 0.55em;
-  background: var(--color-brand);
+  width: 45px;
+  height: 45px;
+  margin: -18px -18px -18px -15px;
+  vertical-align: baseline;
+  background: linear-gradient(var(--theme-tag-bg, var(--color-brand)) 0 0) 18px 18px / 9px 9px no-repeat;
 }
 
-/* a word inside another note (Venice inside "a town near Venice"): one square is enough, at the end */
-html.touch-notes[data-tap-mark='square'] .tap-note .tap-note::after {
-  display: none;
-}
-
-/* the photo: the square sits in its corner */
+/* the photo: the square sits in its corner (the whole photo can be tapped) */
 html.touch-notes .photo-frame.tap-note {
   position: relative;
 }
 
 html.touch-notes .photo-frame.tap-note::after {
+  content: '';
   position: absolute;
   top: 10px;
   right: 10px;
   width: 9px;
   height: 9px;
-  margin: 0;
+  background: var(--color-brand);
   box-shadow: 0 0 0 2px #fff;
 }
 

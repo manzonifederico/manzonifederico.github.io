@@ -1,19 +1,19 @@
 // Touch screens: the labels that follow the mouse on a computer (view-cursor.ts) become a speech bubble.
 // - Notes on things you can't click (Rovigo, Venice, the signature, the photo, a project's title, …) get a small
 //   marker, and a tap shows the bubble right above them for a few seconds (tap elsewhere or scroll and it goes).
-// - Project cards: one that stays in the middle of the screen for a few seconds gives a little wiggle and one of its
-//   nudge lines (the same ones a mouse gets after 10 s on a card). At most one card every 12 s, each card once.
+// - Project cards: one that stays in the middle of the screen gives a little wiggle after 10 s, then 5 s later one of
+//   its own lines that invite to open it (src/data/nudges.ts). The same card can do it again 30 s later, 3 times in a
+//   row at most, then not for 2 minutes.
 // Things you can click keep working as before: a tap there opens the link, no bubble.
 // The bubble is a live region, so screen readers read what it says; the notes can be reached with the keyboard too.
 // Recruiter mode hides the personal ones (data-cursor-pii), as with the mouse. Reduced motion: no wiggle, no pop.
-// Two looks for the marker are being compared: a zigzag underline (default) or the blue square of the clickable
-// pointer (?mark=square in the address).
+// The marker: a zigzag underline on words, chips and the signature, the pointer's blue square after a project's title
+// (styles in global.css).
 import { CLICKABLE, fillLabel, hiddenNow, paintLabel } from './cursor-label';
 
 const html = document.documentElement;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 html.classList.add('touch-notes');
-html.dataset.tapMark = new URLSearchParams(location.search).get('mark') === 'square' ? 'square' : 'zigzag';
 
 // a note: has a label, isn't (inside) something you can click, isn't an image that zooms, isn't a game
 // (the brainrot word on the Instagram page), a trophy's clue or the language you're reading in (header)
@@ -103,46 +103,80 @@ document.addEventListener(
 );
 addEventListener('scroll', () => shownFor && Math.abs(scrollY - shownAtY) > 60 && hide(), { passive: true });
 
-// ---------- project cards: a wiggle and a nudge when one rests in the middle of the screen ----------
-const cards = document.querySelectorAll<HTMLElement>('.card[data-cursor-nudges]');
+// ---------- project cards: a wiggle, then a nudge, when one rests in the middle of the screen ----------
+// 10 s in the middle: the card wiggles; 5 s more: a bubble with one of its lines (data-touch-nudges, src/data/nudges.ts:
+// only the project's own lines that invite most to open it). 30 s later the same card can do it again, up to 3 times
+// in a row; then it waits at least 2 minutes before starting over.
+const cards = document.querySelectorAll<HTMLElement>('.card[data-touch-nudges]');
 if (cards.length && 'IntersectionObserver' in window) {
-  const WAIT = 3500; // ms in the middle of the screen
-  const GAP = 12000; // ms between two nudges
+  const WIGGLE_AFTER = 10000;
+  const TALK_AFTER = 5000; // after the wiggle
+  const RESET = 30000; // before the same card can do it again
+  const IN_A_ROW = 3; // times in a row, then…
+  const LONG_REST = 120000; // …a longer rest
+  const count = new Map<HTMLElement, number>();
   const timers = new Map<HTMLElement, number>();
-  const done = new Set<HTMLElement>();
-  let last = -GAP;
+  const resting = new Set<HTMLElement>(); // cards resting after a nudge
+  const inMiddle = new Set<HTMLElement>();
   let first = true;
 
-  const nudge = (card: HTMLElement) => {
-    timers.delete(card);
-    if (done.has(card) || shownFor || performance.now() - last < GAP) return;
+  const wiggle = (card: HTMLElement) => {
+    if (reduce.matches) return;
+    card.classList.remove('is-wiggle');
+    void card.offsetWidth;
+    card.classList.add('is-wiggle');
+    card.addEventListener('animationend', () => card.classList.remove('is-wiggle'), { once: true });
+  };
+
+  const talk = (card: HTMLElement) => {
     let lines: string[] = [];
     try {
-      lines = JSON.parse(card.dataset.cursorNudges ?? '[]');
+      lines = JSON.parse(card.dataset.touchNudges ?? '[]');
     } catch {
-      return;
+      /* no lines */
     }
-    if (!lines.length) return;
-    done.add(card);
-    last = performance.now();
-    if (!reduce.matches) {
-      card.classList.remove('is-wiggle');
-      void card.offsetWidth;
-      card.classList.add('is-wiggle');
-      card.addEventListener('animationend', () => card.classList.remove('is-wiggle'), { once: true });
+    if (lines.length && !shownFor) {
+      show(card, { text: lines[Math.floor(Math.random() * lines.length)], card: true }); // above the card
+      if (first) document.dispatchEvent(new CustomEvent('achieve', { detail: 'nudge' }));
+      first = false;
     }
-    show(card, { text: lines[Math.floor(Math.random() * lines.length)], card: true }); // just above the card, pointing at it
-    if (first) document.dispatchEvent(new CustomEvent('achieve', { detail: 'nudge' }));
-    first = false;
+    // a rest, then it can start over (right away if it is still in the middle of the screen); after the third time
+    // in a row a longer one, and the count starts again
+    const n = (count.get(card) ?? 0) + 1;
+    count.set(card, n % IN_A_ROW);
+    resting.add(card);
+    timers.set(
+      card,
+      window.setTimeout(
+        () => {
+          resting.delete(card);
+          if (inMiddle.has(card)) start(card);
+        },
+        n >= IN_A_ROW ? LONG_REST : RESET,
+      ),
+    );
+  };
+
+  const start = (card: HTMLElement) => {
+    window.clearTimeout(timers.get(card));
+    timers.set(
+      card,
+      window.setTimeout(() => {
+        wiggle(card);
+        timers.set(card, window.setTimeout(() => talk(card), TALK_AFTER));
+      }, WIGGLE_AFTER),
+    );
   };
 
   const io = new IntersectionObserver(
     (entries) => {
       for (const { target, isIntersecting } of entries) {
         const card = target as HTMLElement;
+        if (isIntersecting) inMiddle.add(card);
+        else inMiddle.delete(card);
+        if (resting.has(card)) continue; // its rest keeps running, wherever it is
         window.clearTimeout(timers.get(card));
-        timers.delete(card);
-        if (isIntersecting && !done.has(card)) timers.set(card, window.setTimeout(() => nudge(card), WAIT));
+        if (isIntersecting) start(card);
       }
     },
     { rootMargin: '-35% 0px -35% 0px' }, // the middle 30% of the screen

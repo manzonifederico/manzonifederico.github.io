@@ -6,7 +6,7 @@ import { Image, getImage } from 'astro:assets';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { projectText, type Project } from '../data/projects';
-import { nudgesFor } from '../data/nudges';
+import { nudgesFor, touchNudgesFor } from '../data/nudges';
 import { t, tagLabel, localePath, type Lang } from '../i18n/ui';
 import Tag from './Tag.astro';
 import ProjectLogo from './ProjectLogo.astro';
@@ -37,6 +37,7 @@ const media = await Promise.all(
   class:list={['card', project.theme, `card--${project.slug}`, { 'card--grouped': grouped }]}
   data-cursor={t(lang).viewProject}
   data-cursor-nudges={JSON.stringify(nudgesFor(project.slug, lang))}
+  data-touch-nudges={JSON.stringify(touchNudgesFor(project.slug, lang))}
   style={`--cursor-color: ${project.cursor}`}>
   <div class="card-head">
     <Heading class="card-title">
