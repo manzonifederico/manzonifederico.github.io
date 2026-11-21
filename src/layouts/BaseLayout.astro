@@ -188,7 +188,10 @@ const altUrl = (l: Lang) => new URL(localePath(l, Astro.url.pathname), Astro.sit
       const loadCursor = () => (cursor ??= import('../scripts/view-cursor'));
       if (fine.matches) loadCursor();
       else {
-        import('../scripts/touch-notes'); // touch screens: the same labels, as a speech bubble on tap
+        // touch screens: the same labels, as a speech bubble on tap (once the page is idle: nothing to do before that)
+        const touch = () => import('../scripts/touch-notes');
+        if ('requestIdleCallback' in window) requestIdleCallback(touch, { timeout: 2000 });
+        else setTimeout(touch, 600);
         fine.addEventListener?.('change', () => fine.matches && loadCursor());
         const onMove = (e: PointerEvent) => {
           if (e.pointerType !== 'mouse') return;

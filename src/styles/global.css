@@ -898,6 +898,12 @@ html.touch-notes .tap-note:focus-visible {
   border-radius: 2px;
 }
 
+/* a project card talking (its nudge bubble is up, touch-notes.ts): outlined in its own colour, the bubble's colour */
+.card.is-nudged {
+  outline: 2px solid var(--theme-tag-bg, var(--color-brand));
+  outline-offset: 3px;
+}
+
 /* a project card that has been in the middle of the screen for a while: a small wiggle to say "open me" */
 .card.is-wiggle {
   animation: card-wiggle 650ms var(--ease);
