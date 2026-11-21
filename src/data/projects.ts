@@ -214,7 +214,7 @@ export const projects: Project[] = [
     it: {
       subtitle: 'Impara in un lampo!',
       description:
-        'Flash Quiz: user research e design UX/UI di una web app di quiz gamificata a supporto della didattica universitaria (tesi triennale e tirocinio, Università di Trento & FBK).',
+        'Flash Quiz: user research e design UX/UI di una web app di quiz gamificata per la didattica universitaria (tesi triennale e tirocinio, UniTrento e FBK).',
     },
     cursor: '#00458f',
     theme: 'theme-flashquiz',
@@ -255,7 +255,7 @@ export const projects: Project[] = [
   {
     slug: 'bk-vs-mc',
     title: 'Team King or Clown?',
-    subtitle: 'Burger King vs McDonalds app',
+    subtitle: 'Burger King vs McDonald’s app',
     description:
       'A between-subjects quantitative user study comparing the Burger King and McDonald’s ordering apps in Italy.',
     tags: ['Uni Project', 'User Research', 'Usability Testing', 'Experimental Design', 'Phone'],
