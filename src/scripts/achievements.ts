@@ -151,6 +151,12 @@ function unlock(id: string) {
 
 document.addEventListener('achieve', (e) => unlock(String((e as CustomEvent<string>).detail)));
 
+// "Let's talk": any contact used (an e-mail, copying an address, LinkedIn, GitHub, ORCID, ResearchGate)
+document.addEventListener('click', (e) => {
+  const t = (e.target as Element | null)?.closest?.('a[href^="mailto:"], [data-copy], a[rel~="me"]');
+  if (t) unlock('contact');
+});
+
 // the board window
 const dialog = document.querySelector<HTMLDialogElement>('[data-ach-dialog]');
 document.querySelectorAll('[data-ach-open]').forEach((btn) =>
