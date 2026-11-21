@@ -142,7 +142,11 @@ const articleJsonLd = {
   bodyClass={project.theme}>
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(articleJsonLd).replace(/</g, '\\u003c')} />
   <main id="main">
-    <article class="case" data-slug={project.slug} data-projects={projects.length}>
+    <article
+      class="case"
+      data-slug={project.slug}
+      data-projects={projects.filter((p) => !p.comingSoon).length}
+      data-coming-soon={project.comingSoon ? '' : undefined}>
       <div class="case-panel">
         <div class="topbar container">
           <a class="back" href={localePath(lang, '/') + '#work'}>
@@ -593,6 +597,7 @@ const articleJsonLd = {
         if (!e.isIntersecting) return;
         seen.disconnect();
         try {
+          if ('comingSoon' in article.dataset) return; // a work in progress doesn't count for "Well-read"
           const read = new Set<string>(JSON.parse(localStorage.getItem('articles-read') ?? '[]'));
           read.add(article.dataset.slug!);
           localStorage.setItem('articles-read', JSON.stringify([...read]));

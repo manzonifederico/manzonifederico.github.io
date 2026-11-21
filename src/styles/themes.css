@@ -2,6 +2,24 @@
  * Per-project themes. Each theme sets the same custom properties, which the
  * project cards, tags and case-study pages read.
  */
+.theme-reonboarding {
+  /* work in progress: the night-blue and orange of the study's recruitment flyer */
+  --theme-bg: linear-gradient(160deg, #24345c 0%, #141c30 100%);
+  --theme-ink: #ffffff;
+  --theme-tag-bg: #ff9a3c;
+  --theme-tag-ink: #1a1a1a;
+  --theme-border: transparent;
+  --theme-title-font: 'Poppins', system-ui, sans-serif;
+  --theme-title-style: normal;
+  --theme-title-weight: 600;
+  --theme-sub-font: 'Poppins', system-ui, sans-serif;
+  --theme-sub-weight: 400;
+  --theme-heading-font: 'Poppins', system-ui, sans-serif;
+  --theme-body-font: 'Poppins', system-ui, sans-serif;
+  --theme-panel: #1d2944;
+  --theme-small-ink: #ffffff;
+}
+
 .theme-cicerone {
   --theme-bg: var(--cicerone-bg);
   --theme-ink: #000;
