@@ -1,0 +1,40 @@
+---
+// The "Home" pill: an outlined house and the word Home, styled like the project filter chips (blue outline, light
+// fill on hover). Used on the trophies pages and on the page-not-found page.
+import { localePath, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+---
+
+<a class="home-pill" href={localePath(lang, '/')} lang={lang} data-cursor={lang === 'it' ? 'Vai alla home' : 'Go to home page'}>
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+    <path fill="currentColor" d="M6 19h3.5v-6h5v6H18v-9l-6-4.5L6 10zm-2 2V9l8-6l8 6v12h-7.5v-6h-1v6z" />
+  </svg>
+  <span>Home</span>
+</a>
+
+<style>
+  .home-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 6px 18px 6px 14px;
+    border: 1px solid var(--color-brand-ink);
+    border-radius: var(--radius-pill);
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 500;
+    text-decoration: none;
+    background: var(--color-surface);
+    color: var(--color-brand-ink);
+    transition: background var(--dur) var(--ease);
+  }
+
+  .home-pill:hover,
+  .home-pill:focus-visible {
+    background: var(--color-brand-soft);
+  }
+</style>

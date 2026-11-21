@@ -1,42 +1,107 @@
 ---
 // Page not found. GitHub Pages serves this one file for every address that doesn't exist, in either language, so the
-// page speaks Italian when the address started with /it/ (the script below), English otherwise (and without scripts).
-// It tries to guess what you were looking for (an address close to a project's, e.g. /work/agra/ → Agorà) and always
-// lists the projects, so a dead link never leaves you stuck.
+// page speaks Italian when the address started with /it/ (the script below), English otherwise.
+// It says what may have gone wrong and what to do, tries to guess what you were looking for (an address close to a
+// project's, e.g. /work/agra/ → Agorà), and lists the projects in list view, so a dead link never leaves you stuck.
+// Graceful degradation: without scripts the English text, the Home button, a link to the Italian home and the list
+// all work (only the guess is missing); without styles it reads top to bottom as plain text and links; images that
+// don't load leave their description, and on a slow connection they show a grey placeholder until they arrive.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Footer from '../components/Footer.astro';
+import HomeButton from '../components/HomeButton.astro';
+import MyWork from '../components/MyWork.astro';
 import { t, localePath, type Lang } from '../i18n/ui';
 import { projects } from '../data/projects';
 
 const langs: Lang[] = ['en', 'it'];
-const more = { en: 'Or have a look at one of my projects:', it: 'Oppure dai un’occhiata a uno dei miei progetti:' };
-const maybe = { en: 'Maybe you were looking for', it: 'Forse cercavi' };
-const shown = projects.filter((p) => !p.comingSoon);
+const text = {
+  en: {
+    why: 'What may have happened',
+    causes: [
+      'there’s a typo in the address;',
+      'the page was moved or removed;',
+      'the link you followed is old or broken;',
+      'or the page can’t be reached right now (a connection hiccup).',
+    ],
+    fix: 'What you can do',
+    steps: [
+      'check the address for typos;',
+      'reload the page in a few seconds;',
+      'go back with your browser’s back button;',
+      'start again from the home page, or pick a project below.',
+    ],
+    tell: 'If a link on my site brought you here,',
+    tellLink: 'let me know',
+    maybe: 'Maybe you were looking for',
+    other: 'In italiano',
+  },
+  it: {
+    why: 'Cosa può essere successo',
+    causes: [
+      'c’è un errore di battitura nell’indirizzo;',
+      'la pagina è stata spostata o rimossa;',
+      'il link che hai seguito è vecchio o rotto;',
+      'oppure la pagina al momento non è raggiungibile (un problema di connessione).',
+    ],
+    fix: 'Cosa puoi fare',
+    steps: [
+      'controlla che l’indirizzo sia scritto giusto;',
+      'ricarica la pagina tra qualche secondo;',
+      'torna indietro con il pulsante del browser;',
+      'riparti dalla home, oppure scegli un progetto qui sotto.',
+    ],
+    tell: 'Se ti ci ha portato un link del mio sito,',
+    tellLink: 'fammelo sapere',
+    maybe: 'Forse cercavi',
+    other: 'In English',
+  },
+};
 // what the script compares the address with: every project's slug, and where it lives in each language
-const targets = shown.map((p) => ({ slug: p.slug, title: p.title, en: localePath('en', `/work/${p.slug}/`), it: localePath('it', `/work/${p.slug}/`) }));
+const targets = projects
+  .filter((p) => !p.comingSoon)
+  .map((p) => ({ slug: p.slug, title: p.title, en: localePath('en', `/work/${p.slug}/`), it: localePath('it', `/work/${p.slug}/`) }));
 ---
 
 <BaseLayout title="Page not found | Federico Manzoni" alternates={false} noindex>
-  <main id="main" class="container nf">
+  <main id="main">
     {
       langs.map((l) => (
-        <div class="nf-text" lang={l} data-nf={l} hidden={l === 'it'}>
-          <h1 class="title">{t(l).notFoundTitle}</h1>
-          <p>{t(l).notFoundText}</p>
-          <p class="nf-maybe" data-nf-maybe hidden>
-            {maybe[l]} <a data-nf-maybe-link href="/"></a>?
-          </p>
-          <p>
-            <a class="nf-home" href={localePath(l, '/')}>{t(l).goHome}</a>
-          </p>
-          <p class="nf-more">{more[l]}</p>
-          <ul class="nf-projects" role="list">
-            {shown.map((p) => (
-              <li>
-                <a href={localePath(l, `/work/${p.slug}/`)}>{p.title}</a>
-              </li>
-            ))}
-          </ul>
+        <div class="nf-lang" lang={l} data-nf={l} hidden={l === 'it'}>
+          <div class="container nf">
+            <h1 class="title">{t(l).notFoundTitle}</h1>
+            <p class="nf-lead">{t(l).notFoundText}</p>
+            <p class="nf-maybe" data-nf-maybe hidden>
+              {text[l].maybe} <a data-nf-maybe-link href={localePath(l, '/')}></a>?
+            </p>
+            <div class="nf-help">
+              <section aria-labelledby={`nf-why-${l}`}>
+                <h2 class="nf-h" id={`nf-why-${l}`}>{text[l].why}</h2>
+                <ul>
+                  {text[l].causes.map((c) => (
+                    <li>{c}</li>
+                  ))}
+                </ul>
+              </section>
+              <section aria-labelledby={`nf-fix-${l}`}>
+                <h2 class="nf-h" id={`nf-fix-${l}`}>{text[l].fix}</h2>
+                <ul>
+                  {text[l].steps.map((c) => (
+                    <li>{c}</li>
+                  ))}
+                </ul>
+                <p class="nf-tell">
+                  {text[l].tell} <a href="#contact">{text[l].tellLink}</a>.
+                </p>
+              </section>
+            </div>
+            <p class="nf-actions">
+              <HomeButton lang={l} />
+              <a class="nf-other" href={localePath(l === 'it' ? 'en' : 'it', '/')} lang={l === 'it' ? 'en' : 'it'}>
+                {text[l].other}
+              </a>
+            </p>
+          </div>
+          <MyWork lang={l} defaultView="list" level="h2" filters={false} uid={`nf-work-${l}`} />
         </div>
       ))
     }
@@ -56,70 +121,74 @@ const targets = shown.map((p) => ({ slug: p.slug, title: p.title, en: localePath
   }
 
   // a guess: the project whose name is closest to a part of the address (a typo, an old or cut address)
-  type Target = { slug: string; title: string; en: string; it: string };
-  const targets: Target[] = JSON.parse(document.querySelector('[data-nf-targets]')?.textContent ?? '[]');
-  // every part of the address except the language and "work" ("/work/agora/x" still finds Agorà)
-  const words = location.pathname
-    .toLowerCase()
-    .split('/')
-    .map((w) => decodeURIComponent(w))
-    .filter((w) => w.length >= 3 && w !== 'work' && w !== 'it');
-  const distance = (a: string, b: string) => {
-    const row = Array.from({ length: b.length + 1 }, (_, i) => i);
-    for (let i = 1; i <= a.length; i++) {
-      let prev = row[0];
-      row[0] = i;
-      for (let j = 1; j <= b.length; j++) {
-        const keep = row[j];
-        row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
-        prev = keep;
-      }
-    }
-    return row[b.length];
-  };
-  // compared with the whole name and with each of its parts ("instagram" → instagram-redesign), and the start of the
-  // name counts as a match ("sunfest-us" → sunfest-usability); a guess is shown only if at most a third of it is wrong
-  let best: Target | null = null;
-  let score = Infinity;
-  for (const last of words)
-    for (const t of targets) {
-      for (const name of [t.slug, ...t.slug.split('-').filter((p) => p.length >= 4)]) {
-        const d = last.length >= 4 && name.startsWith(last) ? 0 : distance(last, name);
-        const ratio = d / name.length;
-        if (d <= Math.max(1, Math.floor(name.length / 3)) && ratio < score) {
-          score = ratio;
-          best = t;
+  try {
+    type Target = { slug: string; title: string; en: string; it: string };
+    const targets: Target[] = JSON.parse(document.querySelector('[data-nf-targets]')?.textContent ?? '[]');
+    // every part of the address except the language and "work" ("/work/agora/x" still finds Agorà)
+    const words = location.pathname
+      .toLowerCase()
+      .split('/')
+      .map((w) => decodeURIComponent(w))
+      .filter((w) => w.length >= 3 && w !== 'work' && w !== 'it');
+    const distance = (a: string, b: string) => {
+      const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i++) {
+        let prev = row[0];
+        row[0] = i;
+        for (let j = 1; j <= b.length; j++) {
+          const keep = row[j];
+          row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+          prev = keep;
         }
       }
+      return row[b.length];
+    };
+    // compared with the whole name and with each of its parts ("instagram" → instagram-redesign), and the start of
+    // the name counts as a match ("sunfest-us" → sunfest-usability); shown only if at most a third of it is wrong
+    let best: Target | null = null;
+    let score = Infinity;
+    for (const last of words)
+      for (const target of targets)
+        for (const name of [target.slug, ...target.slug.split('-').filter((p) => p.length >= 4)]) {
+          const d = last.length >= 4 && name.startsWith(last) ? 0 : distance(last, name);
+          const ratio = d / name.length;
+          if (d <= Math.max(1, Math.floor(name.length / 3)) && ratio < score) {
+            score = ratio;
+            best = target;
+          }
+        }
+    if (best) {
+      const box = document.querySelector<HTMLElement>(`[data-nf="${lang}"] [data-nf-maybe]`);
+      const link = box?.querySelector<HTMLAnchorElement>('[data-nf-maybe-link]');
+      if (box && link) {
+        link.href = best[lang];
+        link.textContent = best.title;
+        box.hidden = false;
+      }
     }
-  if (best) {
-    const box = document.querySelector<HTMLElement>(`[data-nf="${lang}"] [data-nf-maybe]`);
-    const link = box?.querySelector<HTMLAnchorElement>('[data-nf-maybe-link]');
-    if (box && link) {
-      link.href = best[lang];
-      link.textContent = best.title;
-      box.hidden = false;
-    }
+  } catch {
+    /* no guess: the rest of the page works anyway */
   }
 </script>
 
 <style>
   .nf {
-    padding-top: 120px;
-    padding-bottom: 64px;
-  }
-
-  .nf-text {
     display: grid;
-    gap: 16px;
+    gap: 14px;
+    padding-top: 120px;
+    padding-bottom: 72px; /* room before "My work" */
   }
 
-  .nf-text[hidden] {
+  .nf-lang[hidden] {
     display: none;
   }
 
-  .nf a {
+  .nf a:not(:global(.home-pill)) {
     color: var(--color-link);
+  }
+
+  .nf-lead {
+    font-size: 1.15rem;
   }
 
   .nf-maybe {
@@ -130,32 +199,38 @@ const targets = shown.map((p) => ({ slug: p.slug, title: p.title, en: localePath
     font-weight: 600;
   }
 
-  .nf-more {
-    margin-top: 16px;
+  /* why it happened / what to do: side by side on wide screens */
+  .nf-help {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 8px 40px;
+    max-width: 880px;
+    margin-top: 8px;
   }
 
-  .nf-projects {
+  .nf-h {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .nf-help ul {
+    margin: 0;
+    padding-left: 1.2em;
+    display: grid;
+    gap: 4px;
+  }
+
+  .nf-tell {
+    margin-top: 10px;
+  }
+
+  .nf-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  /* the projects as pills, big enough to tap */
-  .nf-projects a {
-    display: inline-flex;
     align-items: center;
-    min-height: 44px;
-    padding: 0 18px;
-    border: 1px solid var(--color-brand-ink);
-    border-radius: var(--radius-pill);
-    text-decoration: none;
-    transition: background var(--dur) var(--ease);
-  }
-
-  .nf-projects a:hover {
-    background: var(--color-brand-soft);
+    gap: 12px 20px;
+    margin-top: 10px;
   }
 </style>

@@ -14,13 +14,15 @@ interface Props {
   level?: 'h2' | 'h3';
   /** Show the topic filter chips */
   filters?: boolean;
+  /** a name of its own when the section appears more than once on a page (the 404 page has one per language) */
+  uid?: string;
 }
-const { lang, exclude, defaultView = 'card', level = 'h2', filters = true } = Astro.props;
+const { lang, exclude, defaultView = 'card', level = 'h2', filters = true, uid: ownUid } = Astro.props;
 const s = t(lang);
 const Title = level;
 const list = projects.filter((p) => p.slug !== exclude);
 const cardLevel = level === 'h2' ? 'h3' : 'h4';
-const uid = exclude ? `work-${exclude}` : 'work';
+const uid = ownUid ?? (exclude ? `work-${exclude}` : 'work');
 
 // Topic chips: tags shared by at least two of the listed projects, most common first
 // (a tag used by one project only stays on its card but is not offered as a filter)
@@ -41,7 +43,7 @@ for (let i = 0; i < list.length; i++) {
 const tagsAttr = (p: Project) => p.tags.join('|');
 ---
 
-<section class="my-work container" id={exclude ? undefined : 'work'} aria-labelledby={`${uid}-title`}>
+<section class="my-work container" id={exclude || ownUid ? undefined : 'work'} aria-labelledby={`${uid}-title`}>
   <Title id={`${uid}-title`} class="title">{s.myWork}</Title>
 
   <div class="toolbar">

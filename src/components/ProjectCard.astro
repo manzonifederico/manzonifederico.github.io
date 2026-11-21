@@ -94,6 +94,22 @@ const media = await Promise.all(
       v.pause();
     });
   }
+
+  // slow connection: a grey placeholder (gently shimmering) in each picture's place until it arrives; a picture that
+  // can't load shows its description on a plain grey box instead. Without scripts the pictures just load as usual
+  document.querySelectorAll<HTMLImageElement>('.card-media img.media').forEach((img) => {
+    if (img.complete && img.naturalWidth) return;
+    img.classList.add('is-loading');
+    img.addEventListener('load', () => img.classList.remove('is-loading'), { once: true });
+    img.addEventListener(
+      'error',
+      () => {
+        img.classList.remove('is-loading');
+        img.classList.add('is-broken');
+      },
+      { once: true },
+    );
+  });
 </script>
 
 <style>
@@ -203,6 +219,43 @@ const media = await Promise.all(
 
   .card-media :global(.media) {
     height: auto;
+  }
+
+  /* skeleton while a picture loads (see the script), and a quiet box with its description if it can't */
+  .card-media :global(img.is-loading),
+  .card-media :global(img.is-broken) {
+    border-radius: 14px;
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
+  }
+
+  .card-media :global(img.is-loading) {
+    color: transparent; /* no half-drawn description while waiting */
+    background-image: linear-gradient(100deg, transparent 30%, color-mix(in srgb, currentColor 12%, transparent) 50%, transparent 70%);
+    background-size: 220% 100%;
+    animation: card-skeleton 1.4s linear infinite;
+  }
+
+  .card-media :global(img.is-broken) {
+    display: grid;
+    place-items: center;
+    padding: 12px;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  @keyframes card-skeleton {
+    from {
+      background-position: 120% 0;
+    }
+    to {
+      background-position: -120% 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-media :global(img.is-loading) {
+      animation: none;
+    }
   }
 
   .card-media :global(.media--phone) {
