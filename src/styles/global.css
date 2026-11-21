@@ -592,6 +592,32 @@ button {
   transition: transform 140ms ease-out, opacity 110ms ease-out;
 }
 
+/* the big square on the blue glow (see view-cursor.ts, "On the blue glow…"): drawn on a canvas, white on the glow and
+   its usual colour off it, with a sharp line between; it pops in and out like the usual square, which hides meanwhile */
+#star-cursor .sq-split {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 3px;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.3);
+  transition:
+    transform 120ms ease-in,
+    opacity 100ms ease-in;
+}
+
+#star-cursor.is-shake.is-split .sq-split {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+  transition:
+    transform 150ms cubic-bezier(0.34, 1.4, 0.64, 1),
+    opacity 80ms ease-out;
+}
+
+#star-cursor.is-split .sq {
+  visibility: hidden;
+}
+
 html.classic-pointer #star-cursor,
 html.classic-pointer #view-cursor {
   display: none;
@@ -600,7 +626,8 @@ html.classic-pointer #view-cursor {
 @media (prefers-reduced-motion: reduce) {
   #star-cursor .tri,
   #star-cursor .spark,
-  #star-cursor .sq {
+  #star-cursor .sq,
+  #star-cursor .sq-split {
     transition: none !important;
   }
 }

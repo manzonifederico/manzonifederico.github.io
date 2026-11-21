@@ -5,11 +5,13 @@ import { localePath, type Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
+  /** filled with the site's blue (the main action on a page, e.g. on the page-not-found page) */
+  filled?: boolean;
 }
-const { lang } = Astro.props;
+const { lang, filled = false } = Astro.props;
 ---
 
-<a class="home-pill" href={localePath(lang, '/')} lang={lang} data-cursor={lang === 'it' ? 'Vai alla home' : 'Go to home page'}>
+<a class:list={['home-pill', { 'home-pill--filled': filled }]} href={localePath(lang, '/')} lang={lang} data-cursor={lang === 'it' ? 'Vai alla home' : 'Go to home page'}>
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
     <path fill="currentColor" d="M6 19h3.5v-6h5v6H18v-9l-6-4.5L6 10zm-2 2V9l8-6l8 6v12h-7.5v-6h-1v6z" />
   </svg>
@@ -36,5 +38,16 @@ const { lang } = Astro.props;
   .home-pill:hover,
   .home-pill:focus-visible {
     background: var(--color-brand-soft);
+  }
+
+  .home-pill--filled {
+    border-color: var(--color-fill);
+    background: var(--color-fill);
+    color: var(--color-on-fill);
+  }
+
+  .home-pill--filled:hover,
+  .home-pill--filled:focus-visible {
+    background: color-mix(in srgb, var(--color-fill) 85%, #000);
   }
 </style>

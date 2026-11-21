@@ -270,6 +270,125 @@ function setup(mouseSeen = false) {
     const speed = dist / Math.max(1, moves[moves.length - 1].t - moves[0].t); // px per ms
     return reversals >= 2 && speed > 0.7 ? speed : 0;
   };
+  // On the blue glow (the hero's and the footer's blob) a blue square would vanish, so there it takes the opposite
+  // colour: white where the square is on the glow, its usual colour where it's off it, with a sharp line between the
+  // two on the glow's soft edge (the line runs where the glow is half strength). The glow is blurred ellipses that
+  // move, so for every point of the square we work out how much glow is under it, the same way the hero's language
+  // switch picks its colour (Hero.astro), and draw the square on a small canvas.
+  const phi = (v: number) => 1 / (1 + Math.exp(-1.702 * v)); // close to the normal curve of a Gaussian blur
+  const toMatrix = (t: string) => new DOMMatrix(t === 'none' ? undefined : t);
+  type Shape = { inv: DOMMatrix; w: number; h: number; blur: number };
+  type Glow = { shapes: Shape[]; mask?: { cx: number; cy: number; rx: number; ry: number } };
+  // the glows on screen right now, measured once per drawing
+  const glows = (): Glow[] =>
+    [...document.querySelectorAll<HTMLElement>('.hero .blob, .footer .blob')].flatMap((blob) => {
+      const host = blob.offsetParent as HTMLElement | null;
+      if (!host) return [];
+      const hr = host.getBoundingClientRect();
+      if (hr.bottom < 0 || hr.top > innerHeight) return [];
+      const bs = getComputedStyle(blob);
+      const W = blob.offsetWidth;
+      const H = blob.offsetHeight;
+      const [tx = 0, ty = 0] = (bs.translate === 'none' ? '' : bs.translate).split(' ').map((v) => parseFloat(v) || 0);
+      // the blob: its tilt ("translate") and its moving transform, both about its centre
+      const mb = new DOMMatrix()
+        .translate(hr.left + blob.offsetLeft + W / 2 + tx, hr.top + blob.offsetTop + H / 2 + ty)
+        .multiply(toMatrix(bs.transform))
+        .translate(-W / 2, -H / 2);
+      // its layers: the two pseudo-elements and any child (the hero's lobe), each an ellipse with its own blur
+      const layers: { cs: CSSStyleDeclaration; x: number; y: number; w: number; h: number }[] = [];
+      for (const pseudo of ['::before', '::after']) {
+        const cs = getComputedStyle(blob, pseudo);
+        if (cs.content === 'none') continue;
+        layers.push({ cs, x: parseFloat(cs.left) || 0, y: parseFloat(cs.top) || 0, w: parseFloat(cs.width) || W, h: parseFloat(cs.height) || H });
+      }
+      for (const child of blob.children) {
+        const el = child as HTMLElement;
+        layers.push({ cs: getComputedStyle(el), x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
+      }
+      const shapes = layers.map(({ cs, x, y, w, h }) => ({
+        inv: mb
+          .multiply(new DOMMatrix().translate(x + w / 2, y + h / 2).multiply(toMatrix(cs.transform)).translate(-w / 2, -h / 2))
+          .inverse(),
+        w,
+        h,
+        blur: parseFloat(cs.filter.replace(/[^\d.]/g, '')) || 1,
+      }));
+      // the footer fades out at the top (its mask: an ellipse 140% × 100% from its bottom centre, solid up to 72%)
+      const mask = host.matches('.footer')
+        ? { cx: hr.left + hr.width / 2, cy: hr.bottom, rx: hr.width * 1.4, ry: hr.height }
+        : undefined;
+      return [{ shapes, mask }];
+    });
+  const glowAt = (list: Glow[], x: number, y: number) => {
+    let clearAll = 1;
+    for (const g of list) {
+      let clear = 1;
+      for (const sh of g.shapes) {
+        const q = sh.inv.transformPoint(new DOMPoint(x, y));
+        const dx = q.x - sh.w / 2;
+        const dy = q.y - sh.h / 2;
+        const r = Math.hypot(dx / (sh.w / 2), dy / (sh.h / 2));
+        const inside = r === 0 ? Math.min(sh.w, sh.h) / 2 : Math.hypot(dx, dy) * (1 / r - 1); // px inside the edge
+        clear *= 1 - phi(inside / sh.blur);
+      }
+      let a = 1 - clear;
+      if (g.mask) {
+        const t = Math.hypot((x - g.mask.cx) / g.mask.rx, (y - g.mask.cy) / g.mask.ry);
+        a *= t <= 0.72 ? 1 : Math.max(0, (1 - t) / 0.28);
+      }
+      clearAll *= 1 - a;
+    }
+    return 1 - clearAll;
+  };
+  const canvas = document.createElement('canvas');
+  canvas.className = 'sq-split';
+  canvas.setAttribute('aria-hidden', 'true');
+  star.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const colourOf = (css: string) => {
+    if (!ctx) return [20, 94, 225];
+    ctx.fillStyle = '#000';
+    ctx.fillStyle = css.trim() || '#145ee1';
+    const h = ctx.fillStyle as string;
+    return h.startsWith('#') ? [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)) : [20, 94, 225];
+  };
+  let drawQueued = 0;
+  const drawSquare = () => {
+    drawQueued = 0;
+    if (!ctx || !star.classList.contains('is-shake')) return;
+    const side = 10 * (parseFloat(star.style.getPropertyValue('--shake')) || 1);
+    const near = document.elementsFromPoint(px, py).some((el) => el.closest('.hero, .footer'));
+    const list = near ? glows() : [];
+    if (!list.length) {
+      star.classList.remove('is-split');
+      return;
+    }
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    const n = Math.round(side * dpr);
+    canvas.width = canvas.height = n;
+    canvas.style.width = canvas.style.height = `${side}px`;
+    const own = colourOf(getComputedStyle(star).getPropertyValue('--cf'));
+    const img = ctx.createImageData(n, n);
+    let onGlow = 0;
+    for (let j = 0; j < n; j++)
+      for (let i = 0; i < n; i++) {
+        const lit = glowAt(list, px - side / 2 + (i + 0.5) / dpr, py - side / 2 + (j + 0.5) / dpr) >= 0.5;
+        const c = lit ? [255, 255, 255] : own;
+        const k = (j * n + i) * 4;
+        img.data[k] = c[0];
+        img.data[k + 1] = c[1];
+        img.data[k + 2] = c[2];
+        img.data[k + 3] = 255;
+        if (lit) onGlow++;
+      }
+    ctx.putImageData(img, 0, 0);
+    // all off the glow: the usual square is enough
+    star.classList.toggle('is-split', onGlow > 0);
+  };
+  const placeSquare = () => {
+    if (!drawQueued) drawQueued = requestAnimationFrame(drawSquare);
+  };
   const shake = (speed: number) => {
     if (isClassic()) return;
     shaking = true;
@@ -280,12 +399,13 @@ function setup(mouseSeen = false) {
     html.classList.add('cursor-idle');
     document.dispatchEvent(new CustomEvent('achieve', { detail: 'shake-square' }));
     star.style.setProperty('--shake', String(Math.min(4.2, 2.4 + speed * 0.6))); // square side: 24–42px
+    placeSquare();
     window.clearTimeout(shakeEnd);
     shakeEnd = window.setTimeout(() => {
       star.classList.remove('is-shake'); // the square shrinks away and the triangle comes back…
       window.setTimeout(() => {
         shaking = false;
-        star.classList.remove('is-on'); // …then the real pointer returns
+        star.classList.remove('is-on', 'is-split'); // …then the real pointer returns
         html.classList.remove('cursor-idle');
       }, reduce.matches ? 0 : 140);
     }, 250);
@@ -302,6 +422,7 @@ function setup(mouseSeen = false) {
       if (level) shake(level);
       if (shaking) {
         star.style.transform = `translate3d(${px}px, ${py}px, 0)`;
+        if (star.classList.contains('is-shake')) placeSquare(); // following the pointer on and off the glow
         restart();
         return;
       }

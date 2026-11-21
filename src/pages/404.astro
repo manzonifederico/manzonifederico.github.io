@@ -33,7 +33,7 @@ const text = {
     tell: 'If a link on my site brought you here,',
     tellLink: 'let me know',
     maybe: 'Maybe you were looking for',
-    other: 'In italiano',
+    other: 'Leggi in italiano',
   },
   it: {
     why: 'Cosa può essere successo',
@@ -53,7 +53,7 @@ const text = {
     tell: 'Se ti ci ha portato un link del mio sito,',
     tellLink: 'fammelo sapere',
     maybe: 'Forse cercavi',
-    other: 'In English',
+    other: 'Read in English',
   },
 };
 // what the script compares the address with: every project's slug, and where it lives in each language
@@ -68,6 +68,9 @@ const targets = projects
       langs.map((l) => (
         <div class="nf-lang" lang={l} data-nf={l} hidden={l === 'it'}>
           <div class="container nf">
+            <a class="nf-other" href={localePath(l === 'it' ? 'en' : 'it', '/')} lang={l === 'it' ? 'en' : 'it'}>
+              {text[l].other}
+            </a>
             <h1 class="title">{t(l).notFoundTitle}</h1>
             <p class="nf-lead">{t(l).notFoundText}</p>
             <p class="nf-maybe" data-nf-maybe hidden>
@@ -95,10 +98,7 @@ const targets = projects
               </section>
             </div>
             <p class="nf-actions">
-              <HomeButton lang={l} />
-              <a class="nf-other" href={localePath(l === 'it' ? 'en' : 'it', '/')} lang={l === 'it' ? 'en' : 'it'}>
-                {text[l].other}
-              </a>
+              <HomeButton lang={l} filled />
             </p>
           </div>
           <MyWork lang={l} defaultView="list" level="h2" filters={false} uid={`nf-work-${l}`} />
@@ -173,10 +173,24 @@ const targets = projects
 
 <style>
   .nf {
+    position: relative;
     display: grid;
     gap: 14px;
     padding-top: 120px;
     padding-bottom: 72px; /* room before "My work" */
+  }
+
+  /* the other language, top right like the language switch on the other pages */
+  .nf-other {
+    position: absolute;
+    top: 32px;
+    right: var(--gutter);
+    font-weight: 500;
+  }
+
+  /* room between "Oops!", the two lines under it and the lists */
+  .nf .title {
+    margin-bottom: 18px;
   }
 
   .nf-lang[hidden] {
@@ -203,9 +217,9 @@ const targets = projects
   .nf-help {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-    gap: 8px 40px;
+    gap: 24px 40px;
     max-width: 880px;
-    margin-top: 8px;
+    margin-top: 36px;
   }
 
   .nf-h {
@@ -226,11 +240,10 @@ const targets = projects
     margin-top: 10px;
   }
 
+  /* the main way out, centred */
   .nf-actions {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px 20px;
-    margin-top: 10px;
+    justify-content: center;
+    margin-top: 36px;
   }
 </style>
