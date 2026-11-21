@@ -1,9 +1,10 @@
 // Touch screens: the labels that follow the mouse on a computer (view-cursor.ts) become a speech bubble.
 // - Notes on things you can't click (Rovigo, Venice, the signature, the photo, a project's title, …) get a small
 //   marker, and a tap shows the bubble right above them for a few seconds (tap elsewhere or scroll and it goes).
-// - Project cards: one that stays in the middle of the screen gives a little wiggle after 10 s, then 2.2 s later one of
-//   its lines that invite to open it, at random (src/data/nudges.ts). The same card can do it again 30 s later, 3 times in a
-//   row at most, then not for 2 minutes.
+//   A project's title answers only on its square (a 45px area around it).
+// - Project cards: one that stays in the middle of the screen gives a little wiggle after 10 s, then 2.2 s later one
+//   of its lines that invite to open it, at random (src/data/nudges.ts). The same card can do it again 30 s later,
+//   3 times in a row at most, then not for 2 minutes.
 // Things you can click keep working as before: a tap there opens the link, no bubble.
 // The bubble is a live region, so screen readers read what it says; the notes can be reached with the keyboard too.
 // Recruiter mode hides the personal ones (data-cursor-pii), as with the mouse. Reduced motion: no wiggle, no pop.
@@ -27,9 +28,28 @@ const isNote = (el: HTMLElement) =>
 const notes = [...document.querySelectorAll<HTMLElement>('[data-cursor]')].filter(isNote);
 notes.forEach((el) => {
   el.classList.add('tap-note');
+  // a project's title: only its square answers (a 45px area with the square in the middle, so the big title doesn't
+  // pop a bubble wherever it's touched); the square is the button, the heading stays a heading
+  if (el.matches('h1, h2, h3')) {
+    el.classList.add('tap-note--dot');
+    const dot = document.createElement('span');
+    dot.className = 'tap-dot';
+    dot.setAttribute('role', 'button');
+    dot.setAttribute('aria-label', html.lang === 'it' ? 'Curiosità sul titolo' : 'About the title');
+    dot.tabIndex = 0;
+    el.appendChild(dot);
+    return;
+  }
   el.tabIndex = 0; // reachable with a keyboard
-  if (el.matches('span')) el.setAttribute('role', 'button'); // a word in a sentence (headings and chips keep theirs)
+  if (el.matches('span')) el.setAttribute('role', 'button'); // a word in a sentence (chips keep their role)
 });
+
+/** the note a tap (or a key) on this element is for: a title only through its square */
+const noteAt = (t: EventTarget | null) => {
+  const el = (t as Element | null)?.closest?.<HTMLElement>('.tap-note');
+  if (!el) return null;
+  return el.matches('.tap-note--dot') && !(t as Element).closest('.tap-dot') ? null : el;
+};
 
 const bubble = document.createElement('div');
 bubble.className = 'tap-bubble';
@@ -86,11 +106,15 @@ const tap = (note: HTMLElement, x?: number) => {
 };
 
 document.addEventListener('click', (e) => {
-  const note = (e.target as Element | null)?.closest?.<HTMLElement>('.tap-note');
-  if (note) tap(note, e.detail ? e.clientX : undefined);
+  const note = noteAt(e.target);
+  if (!note) return;
+  // a title's bubble points at its square
+  const dot = note.querySelector<HTMLElement>(':scope > .tap-dot');
+  const x = dot ? dot.getBoundingClientRect().left + dot.offsetWidth / 2 : e.detail ? e.clientX : undefined;
+  tap(note, x);
 });
 document.addEventListener('keydown', (e) => {
-  const note = (e.target as Element | null)?.closest?.<HTMLElement>('.tap-note');
+  const note = noteAt(e.target);
   if (!note || (e.key !== 'Enter' && e.key !== ' ')) return;
   e.preventDefault();
   tap(note);
@@ -99,7 +123,7 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener(
   'pointerdown',
   (e) => {
-    if (shownFor && !(e.target as Element | null)?.closest?.('.tap-note')) hide();
+    if (shownFor && !noteAt(e.target)) hide();
   },
   { passive: true },
 );

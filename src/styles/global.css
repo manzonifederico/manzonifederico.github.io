@@ -853,11 +853,12 @@ html.touch-notes li.tap-note::after {
   mask-size: 6px 3px;
 }
 
-/* the title's square: 9px, its bottom on the text's baseline like a full stop, in the project's colour. The box
-   around it is 45px wide and tall (see-through) so it is easy to hit with a finger; negative margins keep it from
-   moving the title (baseline of an empty inline-block = its bottom margin edge: 45 - 18 - 9 = 18px under the square) */
-html.touch-notes h1.tap-note::after {
-  content: '';
+/* the title's square (.tap-dot, added by touch-notes.ts): 9px, its bottom on the text's baseline like a full stop, in
+   the project's colour. It is the only part of the title that answers a tap: a see-through 45px box with the square in
+   its middle; negative margins keep it from moving the title (baseline of an empty inline-block = its bottom margin
+   edge: 45 - 18 - 9 = 18px under the square) */
+html.touch-notes .tap-dot {
+  -webkit-tap-highlight-color: transparent;
   display: inline-block;
   width: 45px;
   height: 45px;
@@ -892,7 +893,7 @@ html[data-unbiased='true'] [data-cursor-pii].tap-note::after {
   display: none;
 }
 
-html.touch-notes .tap-note:focus-visible {
+html.touch-notes :is(.tap-note, .tap-dot):focus-visible {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
   border-radius: 2px;
